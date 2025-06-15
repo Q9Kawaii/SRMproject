@@ -5,12 +5,11 @@ import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-export default function StudentsTable() {
+export default function MarksTable() {
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [sendingEmails, setSendingEmails] = useState(false);
-  const [filterLowAttendance, setFilterLowAttendance] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("");
   const [sentEmailLog, setSentEmailLog] = useState([]); // PDF log state
 
@@ -32,17 +31,7 @@ export default function StudentsTable() {
         const studentsData = [];
         querySnapshot.forEach((docSnap) => {
           const student = docSnap.data();
-          const lowSubjects = [];
-          if (student.attendance) {
-            Object.entries(student.attendance).forEach(([sub, perc]) => {
-              if (perc < 75) lowSubjects.push(`${sub}: ${perc}%`);
-            });
-          }
-          studentsData.push({
-            id: docSnap.id,
-            ...student,
-            lowSubjects,
-          });
+          studentsData.push({ id: docSnap.id, ...student });
         });
         setStudents(studentsData);
       } catch (error) {
@@ -54,11 +43,9 @@ export default function StudentsTable() {
   }, []);
 
   const displayedStudents = students.filter((s) => {
-    const matchLow = filterLowAttendance ? s.lowSubjects.length > 0 : true;
-    const matchSection = sectionFilter
+    return sectionFilter
       ? s.section?.toLowerCase().includes(sectionFilter.toLowerCase())
       : true;
-    return matchLow && matchSection;
   });
 
   const toggle = (id) => {
@@ -71,22 +58,18 @@ export default function StudentsTable() {
 
   const sendEmails = async () => {
     if (!selected.size) return alert("Select students first");
-
+    setSendingEmails(true);
     try {
-      setSendingEmails(true);
       const response = await fetch("/api/send-emails", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentIds: Array.from(selected), type: "attendance" }),
+        body: JSON.stringify({ studentIds: Array.from(selected), type: "marks" }),
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to send emails");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send emails");
-      }
-
-      // --- Log PDF logic: build log after sending emails ---
+      // Build log data
       const now = new Date();
       const timeString = now.toLocaleString();
       const logData = students
@@ -97,16 +80,23 @@ export default function StudentsTable() {
           section: s.section,
           studentEmail: s.email,
           parentEmail: s.parentEmail,
-          lowSubjects: s.lowSubjects.join(", "),
+          marks: s.marks
+            ? Object.entries(s.marks)
+                .map(([subject, markObj]) =>
+                  typeof markObj === "object"
+                    ? `${subject}: ${markObj.marks} (${markObj.percentage}%)`
+                    : `${subject}: ${markObj}`
+                )
+                .join(", ")
+            : "—",
           sentTime: timeString,
         }));
-      setSentEmailLog(logData);
-      // --- End log logic ---
 
-      alert("Emails sent successfully!");
+      setSentEmailLog(logData);
+      alert("Marks emails sent successfully!");
       setSelected(new Set());
     } catch (error) {
-      console.error("Error sending emails:", error);
+      console.error('Error sending emails:', error);
       alert(`Error: ${error.message}`);
     } finally {
       setSendingEmails(false);
@@ -114,27 +104,27 @@ export default function StudentsTable() {
   };
 
   // PDF download function
-  const downloadEmailLog = () => {
+  const downloadMarksLog = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
-    doc.text("Attendance Email Log", 14, 22);
+    doc.text("Marks Email Log", 14, 22);
     autoTable(doc, {
       startY: 30,
-      head: [['Name', 'Reg No', 'Section', 'Student Email', 'Parent Email', 'Low Subjects', 'Sent Time']],
+      head: [['Name', 'Reg No', 'Section', 'Student Email', 'Parent Email', 'Marks', 'Sent Time']],
       body: sentEmailLog.map(entry => [
         entry.name,
         entry.regNo,
         entry.section,
         entry.studentEmail,
         entry.parentEmail,
-        entry.lowSubjects,
+        entry.marks,
         entry.sentTime
       ]),
       styles: { fontSize: 9 },
       headStyles: { fillColor: [30, 64, 175], textColor: 255 },
       alternateRowStyles: { fillColor: [245, 245, 245] }
     });
-    doc.save("attendance-email-log.pdf");
+    doc.save("marks-email-log.pdf");
   };
 
   if (loading) return <div className="p-8">Loading...</div>;
@@ -176,16 +166,6 @@ export default function StudentsTable() {
 
         <div className="flex flex-wrap gap-4 mb-4">
           <button
-            onClick={() => setFilterLowAttendance((v) => !v)}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-            disabled={sendingEmails}
-          >
-            {filterLowAttendance
-              ? "Show All Students"
-              : "Filter Low Attendance (<75%)"}
-          </button>
-
-          <button
             onClick={() => {
               if (selected.size === displayedStudents.length) {
                 setSelected(new Set());
@@ -210,11 +190,9 @@ export default function StudentsTable() {
             disabled={sendingEmails}
           />
         </div>
+
         {displayedStudents.length === 0 ? (
-          <p>
-            No students found
-            {filterLowAttendance || sectionFilter ? " with applied filters." : "."}
-          </p>
+          <p>No students found{sectionFilter ? " with applied filter." : "."}</p>
         ) : (
           <>
             <div className="overflow-x-auto">
@@ -227,8 +205,7 @@ export default function StudentsTable() {
                     <th className="p-2 text-center">Section</th>
                     <th className="p-2 text-center">Student Email</th>
                     <th className="p-2 text-center">Parent Email</th>
-                    <th className="p-2 text-center">Low Attendance Subjects</th>
-                    <th className="p-2 text-center">All Subjects Attendance</th>
+                    <th className="p-2 text-center">Marks</th>
                     <th className="p-2 text-center">Delete</th>
                   </tr>
                 </thead>
@@ -249,29 +226,20 @@ export default function StudentsTable() {
                       <td className="p-2 text-center">{s.email}</td>
                       <td className="p-2 text-center">{s.parentEmail}</td>
                       <td className="p-2 flex flex-col text-center">
-                        {s.lowSubjects.length === 0
-                          ? "None"
-                          : s.lowSubjects.map((ls, i) => (
-                              <span
-                                key={i}
-                                className="inline-block bg-red-100 text-red-800 px-2 py-1 rounded mr-2 mb-1"
-                              >
-                                {ls}
-                              </span>
-                            ))}
-                      </td>
-                      <td className="p-2 text-center">
-                        {s.attendance
-                          ? Object.entries(s.attendance).map(([subject, percentage], idx) => (
+                        {s.marks
+                          ? Object.entries(s.marks).map(([subject, markObj], idx) => (
                               <div
                                 key={idx}
-                                className={
-                                  percentage < 75
-                                    ? "bg-red-100 text-red-800 px-2 py-1 rounded mr-2 mb-1"
-                                    : "text-green-600 bg-green-100 px-2 py-1 rounded mr-2 mb-1"
-                                }
+                                className={`px-2 py-1 rounded mr-2 mb-1 text-xs inline-block ${
+                                  typeof markObj === "object" && markObj.marks < 40
+                                    ? "bg-red-100 text-red-800"
+                                    : "bg-blue-100 text-blue-800"
+                                }`}
                               >
-                                {subject}: {percentage}%
+                                {subject}:{" "}
+                                {typeof markObj === "object"
+                                  ? `${markObj.marks} (${markObj.percentage}%)`
+                                  : markObj}
                               </div>
                             ))
                           : "—"}
@@ -290,6 +258,7 @@ export default function StudentsTable() {
                 </tbody>
               </table>
             </div>
+
             <button
               onClick={sendEmails}
               disabled={!selected.size || sendingEmails}
@@ -299,10 +268,10 @@ export default function StudentsTable() {
             </button>
             {sentEmailLog.length > 0 && (
               <button
-                onClick={downloadEmailLog}
+                onClick={downloadMarksLog}
                 className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 mt-4"
               >
-                Download Email Log (PDF)
+                Download Marks Email Log (PDF)
               </button>
             )}
           </>

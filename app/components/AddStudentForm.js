@@ -18,6 +18,16 @@ const studentEmails = [
 const sections = ["A", "B", "F1", "H1", "H2"];
 const subjects = ["Maths", "Physics", "Chemistry", "Biology", "CS"];
 
+function getRandomSubjects() {
+  const shuffled = [...subjects].sort(() => 0.5 - Math.random());
+  const count = Math.floor(Math.random() * 2) + 2;
+  return shuffled.slice(0, count).map(sub => ({
+    subject: sub,
+    percentage: Math.floor(40 + Math.random() * 60),
+    marks: Math.floor(30 + Math.random() * 70),
+  }));
+}
+
 function getRandomName() {
   const first = ["Arjun", "Neha", "Ravi", "Priya", "Aman", "Sneha", "Karan", "Simran", "Vikram", "Anjali"];
   const last = ["Sharma", "Patel", "Verma", "Singh", "Reddy", "Iyer", "Kapoor", "Nair", "Mishra", "Gupta"];
@@ -31,22 +41,12 @@ function getRandomEmail() {
 function getRandomRegNo() {
   const year = "24";
   const collegeCode = "11003";
-  const randomSerial = String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+  const randomSerial = String(Math.floor(100000 + Math.random() * 900000));
   return `RA${year}${collegeCode}${randomSerial}`;
 }
 
-
 function getRandomSection() {
   return sections[Math.floor(Math.random() * sections.length)];
-}
-
-function getRandomSubjects() {
-  const shuffled = [...subjects].sort(() => 0.5 - Math.random());
-  const count = Math.floor(Math.random() * 2) + 2;
-  return shuffled.slice(0, count).map(sub => ({
-    subject: sub,
-    percentage: Math.floor(40 + Math.random() * 60),
-  }));
 }
 
 export default function AddStudentForm() {
@@ -55,7 +55,7 @@ export default function AddStudentForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [parentEmail, setParentEmail] = useState("");
-  const [attendance, setAttendance] = useState([{ subject: "", percentage: "" }]);
+  const [attendance, setAttendance] = useState([{ subject: "", percentage: "", marks: "" }]);
   const [loading, setLoading] = useState(false);
 
   const handleAttendanceChange = (idx, field, value) => {
@@ -65,7 +65,7 @@ export default function AddStudentForm() {
   };
 
   const addAttendanceField = () =>
-    setAttendance(prev => [...prev, { subject: "", percentage: "" }]);
+    setAttendance(prev => [...prev, { subject: "", percentage: "", marks: "" }]);
 
   const removeAttendanceField = idx =>
     setAttendance(prev => prev.filter((_, i) => i !== idx));
@@ -84,10 +84,18 @@ export default function AddStudentForm() {
     setLoading(true);
     try {
       const attendanceMap = {};
-      attendance.forEach(({ subject, percentage }) => {
+      const marksMap = {};
+
+      attendance.forEach(({ subject, percentage, marks }) => {
+        const subj = subject.trim();
         const perc = parseFloat(percentage);
-        if (subject.trim() && !isNaN(perc)) {
-          attendanceMap[subject.trim()] = perc;
+        const mark = parseFloat(marks);
+
+        if (subj && !isNaN(perc)) {
+          attendanceMap[subj] = perc;
+        }
+        if (subj && !isNaN(mark)) {
+          marksMap[subj] = mark;
         }
       });
 
@@ -96,16 +104,18 @@ export default function AddStudentForm() {
         email,
         parentEmail,
         attendance: attendanceMap,
+        marks: marksMap,
         regNo,
         section,
       });
 
+      // Reset form
       setName("");
       setEmail("");
       setParentEmail("");
       setRegNo("");
       setSection("");
-      setAttendance([{ subject: "", percentage: "" }]);
+      setAttendance([{ subject: "", percentage: "", marks: "" }]);
     } catch (err) {
       alert("Error adding student: " + err.message);
     } finally {
@@ -230,13 +240,26 @@ export default function AddStudentForm() {
               />
               <input
                 type="number"
-                className="border p-2 rounded w-24"
+                className="border p-2 rounded w-20"
                 placeholder="%"
                 min="0"
                 max="100"
                 value={a.percentage}
                 onChange={e =>
                   handleAttendanceChange(idx, "percentage", e.target.value)
+                }
+                required
+                disabled={loading}
+              />
+              <input
+                type="number"
+                className="border p-2 rounded w-20"
+                placeholder="Marks"
+                min="0"
+                max="100"
+                value={a.marks}
+                onChange={e =>
+                  handleAttendanceChange(idx, "marks", e.target.value)
                 }
                 required
                 disabled={loading}
