@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
 const studentEmails = [
   "yashdingar17@gmail.com",
@@ -99,7 +99,7 @@ export default function AddStudentForm() {
         }
       });
 
-      await addDoc(collection(db, "User"), {
+      await setDoc(doc(db, "User", regNo), {
         name,
         email,
         parentEmail,
@@ -107,6 +107,7 @@ export default function AddStudentForm() {
         marks: marksMap,
         regNo,
         section,
+        createdAt: new Date().toISOString(),
       });
 
       // Reset form

@@ -3,6 +3,7 @@ import { useState } from "react";
 import AddStudentForm from "./AddStudentForm";
 import StudentsTable from "./StudentsTable";
 import MarksTable from "./MarksTable";
+import CompleteStudentForm from "./CompleteStudentForm";
 
 export default function EmailSystem() {
   const [showForm, setShowForm] = useState(false);
@@ -32,7 +33,8 @@ export default function EmailSystem() {
 
       <div className="w-full">
         {showForm ? (
-          <AddStudentForm />
+          // <AddStudentForm />
+          <CompleteStudentForm/>
         ) : showMarksTable ? (
           <MarksTable />
         ) : (

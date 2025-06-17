@@ -1,19 +1,49 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import SearchBar from "./DashboardComponents/SearchBar";
 import AnimatedBlob from "./DashboardComponents/AnimatedBlob";
 import DashCards from "./DashboardComponents/DashCards";
 import UploadSystem from "./UploadSystem";
 import EmailSystem from "./EmailSystem";
+import SearchComponent from "./SearchComponent";
 
 export default function AdminDashBoard() {
   const [selectedComponent, setSelectedComponent] = useState(null);
+  const [searchResult, setSearchResult] = useState(null);
+  const [searchError, setSearchError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const db = getFirestore();
+
+  const handleSearch = async (regNo) => {
+    try {
+      setLoading(true);
+      setSearchError("");
+      setSearchResult(null);
+      
+      const studentRef = doc(db, "User", regNo);
+      const studentSnap = await getDoc(studentRef);
+
+      if (studentSnap.exists()) {
+        setSearchResult({ ...studentSnap.data(), regNo });
+      } else {
+        setSearchError("No student found with this registration number");
+      }
+    } catch (err) {
+      setSearchError("Error searching student: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCardClick = (type) => {
     setSelectedComponent(type);
+    setSearchResult(null);
   };
 
   const renderComponent = () => {
+    if (searchResult) return <SearchComponent studentData={searchResult} />;
+    
     switch (selectedComponent) {
       case "uploadAttendance":
         return <UploadSystem />;
@@ -26,10 +56,9 @@ export default function AdminDashBoard() {
 
   return (
     <>
-      <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-25 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
+      <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
         <AnimatedBlob />
 
-        {/* Background Image */}
         <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
           style={{
@@ -53,8 +82,11 @@ export default function AdminDashBoard() {
           </p>
 
           <div className="mb-8">
-            <SearchBar />
+            <SearchBar onSearch={handleSearch} />
           </div>
+
+          {loading && <p className="text-gray-600 mb-2">Searching...</p>}
+          {searchError && <p className="text-red-500 mb-2">{searchError}</p>}
 
           <p className="text-sm text-blue-700 italic mb-4">
             Track attendance, academics, and placement progress
@@ -66,11 +98,11 @@ export default function AdminDashBoard() {
         </div>
       </div>
 
-      {/* Cards */}
       <DashCards onCardClick={handleCardClick} />
 
-      {/* Render selected component */}
-      <div className="px-4 py-8">{renderComponent()}</div>
+      <div className="px-4 py-8 w-full max-w-7xl mx-auto">
+        {renderComponent()}
+      </div>
     </>
   );
 }
