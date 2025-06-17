@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Footer() {
   return (
-    <div className="bg-neutral-300 p-6 md:px-72 md:py-7 flex flex-col md:flex-row justify-between items-center gap-6 bottom-0 z-10">
+    <div className="bg-neutral-300 p-6 md:px-72 md:py-7 flex flex-col md:flex-row justify-between items-center gap-6 bottom-0 z-10 mt-50 lg:mt-10">
       <img src="SRMlogo.png" className="h-10 md:h-20" alt="SRM Logo" />
 
         <div className='flex justify-between item-center gap-4 text-xl'>
