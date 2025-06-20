@@ -16,8 +16,15 @@ export default function Home() {
   const [userRole, setUserRole] = useState(null);
   const [sectionPrompt, setSectionPrompt] = useState(false);
   const [section, setSection] = useState("");
+  const [regNo, setRegNo] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [newUserUID, setNewUserUID] = useState("");
+  const [isNewUser, setIsNewUser] = useState(false);
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -33,28 +40,18 @@ export default function Home() {
           if (docSnap.exists()) {
             const data = docSnap.data();
             const role = data.role;
+            setNewUserUID(user.uid); // store it for later display if needed
 
             if (role === "teacher") {
               setUserRole("teacher");
             } else if (role === "student") {
               if (!user.email.endsWith("@srmist.edu.in")) {
-                await auth.signOut();
                 setError("Students must use @srmist.edu.in email.");
                 setUserRole(null);
               } else {
                 setUserRole("student");
-
                 if (!data.section || !data.regNo) {
-                  if (!data.section) {
-                    setSectionPrompt(true);
-                  }
-
-                  if (!data.regNo) {
-                    const regNo = prompt("Enter your Registration Number:");
-                    if (regNo) {
-                      await setDoc(userRef, { regNo: regNo }, { merge: true });
-                    }
-                  }
+                  setSectionPrompt(true);
                 }
               }
             } else {
@@ -63,28 +60,12 @@ export default function Home() {
               setUserRole(null);
             }
           } else {
-            if (user.email.endsWith("@srmist.edu.in")) {
-              setSectionPrompt(true);
-              const regNo = prompt("Enter your Registration Number:");
-              if (regNo) {
-                await setDoc(doc(db, "UsersLogin", user.uid), {
-                  email: user.email,
-                  name: user.displayName,
-                  role: "student",
-                  regNo: regNo,
-                });
-              }
-            } else {
-              await auth.signOut();
-              setError(
-                "Only SRMIST students or pre-approved teachers can login."
-              );
-              setUserRole(null);
-            }
+            setNewUserUID(user.uid);
+            setIsNewUser(true);
+            setSectionPrompt(true);
           }
         } catch (err) {
           console.error("Error fetching user doc:", err);
-          setError("Error fetching user data");
           await auth.signOut();
           setUserRole(null);
         }
@@ -124,13 +105,14 @@ export default function Home() {
           name: user.displayName,
           role: "student",
           section,
+          regNo,
         },
         { merge: true }
       );
       setUserRole("student");
       setSectionPrompt(false);
     } catch (err) {
-      setError("Failed to save section");
+      setError("Failed to save section and registration number");
     }
   };
 
@@ -144,13 +126,13 @@ export default function Home() {
     }
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="text-center p-5">Loading...</div>;
 
-  if (!auth.currentUser) {
+  if (!userRole && !loading) {
     return (
       <>
         <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
-          <AnimatedBlob/>
+          <AnimatedBlob />
 
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
@@ -171,13 +153,38 @@ export default function Home() {
               Welcome, User
             </p>
 
-            <div className=" flex flex-col justify-center items-center text-center pb-10 lg:items-end">
-              <div className="h-30 w-70 bg-white rounded flex flex-col items-center justify-center text-center px-10 drop-shadow-xl shadow-neutral-900 ">
-                <h2 className="font-semibold text-xl pb-5">Portal Login</h2>
-                {error && <div className="error">{error}</div>}
+            <div className="flex flex-col justify-center items-center text-center pb-10 lg:items-end">
+              <div className="bg-white rounded-xl flex flex-col items-center justify-center text-center px-6 py-4 drop-shadow-xl shadow-neutral-900 w-[85%] max-w-md">
+                <h2 className="font-semibold text-xl pb-3">Portal Login</h2>
+                {error && <div className="error mb-3 text-red-600 font-medium">{error}</div>}
+                {isNewUser && newUserUID && (
+                  <div className="text-sm text-blue-600 mb-3 text-center">
+                    <p className="mb-1 font-medium text-black">Your UID is:</p>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="w-40 overflow-hidden bg-neutral-200 rounded px-1"><p className="font-mono bg-gray-100 px-3 py-1 rounded text-base text-blue-800">{newUserUID}</p></span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(newUserUID)}
+                        className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                      >Copy</button>
+                    </div>
+                    <p className="mt-2">
+                      If there is an issue, email: 
+                      <span className="inline-flex items-center gap-2">
+                        <br />
+                        <span className="w-20 overflow-hidden bg-neutral-200 rounded px-1">email@srmist.edu.in</span>
+                        <button
+                          type="button"
+                          onClick={() => copyToClipboard("placements@srmist.edu.in")}
+                          className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                        >Copy</button>
+                      </span>
+                    </p>
+                  </div>
+                )}
                 <button
                   onClick={handleGoogleLogin}
-                  className="bg-blue-500 rounded-xl px-5 py-2 text-white font-bold text-center"
+                  className="bg-blue-500 rounded-xl px-5 py-2 text-white font-bold text-center hover:bg-blue-600"
                 >
                   Sign in with Google
                 </button>
@@ -189,8 +196,7 @@ export default function Home() {
             </p>
 
             <p className="text-xs text-gray-500">
-              SRM Institute of Science and Technology – Empowering Students for
-              the Future
+              SRM Institute of Science and Technology – Empowering Students for the Future
             </p>
           </div>
         </div>
@@ -200,26 +206,74 @@ export default function Home() {
 
   if (sectionPrompt) {
     return (
-      <form onSubmit={handleSectionSubmit} className="section-form">
-        <h3>Enter Your Section</h3>
+      <form
+        onSubmit={handleSectionSubmit}
+        className="section-form flex flex-col items-center justify-center gap-4 p-10 bg-white rounded shadow max-w-md mx-auto mt-10"
+      >
+        <h3 className="text-xl font-semibold">Enter Your Section & Registration Number</h3>
+
+        {newUserUID && (
+          <div className="text-sm text-blue-600 text-center">
+            <p className="mb-1 font-medium text-black">Your UID is:</p>
+            <div className="flex items-center justify-center gap-2">
+              <code className="font-mono bg-gray-100 px-2 py-1 rounded text-blue-800">{newUserUID}</code>
+              <button
+                type="button"
+                onClick={() => copyToClipboard(newUserUID)}
+                className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+              >Copy</button>
+            </div>
+            <p className="mt-2">
+              If there is an issue, email:
+              <span className="inline-flex items-center gap-2">
+                <a href="mailto:placements@srmist.edu.in" className="text-blue-500 underline">placements@srmist.edu.in</a>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard("placements@srmist.edu.in")}
+                  className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+                >Copy</button>
+              </span>
+            </p>
+          </div>
+        )}
+
         <input
-        className=" bg-neutral-200 m-3 "
+          className="bg-neutral-200 p-2 rounded w-full"
           type="text"
           value={section}
           onChange={(e) => setSection(e.target.value)}
-          placeholder="e.g., CSE-A"
+          placeholder="Section (e.g., CSE-A)"
           required
         />
-        <button type="submit">Submit</button>
+        <input
+          className="bg-neutral-200 p-2 rounded w-full"
+          type="text"
+          value={regNo}
+          onChange={(e) => setRegNo(e.target.value)}
+          placeholder="Registration Number"
+          required
+        />
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+        >
+          Submit
+        </button>
+        {error && <p className="text-red-500">{error}</p>}
       </form>
     );
   }
 
   return (
-    <div className="dashboard-container">
-      <button onClick={handleLogout} className="bg-red-500 rounded text-white px-2 py-1 text-center ">
-        Logout
-      </button>
+    <div className="dashboard-container p-4">
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleLogout}
+          className="bg-red-500 rounded text-white px-3 py-1"
+        >
+          Logout
+        </button>
+      </div>
       {userRole === "teacher" && <AdminDashBoardd />}
       {userRole === "student" && <StudentsDashBoard />}
       {!userRole && <div className="error">No role assigned</div>}

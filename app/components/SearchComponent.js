@@ -1,75 +1,148 @@
 "use client";
-import React from 'react';
+import React from "react";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 
-const DetailItem = ({ label, value, isUrl = false }) => (
-  <div className="flex justify-between items-start py-2 border-b">
-    <span className="font-medium text-gray-700">{label}:</span>
-    {isUrl ? (
-      <a 
-        href={value} 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="text-blue-600 hover:underline break-all max-w-[60%] text-right"
-      >
-        {value || "N/A"}
+// Renders one field: either as plain text or a URL based on isUrl
+const DetailItem = ({ label, value, isUrl }) => (
+  <div>
+    <span className="font-medium">{label}: </span>
+    {isUrl && value ? (
+      <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+        {value}
       </a>
     ) : (
-      <span className="text-gray-900 max-w-[60%] text-right">{value || "N/A"}</span>
+      <span>{value || "-"}</span>
     )}
   </div>
 );
 
-export default function SearchComponent({ studentData }) {
-  if (!studentData) return null;
+// Full field config with ids where needed
+const FIELD_CONFIG = [
+  { label: "Registration Number", name: "regNo", readOnly: true },
+  { label: "Name Of Student", name: "name" },
+  { label: "Gender", name: "gender" },
+  { label: "NRI Student", name: "isNRI" },
+  { label: "Date of Birth (D.O.B.)", name: "dob", type: "date" },
+  { label: "Department", name: "department" },
+  { label: "Specialization", name: "specialization" },
+  { label: "Section", name: "section" },
+  { label: "Official Email", name: "email", type: "email" },
+  { label: "Personal Email", name: "personalEmail", type: "personalEmail" },
+  { label: "Mobile No.", name: "phone", type: "tel" },
+  { label: "Alternate Contact Number", name: "alternatePhone", type: "tel" },
+  { label: "Father Mobile No.", name: "fatherPhone", type: "tel" },
+  { label: "Father Email ID", name: "fatherEmail", type: "email" },
+  { label: "Mother Mobile No.", name: "motherPhone", type: "tel" },
+  { label: "Mother Email ID", name: "motherEmail", type: "email" },
+  { label: "Guardian Contact Number", name: "guardianPhone", type: "tel" },
+  { label: "Name of Faculty Advisor", name: "advisorName" },
+  { label: "Languages Known", name: "languages" },
+  { label: "10th %age", name: "percent10" },
+  { label: "10th Medium of Instruction", name: "10thMediumofInstruction" },
+  { label: "10th Board Of Studies", name: "board10" },
+  { label: "Studied Diploma", name: "studied极狐Diploma" },
+  { label: "12th %age", name: "percent12" },
+  { label: "12th Medium of Instruction", name: "12thMediumofInstruction" },
+  { label: "12th Board Of Studies", name: "board12" },
+  { label: "Copy of 10th & 12th Marksheet", name: "Copyof10th&12thMarksheet" },
+  { label: "CGPA", name: "cgpa" },
+  { label: "Standing Arrears", name: "standingArrears" },
+  { label: "History of Arrears", name: "historyArrears" },
+  { label: "GitHub Profile Link", name: "githubLink", id: "link" },
+  { label: "Coding Practice Platform", name: "CodingPracticePlatform" },
+  { label: "Internship Experience", name: "internshipExperience" },
+  { label: "Internship Experience in Months", name: "internshipMonths" },
+  { label: "Training Company Details(name,location,year,month)", name: "trainingDetails" },
+  { label: "Programming Skillset", name: "skillset" },
+  { label: "Standard Certification Courses Completed", name: "StdCertificationCourses" },
+  { label: "Application Development Experience", name: "AppDevExp" },
+  { label: "Currently Available Application Name", name: "currentApps" },
+  { label: "FSD Experience", name: "fsdExp" },
+  { label: "Currently Available FSD Apps Name", name: "currentFSD" },
+  { label: "Coding Competitions", name: "codingCompetitionswon" },
+  { label: "Hackathons", name: "hackathonswon" },
+  { label: "Hackathon Names", name: "hackathonNames" },
+  { label: "Other Coding Events", name: "otherCodingEvents" },
+  { label: "Inhouse Projects", name: "inhouseProjects" },
+  { label: "Achievements", name: "achievements" },
+  { label: "Membership of Professional Bodies", name: "memberships" },
+  { label: "Assessment Score (SHL/NCET)", name: "assessmentScore" },
+  { label: "Career Plans", name: "careerPlans" },
+  { label: "GitHub No. of Contributions", name: "githubContri" },
+  { label: "GitHub Frequency of Contributions", name: "githubContriFreq" },
+  { label: "Projects done for comunity", name: "ProjectsDoneForComunity" },
+  { label: "GitHub Collaborations", name: "githubCollaborations" },
+  { label: "No of Badges Earned", name: "BadgesEarned" },
+  { label: "No of Medium & Difficult Questions Solv.", name: "MediumDifficultQuestions" },
+  { label: "IIT, NIT, SRM internship Cycle", name: "eliteInternshipCycle" },
+  { label: "Fortune 500 Companies", name: "Fortune500" },
+  { label: "Small Companies", name: "SmallCompanies" },
+  { label: "Internship Duration < 3 Months", name: "internshipShort" },
+  { label: "Paid Intern", name: "internshipPaid" },
+  { label: "CISCO, CCNA, CCNP, MCNA, MCNP, Matlab, Redhat, IBM", name: "ciscolist" },
+  { label: "NPTEL", name: "nptel" },
+  { label: "Coursera", name: "coursera" },
+  { label: "Programming Certificate", name: "Pcertificate" },
+  { label: "Udemy/Elab", name: "udemy" },
+  { label: "IIT,NIT,DRDO Projects", name: "eliteProjects" },
+  { label: "Govt Projects", name: "govtprojects" },
+  { label: "Mobile & Web App Projects", name: "mobilewebProjects" },
+  { label: "Mini Project", name: "miniprojects" },
+  { label: "FSD Project", name: "fsdProjects" },
+  { label: "First Prize", name: "firstprize" },
+  { label: "Second Prize", name: "secondprize" },
+  { label: "Third Prize", name: "thirdprize" },
+  { label: "Participated", name: "participated" },
+  { label: "Inhouse Projects", name: "inhouseprojects" },
+  { label: "Placed via SRM Placement Process", name: "internshipViaSRM" },
+  { label: "Date Of Admission", name: "dateOfAdmission", type: "date" },
+  { label: "Total placement marks", name: "PLM" },
+];
 
+// PDF Generation function
+const generatePDF = (studentData, fieldConfig) => {
+  const doc = new jsPDF();
+  doc.setFontSize(18);
+  doc.text("Student Profile", 14, 15);
+
+  // Prepare table data: [[label, value], ...]
+  const tableRows = fieldConfig.map(field => [
+    field.label,
+    studentData[field.name] ? String(studentData[field.name]) : "-"
+  ]);
+
+  // Corrected autoTable usage
+  autoTable(doc, {
+    head: [["Field", "Value"]],
+    body: tableRows,
+    startY: 25,
+    styles: { fontSize: 10, cellPadding: 2 },
+    headStyles: { fillColor: [30, 64, 175] },
+  });
+
+  doc.save("student_profile.pdf");
+};
+
+export default function SearchComponent({ studentData }) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
       <h2 className="text-2xl font-bold mb-6 text-center">Student Profile</h2>
-      
+      <button
+        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        onClick={() => generatePDF(studentData, FIELD_CONFIG)}
+      >
+        Download PDF
+      </button>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Personal Information */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold mb-3">Personal Information</h3>
-          <DetailItem label="Name" value={studentData.name} />
-          <DetailItem label="Registration Number" value={studentData.regNo} />
-          <DetailItem label="Programme" value={studentData.programme} />
-          <DetailItem label="Semester" value={studentData.semester} />
-          <DetailItem label="Batch" value={studentData.batch} />
-          <DetailItem label="Date of Admission" value={studentData.dateOfAdmission} />
-          <DetailItem label="Section" value={studentData.section} />
-          <DetailItem label="Date of Birth" value={studentData.dob} />
-          <DetailItem label="Net-ID" value={studentData.netId} />
-          <DetailItem label="Official Email" value={studentData.email} />
-          <DetailItem label="Mobile No" value={studentData.phone} />
-        </div>
-
-        {/* Academic Information */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold mb-3">Academic Details</h3>
-          <DetailItem label="10th Board" value={studentData.board10} />
-          <DetailItem label="10th Percentage" value={studentData.percent10} />
-          <DetailItem label="12th Board" value={studentData.board12} />
-          <DetailItem label="12th Percentage" value={studentData.percent12} />
-          <DetailItem label="Studied Diploma" value={studentData.studiedDiploma} />
-          <DetailItem label="CGPA" value={studentData.cgpa} />
-          <DetailItem label="Standing Arrears" value={studentData.standingArrears} />
-          <DetailItem label="History of Arrears" value={studentData.historyArrears} />
-          <DetailItem label="GitHub Profile" value={studentData.github} isUrl />
-        </div>
-
-        {/* Professional Development */}
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold mb-3">Professional Details</h3>
-          <DetailItem label="Internship Experience (Months)" value={studentData.internshipMonths} />
-          <DetailItem label="Industrial Trainings" value={studentData.industrialTrainingCount} />
-          <DetailItem label="Certifications" value={studentData.certifications} />
-          <DetailItem label="Programming Skills" value={studentData.skillset} />
-          <DetailItem label="Current Application" value={studentData.currentApp} />
-          <DetailItem label="FSD Experience" value={studentData.fsdExp} />
-          <DetailItem label="Coding Competitions" value={studentData.codingCompetitions} />
-          <DetailItem label="Hackathons" value={studentData.hackathons} />
-          <DetailItem label="Career Plans" value={studentData.careerPlans} />
-        </div>
+        {FIELD_CONFIG.map(({ label, name, id }) => (
+          <DetailItem
+            key={name}
+            label={label}
+            value={studentData[name]}
+            isUrl={id === "link"}
+          />
+        ))}
       </div>
     </div>
   );
