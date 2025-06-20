@@ -4,6 +4,7 @@ import NavBar from "./components/NavBar";
 import "./globals.css";
 import AuthReset from './components/AuthReset';
 import React, { useState } from "react";
+import Link from "next/link";
 
 export default function RootLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,9 +23,8 @@ export default function RootLayout({ children }) {
   <div className="p-4">
     <h2 className="text-lg font-bold mb-4">Menu</h2>
     <ul className="space-y-2">
-      <li><a href="/">Dashboard</a></li>
-      <li><a href="#">Features</a></li>
-      <li><a href="#">About Us</a></li>
+      <Link href="/">Home</Link>
+      <Link href="#">About US</Link>
     </ul>
   </div>
 </div>
