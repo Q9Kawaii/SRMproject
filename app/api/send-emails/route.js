@@ -1,18 +1,22 @@
-import { db } from "@/lib/firebase";
-import { doc, getDoc } from "firebase/firestore";
+console.log("[API] /api/send-emails hit");
+import { adminDb } from "@/lib/firebase-admin";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+console.log("Resend API Key:", process.env.RESEND_API_KEY);
+
 
 export async function POST(request) {
   try {
     const { studentIds, type } = await request.json();
 
     if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      console.warn("[API] No students selected");
       return Response.json({ error: "No students selected" }, { status: 400 });
     }
 
     if (!["attendance", "marks"].includes(type)) {
+      console.warn("[API] Invalid email type:", type);
       return Response.json({ error: "Invalid type" }, { status: 400 });
     }
 
@@ -20,36 +24,42 @@ export async function POST(request) {
 
     for (const id of studentIds) {
       try {
-        const studentRef = doc(db, "User", id);
-        const studentSnap = await getDoc(studentRef);
-        if (!studentSnap.exists()) {
+        if (!id) {
+          console.warn("[SKIP] Missing student ID");
+          results.push({ id, status: "failed", reason: "Missing ID" });
+          continue;
+        }
+
+        const studentSnap = await adminDb.collection("User").doc(id).get();
+
+
+        if (!studentSnap.exists) {
+          console.warn(`[SKIP] Student not found for ID: ${id}`);
           results.push({ id, status: "failed", reason: "Student not found" });
           continue;
         }
 
         const student = studentSnap.data();
-
         const requiredFields = ["name", "email", "parentEmail", "regNo", "section"];
         if (type === "attendance") requiredFields.push("attendance");
         if (type === "marks") requiredFields.push("marks");
 
-        const missingFields = requiredFields.filter(field => !student[field]);
+        const missingFields = requiredFields.filter((field) => !student[field]);
         if (missingFields.length > 0) {
+          console.warn(`[SKIP] ${student.name} missing:`, missingFields);
           results.push({ id, status: "failed", reason: `Missing fields: ${missingFields.join(", ")}` });
           continue;
         }
 
-        const subjectData = student[type]; // attendance or marks
+        const subjectData = student[type];
         const subjectEntries = [];
 
         if (subjectData && typeof subjectData === "object") {
           for (const [subject, value] of Object.entries(subjectData)) {
             const parsed = typeof value === "string" ? parseFloat(value) : value;
-
             if (type === "attendance" && !isNaN(parsed) && parsed < 75) {
               subjectEntries.push(`${subject}: ${parsed}%`);
             }
-
             if (type === "marks") {
               subjectEntries.push(`${subject}: ${parsed}`);
             }
@@ -57,13 +67,12 @@ export async function POST(request) {
         }
 
         if (type === "attendance" && subjectEntries.length === 0) {
+          console.log(`[SKIP] ${student.name} has no low attendance.`);
           results.push({ id, status: "skipped", reason: "No low attendance" });
           continue;
         }
 
-        const subjectLine =
-          type === "attendance" ? "Attendance Alert" : "Marks Report";
-
+        const subjectLine = type === "attendance" ? "Attendance Alert" : "Marks Report";
         const subjectColor = type === "attendance" ? "#d93025" : "#1a73e8";
 
         const messageBody =
@@ -71,7 +80,7 @@ export async function POST(request) {
             ? `your attendance is currently below <strong>75%</strong> in the following subject(s):`
             : `your marks for recent assessments are as follows:`;
 
-        const htmlList = subjectEntries.map(item => `<li>${item}</li>`).join("");
+        const htmlList = subjectEntries.map((item) => `<li>${item}</li>`).join("");
 
         const studentEmail = {
           from: "School Alerts <noreply@yashdingar.xyz>",
@@ -116,21 +125,36 @@ export async function POST(request) {
           `,
         };
 
-        await Promise.all([
-          resend.emails.send(studentEmail),
-          resend.emails.send(parentEmail),
-        ]);
+        const studentRes = await resend.emails.send(studentEmail);
+        const parentRes = await resend.emails.send(parentEmail);
+
+        console.log(`[EMAIL] Student Email (${student.email}):`, studentRes);
+        console.log(`[EMAIL] Parent Email (${student.parentEmail}):`, parentRes);
+
+        if (!studentRes?.id || !parentRes?.id) {
+          console.warn(`[SEND FAIL] ${student.name}`, {
+            studentId: studentRes?.id,
+            parentId: parentRes?.id,
+          });
+          results.push({
+            id,
+            status: "failed",
+            reason: `Send failed. studentId: ${!!studentRes?.id}, parentId: ${!!parentRes?.id}`,
+          });
+          continue;
+        }
 
         results.push({ id, status: "success" });
 
       } catch (error) {
+        console.error(`[ERROR] Sending email for student ID ${id}:`, error);
         results.push({ id, status: "failed", reason: error.message });
       }
     }
 
     return Response.json({ results });
   } catch (err) {
-    console.error("[API] Error:", err);
+    console.error("[API] Fatal error:", err);
     return Response.json(
       { error: "Internal server error", details: err.message },
       { status: 500 }

@@ -7,6 +7,7 @@ import DashCards from "./DashboardComponents/DashCards";
 import UploadSystem from "./UploadSystem";
 import EmailSystem from "./EmailSystem";
 import SearchComponent from "./SearchComponent";
+import HamsterLoader from "./HamsterLoader"; // ✅ Import hamster loader
 
 export default function AdminDashBoard() {
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -20,7 +21,7 @@ export default function AdminDashBoard() {
       setLoading(true);
       setSearchError("");
       setSearchResult(null);
-      
+
       const studentRef = doc(db, "User", regNo);
       const studentSnap = await getDoc(studentRef);
 
@@ -43,7 +44,7 @@ export default function AdminDashBoard() {
 
   const renderComponent = () => {
     if (searchResult) return <SearchComponent studentData={searchResult} />;
-    
+
     switch (selectedComponent) {
       case "uploadAttendance":
         return <UploadSystem />;
@@ -56,7 +57,7 @@ export default function AdminDashBoard() {
 
   return (
     <>
-      <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
+      <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%] ">
         <AnimatedBlob />
 
         <div
@@ -85,7 +86,7 @@ export default function AdminDashBoard() {
             <SearchBar onSearch={handleSearch} />
           </div>
 
-          {loading && <p className="text-gray-600 mb-2">Searching...</p>}
+          {loading && <HamsterLoader />} {/* ✅ Show hamster loader */}
           {searchError && <p className="text-red-500 mb-2">{searchError}</p>}
 
           <p className="text-sm text-blue-700 italic mb-4">
@@ -100,7 +101,7 @@ export default function AdminDashBoard() {
 
       <DashCards onCardClick={handleCardClick} />
 
-      <div className="px-4 py-8 w-full max-w-7xl mx-auto">
+      <div className="px-4 py-8 w-full max-w-7xl mx-auto -mb-60 md:-mb-15">
         {renderComponent()}
       </div>
     </>

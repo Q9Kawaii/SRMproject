@@ -4,6 +4,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import HamsterLoader from "./HamsterLoader";
 
 export default function StudentsTable() {
   const [students, setStudents] = useState([]);
@@ -12,7 +13,7 @@ export default function StudentsTable() {
   const [sendingEmails, setSendingEmails] = useState(false);
   const [filterLowAttendance, setFilterLowAttendance] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("");
-  const [sentEmailLog, setSentEmailLog] = useState([]); // PDF log state
+  const [sentEmailLog, setSentEmailLog] = useState([]);
 
   const deleteStudent = async (id) => {
     try {
@@ -81,28 +82,20 @@ export default function StudentsTable() {
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Failed to send emails");
 
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to send emails");
-      }
-
-      // --- Log PDF logic: build log after sending emails ---
       const now = new Date();
       const timeString = now.toLocaleString();
-      const logData = students
-        .filter(s => selected.has(s.id))
-        .map(s => ({
-          name: s.name,
-          regNo: s.regNo,
-          section: s.section,
-          studentEmail: s.email,
-          parentEmail: s.parentEmail,
-          lowSubjects: s.lowSubjects.join(", "),
-          sentTime: timeString,
-        }));
+      const logData = students.filter(s => selected.has(s.id)).map(s => ({
+        name: s.name,
+        regNo: s.regNo,
+        section: s.section,
+        studentEmail: s.email,
+        parentEmail: s.parentEmail,
+        lowSubjects: s.lowSubjects.join(", "),
+        sentTime: timeString,
+      }));
       setSentEmailLog(logData);
-      // --- End log logic ---
-
       alert("Emails sent successfully!");
       setSelected(new Set());
     } catch (error) {
@@ -113,7 +106,6 @@ export default function StudentsTable() {
     }
   };
 
-  // PDF download function
   const downloadEmailLog = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
@@ -137,34 +129,15 @@ export default function StudentsTable() {
     doc.save("attendance-email-log.pdf");
   };
 
-  if (loading) return <div className="p-8">Loading...</div>;
+  if (loading) return <div className="p-8 flex justify-center"><HamsterLoader/></div>;
 
   return (
     <div className="relative">
       {sendingEmails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
-            <svg
-              className="animate-spin h-10 w-10 text-blue-600 mb-4"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-            <span className="text-lg font-semibold text-blue-700">
+            <HamsterLoader/>
+            <span className="text-lg font-semibold text-blue-700 mt-4">
               Sending emails, please wait...
             </span>
           </div>

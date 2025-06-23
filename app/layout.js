@@ -20,12 +20,18 @@ export default function RootLayout({ children }) {
     menuOpen ? "translate-x-0" : "translate-x-full"
   }`}
 >
-  <div className="p-4">
-    <h2 className="text-lg font-bold mb-4">Menu</h2>
-    <ul className="space-y-2">
-      <Link href="/">Home</Link>
-      <Link href="#">About US</Link>
-    </ul>
+  <div className="p-4 flex flex-col justify-between h-[100%]">
+    <div>
+      <h2 className="text-lg font-bold mb-4">Menu</h2>
+        <ul className="space-y-2 flex-col flex">
+          <Link href="/">Home</Link>
+          <Link href="#">Contact Us</Link>
+          <Link href="/AboutUs">About US</Link>
+        </ul>
+    </div>
+    <div>
+      <img src="SAMADHAN transparent english.png" className="h-20" />
+    </div>
   </div>
 </div>
 {menuOpen && (
