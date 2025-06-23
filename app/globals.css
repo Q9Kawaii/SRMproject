@@ -26,9 +26,15 @@
 }
 
 .wheel {
-  background: radial-gradient(100% 100% at center,hsla(0,0%,60%,0) 47.8%,hsl(0,0%,60%) 48%);
+  background: radial-gradient(
+    100% 100% at center,
+    hsla(0, 0%, 60%, 0) 40%,
+    hsla(0, 0%, 60%, 0.5) 60%,
+    hsl(0, 0%, 60%) 80%
+  );
   z-index: 2;
 }
+
 
 .hamster {
   animation: hamster var(--dur) ease-in-out infinite;
