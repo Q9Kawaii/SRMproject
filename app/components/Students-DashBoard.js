@@ -655,6 +655,33 @@ const generatePDF = () => {
     </div>
   )}
 
+  {/* 👇 Achievements View Section */}
+        {studentData.achievementsMap && !isEditing && (
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h2>
+            <ul className="list-disc list-inside text-left">
+              {Object.values(studentData.achievementsMap).map((val, i) => {
+                const [title, link] = val.split("~");
+                return (
+                  <li key={i} className="mb-1">
+                    <strong>{title}</strong>{" "}
+                    {link && (
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline ml-1"
+                      >
+                        [View]
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
   {/* Buttons */}
   <div className="md:col-span-2 flex justify-end mt-4">
     {isEditing ? (
@@ -717,32 +744,7 @@ const generatePDF = () => {
           </div>
         )}
 
-        {/* 👇 Achievements View Section */}
-        {studentData.achievementsMap && !isEditing && (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h2>
-            <ul className="list-disc list-inside text-left">
-              {Object.values(studentData.achievementsMap).map((val, i) => {
-                const [title, link] = val.split("~");
-                return (
-                  <li key={i} className="mb-1">
-                    <strong>{title}</strong>{" "}
-                    {link && (
-                      <a
-                        href={link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline ml-1"
-                      >
-                        [View]
-                      </a>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
+        
 
 
       </div>
