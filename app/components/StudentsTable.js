@@ -117,7 +117,7 @@ const handleLowerAlert = async (student) => {
         regNo: s.regNo,
         section: s.section,
         studentEmail: s.email,
-        parentEmail: s.parentEmail,
+        parentEmail: s.fatherEmail,
         lowSubjects: s.lowSubjects.join(", "),
         sentTime: timeString,
       }));
