@@ -7,6 +7,7 @@ import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
+//hehe
 
 const FIELD_CONFIG = [
   // Basic Details :
@@ -573,85 +574,176 @@ const generatePDF = () => {
 
           {studentData && (
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (isEditing) handleSave();
-                else setIsEditing(true);
+  onSubmit={(e) => {
+    e.preventDefault();
+    if (isEditing) handleSave();
+    else setIsEditing(true);
+  }}
+  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+>
+  {FIELD_CONFIG.map((field) => (
+    <div key={field.name} className="text-left">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {field.label}
+      </label>
+      {isEditing && !field.readOnly ? (
+        <input
+          type={field.type || "text"}
+          name={field.name}
+          value={studentData[field.name] || ""}
+          onChange={handleChange}
+          className="w-full px-2 py-1 border rounded"
+        />
+      ) : (
+        <div className="p-2 bg-gray-50 rounded min-h-[38px]">
+          {studentData[field.name] || <span className="text-gray-400">N/A</span>}
+        </div>
+      )}
+    </div>
+  ))}
+
+  {/* --- Achievements Editable Section --- */}
+  {isEditing && (
+    <div className="md:col-span-2 mt-4">
+      <h2 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h2>
+
+      {Object.entries(studentData.achievementsMap || {}).map(([key, value]) => {
+        const [title, link] = value.split("~");
+
+        return (
+          <div key={key} className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
+            <input
+              type="text"
+              placeholder="Achievement Title"
+              value={title}
+              onChange={(e) => {
+                const updatedMap = { ...studentData.achievementsMap };
+                updatedMap[key] = `${e.target.value}~${link}`;
+                setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
               }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              {FIELD_CONFIG.map((field) => (
-                <div key={field.name} className="text-left">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {field.label}
-                  </label>
-                  {isEditing && !field.readOnly ? (
-                    <input
-                      type={field.type || "text"}
-                      name={field.name}
-                      value={studentData[field.name] || ""}
-                      onChange={handleChange}
-                      className="w-full px-2 py-1 border rounded"
-                    />
-                  ) : (
-                    <div className="p-2 bg-gray-50 rounded min-h-[38px]">
-                      {studentData[field.name] || <span className="text-gray-400">N/A</span>}
-                    </div>
-                  )}
-                </div>
-              ))}
-              <div className="md:col-span-2 flex justify-end mt-4">
-                {isEditing ? (
-                  <>
-                    <button
-                      type="submit"
-                      className="px-4 py-2 bg-green-600 text-white rounded mr-2"
-                    >
-                      Save Changes
-                    </button>
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-gray-500 text-white rounded"
-                      onClick={() => setIsEditing(false)}
-                    >
-                      Cancel
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex space-x-2">
-                    <button 
-                      type="button" 
-                      className="px-4 py-2 bg-blue-600 text-white rounded"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setIsEditing(true);
-                      }}
-                    >
-                      Edit Profile
-                    </button>
-                    <button
-                      type="button"
-                      className="px-4 py-2 bg-purple-600 text-white rounded flex items-center"
-                      onClick={generatePDF}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                      Download PDF
-                    </button>
-                  </div>
-                )}
-              </div>
-            </form>
+              className="w-full px-2 py-1 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="Google Drive Link"
+              value={link}
+              onChange={(e) => {
+                const updatedMap = { ...studentData.achievementsMap };
+                updatedMap[key] = `${title}~${e.target.value}`;
+                setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
+              }}
+              className="w-full px-2 py-1 border rounded"
+            />
+          </div>
+        );
+      })}
+
+      <button
+        type="button"
+        className="mt-2 px-4 py-1 bg-blue-500 text-white rounded"
+        onClick={() => {
+          const newKey = `achi${Date.now()}`;
+          const updatedMap = {
+            ...(studentData.achievementsMap || {}),
+            [newKey]: `~`,
+          };
+          setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
+        }}
+      >
+        + Add Achievement
+      </button>
+    </div>
+  )}
+
+  {/* Buttons */}
+  <div className="md:col-span-2 flex justify-end mt-4">
+    {isEditing ? (
+      <>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-green-600 text-white rounded mr-2"
+        >
+          Save Changes
+        </button>
+        <button
+          type="button"
+          className="px-4 py-2 bg-gray-500 text-white rounded"
+          onClick={() => setIsEditing(false)}
+        >
+          Cancel
+        </button>
+      </>
+    ) : (
+      <div className="flex space-x-2">
+        <button
+          type="button"
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+          onClick={(e) => {
+            e.preventDefault();
+            setIsEditing(true);
+          }}
+        >
+          Edit Profile
+        </button>
+        <button
+          type="button"
+          className="px-4 py-2 bg-purple-600 text-white rounded flex items-center"
+          onClick={generatePDF}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Download PDF
+        </button>
+      </div>
+    )}
+  </div>
+</form>
+
           )}
         </div>
-        {studentData && !isEditing && (
-  <div className="mt-6 text-lg font-semibold text-green-700">
-  Total Profile Score: {calculateTotalScore()}
-</div>
+                {studentData && !isEditing && (
+          <div className="mt-6 text-lg font-semibold text-green-700">
+            Total Profile Score: {calculateTotalScore()}
+          </div>
+        )}
 
+        {/* 👇 Achievements View Section */}
+        {studentData.achievementsMap && !isEditing && (
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h2>
+            <ul className="list-disc list-inside text-left">
+              {Object.values(studentData.achievementsMap).map((val, i) => {
+                const [title, link] = val.split("~");
+                return (
+                  <li key={i} className="mb-1">
+                    <strong>{title}</strong>{" "}
+                    {link && (
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline ml-1"
+                      >
+                        [View]
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
-)}
 
       </div>
     </div>

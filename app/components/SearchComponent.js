@@ -106,13 +106,11 @@ const generatePDF = (studentData, fieldConfig) => {
   doc.setFontSize(18);
   doc.text("Student Profile", 14, 15);
 
-  // Prepare table data: [[label, value], ...]
   const tableRows = fieldConfig.map(field => [
     field.label,
     studentData[field.name] ? String(studentData[field.name]) : "-"
   ]);
 
-  // Corrected autoTable usage
   autoTable(doc, {
     head: [["Field", "Value"]],
     body: tableRows,
@@ -121,9 +119,32 @@ const generatePDF = (studentData, fieldConfig) => {
     headStyles: { fillColor: [30, 64, 175] },
   });
 
+  if (studentData.achievementsMap && Object.keys(studentData.achievementsMap).length > 0) {
+    const achievementData = Object.values(studentData.achievementsMap).map((val, idx) => {
+      const [title, link] = val.split("~");
+      return [`${idx + 1}. ${title}`, link || "No link"];
+    });
+
+    doc.addPage();
+    doc.setFontSize(16);
+    doc.text("Achievements", 14, 15);
+
+    autoTable(doc, {
+      startY: 20,
+      head: [["Title", "Link"]],
+      body: achievementData,
+      styles: { fontSize: 10, cellPadding: 2 },
+      headStyles: { fillColor: [34, 139, 34] },
+      columnStyles: {
+        1: { cellWidth: 120 },
+      },
+    });
+  }
+
   doc.save("student_profile.pdf");
 };
 
+// Main UI Component
 export default function SearchComponent({ studentData }) {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6">
@@ -143,6 +164,33 @@ export default function SearchComponent({ studentData }) {
             isUrl={id === "link"}
           />
         ))}
+
+        {/* Achievements Section */}
+        {studentData.achievementsMap && Object.keys(studentData.achievementsMap).length > 0 && (
+          <div className="mt-8 col-span-full">
+            <h3 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h3>
+            <ul className="list-disc list-inside">
+              {Object.values(studentData.achievementsMap).map((val, i) => {
+                const [title, link] = val.split("~");
+                return (
+                  <li key={i} className="mb-1">
+                    <strong>{title}</strong>{" "}
+                    {link && (
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline ml-2"
+                      >
+                        [View]
+                      </a>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );

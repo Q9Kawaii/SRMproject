@@ -8,7 +8,7 @@ export default function NavBar({onHamClick}) {
         समाधान – SRM Institute of Science and Technology, Chennai
       </div>
       <div className="bg-white flex sm:flex-row justify-between items-center px-3 py-3 gap-2 ">
-        <div className="h-12 w-20 overflow-hidden flex justify-center items-center"><img src="/SAMADHAN transparent hindi.png" className="h-20 w-20 " alt="Logo" /></div>
+        <div className="h-12 w-20 overflow-hidden flex justify-center items-center"><img src="/SRMlogo.png" className="h-9 w-20 " alt="Logo" /></div>
         <span className="text-3xl text-[#0c4da2] font-extrabold cursor-pointer shadow-2xl shadow-neutral-950" onClick={onHamClick} >&#9776;</span>
       </div>
     </div>
