@@ -24,7 +24,7 @@ const FIELD_CONFIG = [
   { label: "Mobile No.", name: "phone", type: "tel" },
   { label: "Alternate Contact Number", name: "alternatePhone", type: "tel" },
   { label: "Father Mobile No.", name: "fatherPhone", type: "tel" },
-  { label: "Father Email ID", name: "fatherEmail", type: "email" },
+  { label: "Father Email ID", name: "parentEmail", type: "email" },
   { label: "Mother Mobile No.", name: "motherPhone", type: "tel" },
   { label: "Mother Email ID", name: "motherEmail", type: "email" },
   { label: "Guardian Contact Number", name: "guardianPhone", type: "tel" },

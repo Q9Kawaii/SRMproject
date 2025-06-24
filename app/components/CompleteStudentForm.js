@@ -34,7 +34,7 @@ const studentDataSet = {
     "9876543210", "9876543211", "9876543212", "9876543213", "9876543214"
   ],
   isNRI: ["Yes", "No"],
-  fatherEmail: [
+  parentEmail: [
     "father.aarav@gmail.com", "father.priya@gmail.com", "father.rohan@gmail.com", "father.sneha@gmail.com", "father.aditya@gmail.com"
   ],
   fatherPhone: [
@@ -145,7 +145,7 @@ export default function StudentForm() {
     email: "",
     phone: "",
     isNRI: "",
-    fatherEmail: "",
+    parentEmail: "",
     fatherPhone: "",
     motherEmail: "",
     motherPhone: "",
@@ -240,7 +240,7 @@ export default function StudentForm() {
         <input name="email" value={form.email} onChange={handleChange} placeholder="Official Email" />
         <input name="phone" value={form.phone} onChange={handleChange} placeholder="Mobile No." />
         <input name="isNRI" value={form.isNRI} onChange={handleChange} placeholder="NRI Student" />
-        <input name="fatherEmail" value={form.fatherEmail} onChange={handleChange} placeholder="Father Email ID" />
+        <input name="parentEmail" value={form.parentEmail} onChange={handleChange} placeholder="Father Email ID" />
         <input name="fatherPhone" value={form.fatherPhone} onChange={handleChange} placeholder="Father Mobile No." />
         <input name="motherEmail" value={form.motherEmail} onChange={handleChange} placeholder="Mother Email ID" />
         <input name="motherPhone" value={form.motherPhone} onChange={handleChange} placeholder="Mother Mobile No." />
