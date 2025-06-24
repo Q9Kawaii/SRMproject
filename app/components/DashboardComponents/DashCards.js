@@ -6,7 +6,7 @@ export default function DashCards({ onCardClick }) {
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 px-4 py-8">
 
       {/* Upload Attendance Card */}
-      <a href="https://university-portal-pink.vercel.app/" className="block relative h-[200px] w-full">
+      <a href="https://university-portal-pink.vercel.app/" target='_blank' className="block relative h-[200px] w-full">
   <div className="h-full w-full bg-green-100 rounded-xl flex flex-col items-center justify-center p-10 text-center shadow-md transition">
     <h1 className="font-bold text-3xl text-green-600">Upload Attendance</h1>
     <p className="pt-6 text-green-500">
