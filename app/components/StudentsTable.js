@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import HamsterLoader from "./HamsterLoader";
@@ -24,6 +24,8 @@ export default function StudentsTable() {
       alert("Error deleting student.");
     }
   };
+
+  
 
   useEffect(() => {
     async function fetchStudents() {
@@ -69,6 +71,30 @@ export default function StudentsTable() {
       return next;
     });
   };
+
+  const handleAlert = async (student) => {
+  try {
+    await updateDoc(doc(db, "User", student.id), { attendanceAlert: true });
+    alert("Alert raised successfully!");
+  } catch (e) {
+    alert("Failed to raise alert");
+    return; // Stop if failed
+  }
+};
+
+const handleLowerAlert = async (student) => {
+  try {
+    await updateDoc(doc(db, "User", student.id), {
+      attendanceAlert: false,
+      absenceReason: "",
+    });
+    alert("Alert Lowered successfully!");
+  } catch (e) {
+    alert("Failed to lower alert");
+    return;
+  }
+};
+
 
   const sendEmails = async () => {
     if (!selected.size) return alert("Select students first");
@@ -202,6 +228,8 @@ export default function StudentsTable() {
                     <th className="p-2 text-center">Parent Email</th>
                     <th className="p-2 text-center">Low Attendance Subjects</th>
                     <th className="p-2 text-center">All Subjects Attendance</th>
+                    <th className="p-2 text-center">Alert</th>
+                    <th className="p-2 text-center">Reason</th>
                     <th className="p-2 text-center">Delete</th>
                   </tr>
                 </thead>
@@ -249,6 +277,29 @@ export default function StudentsTable() {
                             ))
                           : "—"}
                       </td>
+                      <td className="p-2 text-center">
+                    {!s.attendanceAlert ? (
+                      <button
+                        onClick={() => handleAlert(s)}
+                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                        disabled={sendingEmails}
+                      >
+                        Alert
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleLowerAlert(s)}
+                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                        disabled={sendingEmails}
+                      >
+                        Lower Alert
+                      </button>
+                    )}
+                  </td>
+                  {/* ----------- NEW: Reason Column ----------- */}
+                  <td className="p-2 text-center">
+                    {s.attendanceAlert ? (s.absenceReason || <span className="text-gray-400">No reason submitted</span>) : "—"}
+                  </td>
                       <td className="p-2">
                         <button
                           onClick={() => deleteStudent(s.id)}

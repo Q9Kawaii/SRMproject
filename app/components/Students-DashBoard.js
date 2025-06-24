@@ -572,6 +572,50 @@ const generatePDF = () => {
         <div className="mt-8 p-4 bg-white rounded-lg shadow-md">
           {error && <p className="text-red-500 mb-2">{error}</p>}
 
+          {/* --- Absence Reason Input for Low Attendance Alert --- */}
+{studentData?.attendanceAlert && !isEditing && (
+  <form
+    onSubmit={async (e) => {
+      e.preventDefault();
+      try {
+        await setDoc(
+          doc(getFirestore(), "User", studentData.regNo),
+          { absenceReason: studentData.absenceReason || "" },
+          { merge: true }
+        );
+        setError("Reason submitted!");
+      } catch (err) {
+        setError("Failed to submit reason: " + err.message);
+      }
+    }}
+    className="mt-8 p-4 bg-yellow-100 rounded-lg shadow-md"
+  >
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Please provide a reason for your absenteeism:
+    </label>
+    <input
+      type="text"
+      name="absenceReason"
+      value={studentData.absenceReason || ""}
+      onChange={(e) =>
+        setStudentData((prev) => ({
+          ...prev,
+          absenceReason: e.target.value,
+        }))
+      }
+      className="w-full px-2 py-1 border rounded mb-2"
+      required
+    />
+    <button
+      type="submit"
+      className="px-4 py-2 bg-yellow-600 text-white rounded"
+    >
+      Submit Reason
+    </button>
+  </form>
+)}
+
+
           {studentData && (
             <form
   onSubmit={(e) => {
