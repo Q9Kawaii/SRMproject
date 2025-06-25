@@ -5,6 +5,7 @@ import "./globals.css";
 import AuthReset from './components/AuthReset';
 import React, { useState } from "react";
 import Link from "next/link";
+import CursorBlob from "./components/DashboardComponents/CursorBlob";
 
 export default function RootLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className="antialiased flex flex-col min-h-screen">
         <AuthReset />
+        <CursorBlob/>
         <main className="flex-1">
           <NavBar onHamClick={() => setMenuOpen(prev => !prev)} />
             <div
@@ -24,7 +26,6 @@ export default function RootLayout({ children }) {
     <div>
       <h2 className="text-lg font-bold mb-4">Menu</h2>
         <ul className="space-y-2 flex-col flex">
-          <Link href="/">Home</Link>
           <Link href="#">Contact Us</Link>
           <Link href="/AboutUs">About US</Link>
         </ul>

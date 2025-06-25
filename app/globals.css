@@ -279,3 +279,24 @@
     transform: rotate(-1turn);
   }
 }
+
+
+@keyframes gradient-slide {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animated-gradient {
+  background: linear-gradient(270deg, #bbd5ff, #ffffff, #b8d3ff);
+  background-size: 600% 600%;
+  animation: gradient-slide 8s ease infinite;
+}
+.animated-gradient-signinwithgoogle {
+  background: linear-gradient(270deg, #5898ff, #c2e9fb, #a1c4fd);
+  background-size: 600% 600%;
+  animation: gradient-slide 8s ease infinite;
+}

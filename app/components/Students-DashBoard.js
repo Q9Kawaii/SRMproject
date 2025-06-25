@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import SearchBar from "./DashboardComponents/SearchBar";
-import AnimatedBlob from "./DashboardComponents/AnimatedBlob";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { jsPDF } from "jspdf";
@@ -544,7 +543,6 @@ const generatePDF = () => {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
-      <AnimatedBlob />
       <div
           className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
           style={{
@@ -558,10 +556,9 @@ const generatePDF = () => {
           <h1 className="text-3xl sm:text-4xl font-bold text-blue-900 mb-3 lg:mb-15 lg:text-7xl">
             Student Dashboard
           </h1>
-
-          <p className="text-lg text-gray-800 font-medium mb-2 lg:text-3xl">
-            Welcome, {studentData.name}
-          </p>
+        <p className="text-lg text-gray-800 font-medium mb-2 lg:text-3xl">
+        Welcome, {studentData?.name || "Student"}
+        </p>
         <p className="text-sm text-blue-700 italic mb-4">
           Track attendance, academics, and placement progress
         </p>

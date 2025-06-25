@@ -32,7 +32,7 @@ const FIELD_CONFIG = [
   { label: "Mobile No.", name: "phone", type: "tel" },
   { label: "Alternate Contact Number", name: "alternatePhone", type: "tel" },
   { label: "Father Mobile No.", name: "fatherPhone", type: "tel" },
-  { label: "Father Email ID", name: "fatherEmail", type: "email" },
+  { label: "Father Email ID", name: "parentEmail", type: "email" },
   { label: "Mother Mobile No.", name: "motherPhone", type: "tel" },
   { label: "Mother Email ID", name: "motherEmail", type: "email" },
   { label: "Guardian Contact Number", name: "guardianPhone", type: "tel" },
@@ -119,10 +119,17 @@ const generatePDF = (studentData, fieldConfig) => {
     headStyles: { fillColor: [30, 64, 175] },
   });
 
-  if (studentData.achievementsMap && Object.keys(studentData.achievementsMap).length > 0) {
-    const achievementData = Object.values(studentData.achievementsMap).map((val, idx) => {
-      const [title, link] = val.split("~");
-      return [`${idx + 1}. ${title}`, link || "No link"];
+  const achievements = studentData.achievementsMap;
+  if (achievements && typeof achievements === "object" && Object.keys(achievements).length > 0) {
+    const achievementData = Object.values(achievements).map((val, idx) => {
+      let title = `Achievement ${idx + 1}`;
+      let link = "";
+      if (typeof val === "string") {
+        const parts = val.split("~");
+        title = parts[0]?.trim() || title;
+        link = parts[1]?.trim() || "No link";
+      }
+      return [title, link];
     });
 
     doc.addPage();

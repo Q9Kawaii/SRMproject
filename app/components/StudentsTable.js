@@ -14,6 +14,8 @@ export default function StudentsTable() {
   const [filterLowAttendance, setFilterLowAttendance] = useState(false);
   const [sectionFilter, setSectionFilter] = useState("");
   const [sentEmailLog, setSentEmailLog] = useState([]);
+  const [regNoFilter, setRegNoFilter] = useState("");
+
 
   const deleteStudent = async (id) => {
     try {
@@ -57,12 +59,17 @@ export default function StudentsTable() {
   }, []);
 
   const displayedStudents = students.filter((s) => {
-    const matchLow = filterLowAttendance ? s.lowSubjects.length > 0 : true;
-    const matchSection = sectionFilter
-      ? s.section?.toLowerCase().includes(sectionFilter.toLowerCase())
-      : true;
-    return matchLow && matchSection;
-  });
+  const matchLow = filterLowAttendance ? s.lowSubjects.length > 0 : true;
+  const matchSection = sectionFilter
+    ? s.section?.toLowerCase().includes(sectionFilter.toLowerCase())
+    : true;
+  const matchRegNo = regNoFilter
+    ? s.regNo?.toLowerCase().includes(regNoFilter.toLowerCase())
+    : true;
+  return matchLow && matchSection && matchRegNo;
+});
+
+
 
   const toggle = (id) => {
     setSelected((prev) => {
@@ -75,10 +82,14 @@ export default function StudentsTable() {
   const handleAlert = async (student) => {
   try {
     await updateDoc(doc(db, "User", student.id), { attendanceAlert: true });
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.id === student.id ? { ...s, attendanceAlert: true } : s
+      )
+    );
     alert("Alert raised successfully!");
   } catch (e) {
     alert("Failed to raise alert");
-    return; // Stop if failed
   }
 };
 
@@ -88,13 +99,18 @@ const handleLowerAlert = async (student) => {
       attendanceAlert: false,
       absenceReason: "",
     });
+    setStudents((prev) =>
+      prev.map((s) =>
+        s.id === student.id
+          ? { ...s, attendanceAlert: false, absenceReason: "" }
+          : s
+      )
+    );
     alert("Alert Lowered successfully!");
   } catch (e) {
     alert("Failed to lower alert");
-    return;
   }
 };
-
 
   const sendEmails = async () => {
     if (!selected.size) return alert("Select students first");
@@ -208,6 +224,15 @@ const handleLowerAlert = async (student) => {
             className="border p-2 rounded w-64"
             disabled={sendingEmails}
           />
+          <input
+  type="text"
+  placeholder="Filter by Registration No"
+  value={regNoFilter}
+  onChange={(e) => setRegNoFilter(e.target.value)}
+  className="border p-2 rounded w-64"
+  disabled={sendingEmails}
+/>
+
         </div>
         {displayedStudents.length === 0 ? (
           <p>

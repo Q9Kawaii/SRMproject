@@ -148,7 +148,8 @@ export default function Home() {
           <p className="text-lg text-gray-800 font-medium mb-2 lg:text-3xl">Welcome, User</p>
 
           <div className="flex flex-col justify-center items-center text-center pb-10 lg:items-end">
-            <div className="bg-white rounded-xl flex flex-col items-center justify-center text-center px-6 py-4 drop-shadow-xl shadow-neutral-900 w-[85%] max-w-md">
+            <div className="animated-gradient bg-white bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-80 rounded-xl flex flex-col items-center justify-center text-center px-6 py-4 drop-shadow-xl shadow-neutral-900 w-[85%] max-w-md transition-all duration-500 backdrop-blur-md bg-white/10 border-2 border-white/30 rounded-xl  p-6">
+
               <h2 className="font-semibold text-xl pb-3">Portal Login</h2>
               {error && <div className="error mb-3 text-red-600 font-medium">{error}</div>}
               {isNewUser && newUserUID && (
@@ -188,7 +189,7 @@ export default function Home() {
               )}
               <button
                 onClick={handleGoogleLogin}
-                className="bg-blue-500 rounded-xl px-5 py-2 text-white font-bold text-center hover:bg-blue-600"
+                className="bg-blue-500 rounded-xl px-5 py-2 text-white font-bold text-center hover:bg-blue-600 .animated-gradient-signinwithgoogle"
               >
                 Sign in with Google
               </button>
