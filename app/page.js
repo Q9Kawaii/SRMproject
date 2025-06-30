@@ -8,6 +8,7 @@ import StudentsDashBoard from "./components/Students-DashBoard";
 import { app } from "../lib/firebase";
 import AnimatedBlob from "./components/DashboardComponents/AnimatedBlob";
 import HamsterLoader from "./components/HamsterLoader"; // ✅ Import loader
+import Image from "next/image";
 
 const auth = getAuth(app);
 const db = getFirestore(app);
