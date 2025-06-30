@@ -33,6 +33,35 @@ export default function DashCards({ onCardClick }) {
         />
       </div>
 
+    {/* Achievements */}
+      <div className="relative h-[200px] w-full">
+        <div className="h-full w-full bg-yellow-100 rounded-xl flex flex-col items-center justify-center p-10 text-center shadow-md transition">
+          <h1 className="font-bold text-3xl text-yellow-600">Achievements</h1>
+          <p className="pt-6 text-yellow-500">
+            Send updates to students or parents.
+            <br /> Keep communication clear!
+          </p>
+        </div>
+        <div
+          onClick={() => onCardClick("Achievements")}
+          className="absolute inset-0 rounded-xl cursor-pointer hover:bg-yellow-200/20 z-10"
+        />
+      </div>
+
+    {/* placement matrix */}
+      <div className="relative h-[200px] w-full">
+        <div className="h-full w-full bg-yellow-100 rounded-xl flex flex-col items-center justify-center p-10 text-center shadow-md transition">
+          <h1 className="font-bold text-3xl text-yellow-600">placement matrix</h1>
+          <p className="pt-6 text-yellow-500">
+            Send updates to students or parents.
+            <br /> Keep communication clear!
+          </p>
+        </div>
+        <div
+          onClick={() => onCardClick("TeacherVerificationTable")}
+          className="absolute inset-0 rounded-xl cursor-pointer hover:bg-yellow-200/20 z-10"
+        />
+      </div>
     </div>
   );
 }

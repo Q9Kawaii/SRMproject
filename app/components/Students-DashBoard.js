@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import SearchBar from "./DashboardComponents/SearchBar";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -405,10 +405,12 @@ const SCORE_CONFIG = {
 
 
 export default function StudentsDashBoard() {
+  const [declineAlert, setDeclineAlert] = useState(null);
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+   const [originalData, setOriginalData] = useState(null);
   const db = getFirestore();
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -469,25 +471,61 @@ const generatePDF = () => {
     doc.save('student_profile.pdf');
   };
 
+  const dismissAlert = () => {
+  setDeclineAlert(null);
+  // Optional: Clear from Firestore
+  // const docRef = doc(db, "PendingUpdates", studentData.regNo);
+  // await updateDoc(docRef, { message: "" });
+};
+
+
   const handleSave = async () => {
   try {
-    // 1. Calculate the total score
+
+    
+    // 1. Calculate PLM score
     const totalScore = calculateTotalScore();
+    
+    // 2. Create updated data WITH CGPA
+    const updatedData = { 
+      ...studentData, 
+      PLM: totalScore,
+      // Keep CGPA if it was edited
+      cgpa: studentData.cgpa 
+    };
 
-    // 2. Add/Update the PLM field in studentData
-    const updatedData = { ...studentData, PLM: totalScore };
+    // 3. Collect ALL changed fields including CGPA
+    const changes = {};
+    Object.keys(updatedData).forEach(key => {
+      // Compare with original data
+      if (updatedData[key] !== originalData[key]) {
+        changes[key] = updatedData[key];
+      }
+    });
 
-    // 3. Save to Firestore
-    await setDoc(doc(db, "User", updatedData.regNo), updatedData, { merge: true });
+    // 4. Save to PendingUpdates
+    if (Object.keys(changes).length > 0) {
+      const pendingRef = doc(db, "PendingUpdates", updatedData.regNo);
+      await setDoc(pendingRef, {
+        regNo: updatedData.regNo,
+        updates: changes,
+        original: Object.fromEntries(
+          Object.keys(changes).map(k => [k, originalData[k]])
+        ),
+        status: "pending",
+        timestamp: new Date().toISOString()
+      }, { merge: true });
 
-    // 4. Update local state and UI
-    setStudentData(updatedData);
-    setIsEditing(false);
-    setError("Changes saved successfully!");
+      setIsEditing(false);
+      setError("Changes submitted for teacher approval.");
+    } else {
+      setError("No changes to save.");
+    }
   } catch (err) {
-    setError("Error saving changes: " + err.message);
+    setError("Error submitting changes: " + err.message);
   }
 };
+
 
 
   useEffect(() => {
@@ -515,11 +553,14 @@ const generatePDF = () => {
         const studentSnap = await getDoc(studentRef);
 
         if (studentSnap.exists()) {
-          setStudentData({ ...studentSnap.data(), regNo: registrationNumber });
-        } else {
-          // If no data, initialize with regNo so the form can be filled
-          setStudentData({ regNo: registrationNumber });
-        }
+  const data = { ...studentSnap.data(), regNo: registrationNumber };
+  setStudentData(data);
+  setOriginalData(data); // <-- Add this line!
+} else {
+  setStudentData({ regNo: registrationNumber });
+  setOriginalData({ regNo: registrationNumber }); // <-- Add this line!
+}
+
       } catch (err) {
         setError("Error fetching data: " + err.message);
       } finally {
@@ -537,6 +578,31 @@ const generatePDF = () => {
 
     return () => unsubscribe();
   }, [db]);
+
+  useEffect(() => {
+  if (!studentData?.regNo) return;
+  
+  const docRef = doc(db, "PendingUpdates", studentData.regNo);
+  const unsubscribe = onSnapshot(docRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.status === "declined" && data.message) {
+        setDeclineAlert({
+          message: data.message,
+          timestamp: data.timestamp
+        });
+      } else {
+        setDeclineAlert(null);
+      }
+    } else {
+      setDeclineAlert(null);
+    }
+  });
+  
+  return () => unsubscribe();
+}, [studentData?.regNo]);
+
+
 
 
   if (loading) return <div className="text-center p-4">Loading...</div>;
@@ -568,6 +634,8 @@ const generatePDF = () => {
 
         <div className="mt-8 p-4 bg-white rounded-lg shadow-md">
           {error && <p className="text-red-500 mb-2">{error}</p>}
+
+
 
           {/* --- Absence Reason Input for Low Attendance Alert --- */}
 {studentData?.attendanceAlert && !isEditing && (
@@ -789,6 +857,21 @@ const generatePDF = () => {
 
 
       </div>
+      {declineAlert && (
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 relative">
+        <div className="font-bold">Update Declined</div>
+        <p>{declineAlert.message}</p>
+        <div className="text-xs mt-1 text-yellow-600">
+          {declineAlert.timestamp && new Date(declineAlert.timestamp).toLocaleString()}
+        </div>
+        <button
+          onClick={dismissAlert}
+          className="absolute top-2 right-2 text-yellow-700 hover:text-yellow-900"
+        >
+          ×
+        </button>
+      </div>
+    )}
     </div>
   );
 }

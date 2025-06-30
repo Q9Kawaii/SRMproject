@@ -8,6 +8,8 @@ import UploadSystem from "./UploadSystem";
 import EmailSystem from "./EmailSystem";
 import SearchComponent from "./SearchComponent";
 import HamsterLoader from "./HamsterLoader"; // ✅ Import hamster loader
+import AchievementsTable from "./AchievementsTable";
+import TeacherVerificationTable from "./TeacherVerificationTable";
 
 export default function AdminDashBoard() {
   const [selectedComponent, setSelectedComponent] = useState(null);
@@ -50,6 +52,10 @@ export default function AdminDashBoard() {
         return <UploadSystem />;
       case "emailSystem":
         return <EmailSystem />;
+      case "Achievements":
+        return <AchievementsTable/>
+      case "TeacherVerificationTable" :
+        return <TeacherVerificationTable/>
       default:
         return null;
     }

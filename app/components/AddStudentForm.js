@@ -15,7 +15,7 @@ const studentEmails = [
   "frostyhasbackup1@gmail.com",
 ];
 
-const sections = ["A", "B", "F1", "H1", "H2"];
+const sections = ["F1", ];
 const subjects = ["Maths", "Physics", "Chemistry", "Biology", "CS"];
 
 function getRandomSubjects() {

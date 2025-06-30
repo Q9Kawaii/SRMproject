@@ -60,14 +60,21 @@ export default function StudentsTable() {
 
   const displayedStudents = students.filter((s) => {
   const matchLow = filterLowAttendance ? s.lowSubjects.length > 0 : true;
+  
+  // Special case: if "all404" is entered, show all sections
   const matchSection = sectionFilter
-    ? s.section?.toLowerCase().includes(sectionFilter.toLowerCase())
+    ? sectionFilter.toLowerCase() === "all404" 
+      ? true  // Show all sections
+      : s.section?.toLowerCase().includes(sectionFilter.toLowerCase())
     : true;
+    
   const matchRegNo = regNoFilter
     ? s.regNo?.toLowerCase().includes(regNoFilter.toLowerCase())
     : true;
+    
   return matchLow && matchSection && matchRegNo;
 });
+
 
 
 
@@ -78,39 +85,6 @@ export default function StudentsTable() {
       return next;
     });
   };
-
-  const handleAlert = async (student) => {
-  try {
-    await updateDoc(doc(db, "User", student.id), { attendanceAlert: true });
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.id === student.id ? { ...s, attendanceAlert: true } : s
-      )
-    );
-    alert("Alert raised successfully!");
-  } catch (e) {
-    alert("Failed to raise alert");
-  }
-};
-
-const handleLowerAlert = async (student) => {
-  try {
-    await updateDoc(doc(db, "User", student.id), {
-      attendanceAlert: false,
-      absenceReason: "",
-    });
-    setStudents((prev) =>
-      prev.map((s) =>
-        s.id === student.id
-          ? { ...s, attendanceAlert: false, absenceReason: "" }
-          : s
-      )
-    );
-    alert("Alert Lowered successfully!");
-  } catch (e) {
-    alert("Failed to lower alert");
-  }
-};
 
   const sendEmails = async () => {
     if (!selected.size) return alert("Select students first");
@@ -234,13 +208,26 @@ const handleLowerAlert = async (student) => {
 />
 
         </div>
-        {displayedStudents.length === 0 ? (
-          <p>
-            No students found
-            {filterLowAttendance || sectionFilter ? " with applied filters." : "."}
-          </p>
-        ) : (
+        {!sectionFilter ? (
+  <p className="text-red-600 font-semibold">
+    Please enter a section in the filter box above to view the student table. (Type "all404" to show all sections)
+  </p>
+) : (
+  displayedStudents.length === 0 ? (
+    <p>
+      No students found
+      {filterLowAttendance || sectionFilter ? " with applied filters." : "."}
+    </p>
+  ) : (
           <>
+          {/* Display current filter status */}
+      <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded">
+        <span className="text-blue-700 font-medium">
+          {sectionFilter.toLowerCase() === "all404" 
+            ? "Showing all sections" 
+            : `Filtering by section: ${sectionFilter}`}
+        </span>
+      </div>
             <div className="overflow-x-auto">
               <table className="min-w-full border mb-4 text-sm">
                 <thead>
@@ -253,8 +240,6 @@ const handleLowerAlert = async (student) => {
                     <th className="p-2 text-center">Parent Email</th>
                     <th className="p-2 text-center">Low Attendance Subjects</th>
                     <th className="p-2 text-center">All Subjects Attendance</th>
-                    <th className="p-2 text-center">Alert</th>
-                    <th className="p-2 text-center">Reason</th>
                     <th className="p-2 text-center">Delete</th>
                   </tr>
                 </thead>
@@ -302,29 +287,7 @@ const handleLowerAlert = async (student) => {
                             ))
                           : "—"}
                       </td>
-                      <td className="p-2 text-center">
-                    {!s.attendanceAlert ? (
-                      <button
-                        onClick={() => handleAlert(s)}
-                        className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
-                        disabled={sendingEmails}
-                      >
-                        Alert
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleLowerAlert(s)}
-                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                        disabled={sendingEmails}
-                      >
-                        Lower Alert
-                      </button>
-                    )}
-                  </td>
-                  {/* ----------- NEW: Reason Column ----------- */}
-                  <td className="p-2 text-center">
-                    {s.attendanceAlert ? (s.absenceReason || <span className="text-gray-400">No reason submitted</span>) : "—"}
-                  </td>
+                      
                       <td className="p-2">
                         <button
                           onClick={() => deleteStudent(s.id)}
@@ -355,6 +318,7 @@ const handleLowerAlert = async (student) => {
               </button>
             )}
           </>
+  )
         )}
       </div>
     </div>

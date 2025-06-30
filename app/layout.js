@@ -1,6 +1,7 @@
 "use client"
 import Footer from "./components/Footer";
 import NavBar from "./components/NavBar";
+import test from "./components/test";
 import "./globals.css";
 import AuthReset from './components/AuthReset';
 import React, { useState } from "react";
@@ -44,7 +45,8 @@ export default function RootLayout({ children }) {
 
         {children}
         </main>
-        <Footer />
+        <Footer/>
+        <test/>
       </body>
     </html>
   );
