@@ -167,7 +167,7 @@ export default function UserAchievementsTable() {
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700">
             <p className="font-medium">Please enter a section to view achievements.</p>
             <p className="text-sm mt-1">
-              Type a section code (e.g., "A", "B1") or &all404 to show all sections.
+              Type a section code e.g. A, B, C or &all404 to show all sections.
             </p>
           </div>
         ) : filteredUsers.length === 0 ? (
