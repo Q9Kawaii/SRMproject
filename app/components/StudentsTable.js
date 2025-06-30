@@ -210,7 +210,7 @@ export default function StudentsTable() {
         </div>
         {!sectionFilter ? (
   <p className="text-red-600 font-semibold">
-    Please enter a section in the filter box above to view the student table. (Type "all404" to show all sections)
+    Please enter a section in the filter box above to view the student table. (Type all404 to show all sections)
   </p>
 ) : (
   displayedStudents.length === 0 ? (
