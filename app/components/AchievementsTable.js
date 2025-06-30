@@ -147,7 +147,7 @@ export default function UserAchievementsTable() {
             </button>
           </div>
           <p className="text-sm text-gray-500 mt-2">
-            You must enter a section to view achievements. Type "all404" to show all sections.
+            You must enter a section to view achievements. Type "ll404"to show all sections.
           </p>
         </div>
 
@@ -167,7 +167,7 @@ export default function UserAchievementsTable() {
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700">
             <p className="font-medium">Please enter a section to view achievements.</p>
             <p className="text-sm mt-1">
-              Type a section code (e.g., "A", "B1") or "all404" to show all sections.
+              Type a section code (e.g., "A", "B1") or &quot;all404&quot to show all sections.
             </p>
           </div>
         ) : filteredUsers.length === 0 ? (

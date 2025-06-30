@@ -7,6 +7,7 @@ import AuthReset from './components/AuthReset';
 import React, { useState } from "react";
 import Link from "next/link";
 import CursorBlob from "./components/DashboardComponents/CursorBlob";
+import Image from 'next/image';
 
 export default function RootLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -32,7 +33,7 @@ export default function RootLayout({ children }) {
         </ul>
     </div>
     <div>
-      <img src="SAMADHAN transparent english.png" className="h-20" />
+      <Image src="/SAMADHAN transparent english.png" width={160} height={80} className="h-20" alt="Samadhan Logo" />
     </div>
   </div>
 </div>
