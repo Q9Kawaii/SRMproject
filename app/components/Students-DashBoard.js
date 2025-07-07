@@ -632,7 +632,7 @@ useEffect(() => {
   <div className="absolute bottom-40 left-32 w-5 h-5 bg-blue-400 transform rotate-45 animate-bounce delay-1000"></div>
 
   <div
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10 opacity-100"
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10 opacity-10"
     style={{
       backgroundImage: 'url("/Dashboard-bg4.jpg")',
       backgroundSize: '900px',
@@ -643,7 +643,13 @@ useEffect(() => {
 
   <div className="relative z-10 w-full max-w-3xl">
     {/* Header Section */}
+    
     <div className="inline-block p-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl mb-8 border border-blue-100 hover:shadow-3xl transition-all duration-500 hover:-translate-y-1">
+    <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
       <h1 className="text-3xl sm:text-4xl font-bold mb-3 lg:mb-6 lg:text-7xl">
         <span className="text-[#0c4da2] relative">
           Student
@@ -653,12 +659,7 @@ useEffect(() => {
       </h1>
 
       <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-          </svg>
-        </div>
-        <div className="w-16 h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
+        
       </div>
 
       <p className="text-lg text-[#0c4da2] font-bold mb-2 lg:text-3xl">

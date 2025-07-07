@@ -208,7 +208,7 @@ pdfImages.forEach(({ regNo, imagePath }) => {
      <div className="relative">
     {/* PDF Upload Section */}
     <div className="mb-4 p-4 border rounded bg-gray-50">
-      <h3 className="font-semibold mb-2">Upload Attendance PDF</h3>
+      <h3 className="font-semibold mb-2">Upload Letter To Parent</h3>
       <div className="flex gap-2 items-center">
         <input
           type="file"
@@ -219,7 +219,7 @@ pdfImages.forEach(({ regNo, imagePath }) => {
         <button
           disabled={!pdfFile || uploadingPdf}
           onClick={handlePdfUpload}
-          className="px-4 py-2 bg-[#0c4da2] text-white rounded hover:bg-purple-700 disabled:bg-gray-400"
+          className="px-4 py-2 bg-[#0c4da2] text-white rounded  disabled:bg-gray-400"
         >
           {uploadingPdf ? "Processing..." : "Upload PDF & Split"}
         </button>

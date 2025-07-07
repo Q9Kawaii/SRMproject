@@ -76,7 +76,7 @@ export default function AdminDashBoard({ secRole }) {
   <div className="absolute top-60 left-1/3 w-3 h-3 bg-[#0c4da2] rounded-full animate-bounce delay-1500"></div>
 
   <div
-    className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10 opacity-100"
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10 opacity-10"
     style={{
       backgroundImage: 'url("/Dashboard-bg4.jpg")',
       backgroundSize: "contain",
@@ -86,22 +86,22 @@ export default function AdminDashBoard({ secRole }) {
   />
 
   <div className="relative z-10 w-full max-w-3xl">
+    
     {/* Header Section with Glass-morphism */}
     <div className="inline-block p-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl mb-8 border border-blue-100 hover:shadow-3xl transition-all duration-500 hover:-translate-y-1">
+    <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
+          <Shield className="w-6 h-6 text-white" />
+        </div>
       <h1 className="text-3xl sm:text-4xl font-bold mb-3 lg:mb-6 lg:text-7xl">
         <span className="text-[#0c4da2] relative">
           {secRole}
           <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
         </span>{" "}
-        <span className="text-[#3a5b72]">Dashboard</span>
+        <span className="text-[#3a5b72]">Dashboard </span>
+        
       </h1>
 
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
-          <Shield className="w-6 h-6 text-white" />
-        </div>
-        <div className="w-16 h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
-      </div>
+      
 
       <p className="text-lg text-[#0c4da2] font-bold mb-2 lg:text-3xl">
         Welcome {secRole},

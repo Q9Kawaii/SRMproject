@@ -145,7 +145,7 @@ export default function Home() {
     return (
       <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10 opacity-10"
           style={{
             backgroundImage: 'url("/Dashboard-bg4.jpg")',
             backgroundSize: "contain",
