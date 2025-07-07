@@ -5,7 +5,6 @@ import { Search, Upload, Download, AlertTriangle, Check, Clock, Users, Filter, F
 import { useSearchParams } from "next/navigation";
 
 // Utility: Get subjects with attendance < 75%
-
 const getLowAttendanceSubjects = (attendanceMap) => {
   if (!attendanceMap || typeof attendanceMap !== 'object') return [];
 
@@ -725,24 +724,6 @@ const confirmBulkAlert = async () => {
               </div>
             </motion.div>
           )}
-          {/* Empty State for no students found */}
-          {/* {!loading && filteredStudents.length === 0 && section.trim() && (
-            <motion.div
-              key="no-students"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-12 bg-white rounded-lg shadow-sm"
-            >
-              <Users className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">No students found</h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {showLowAttendanceOnly
-                  ? `No students with attendance below 75% in section '${section}'.`
-                  : `No students found in section '${section}'. Please check the section name or try a different one.`}
-              </p>
-            </motion.div>
-          )} */}
         </AnimatePresence>
       </div>
     </div>
