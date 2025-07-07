@@ -15,6 +15,11 @@ export default function StudentsTable() {
   const [sectionFilter, setSectionFilter] = useState("");
   const [sentEmailLog, setSentEmailLog] = useState([]);
   const [regNoFilter, setRegNoFilter] = useState("");
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfImages, setPdfImages] = useState([]);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+
+
 
 
   const deleteStudent = async (id) => {
@@ -90,11 +95,16 @@ export default function StudentsTable() {
     if (!selected.size) return alert("Select students first");
 
     try {
+      const imageMap = {};
+pdfImages.forEach(({ regNo, imagePath }) => {
+  imageMap[regNo] = imagePath;
+});
+
       setSendingEmails(true);
       const response = await fetch("/api/send-emails", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentIds: Array.from(selected), type: "attendance" }),
+        body: JSON.stringify({ studentIds: Array.from(selected), type: "attendance", imageMap: imageMap, }),
       });
 
       const data = await response.json();
@@ -145,10 +155,57 @@ export default function StudentsTable() {
     doc.save("attendance-email-log.pdf");
   };
 
+  const handlePdfUpload = async () => {
+  if (!pdfFile) return alert("Please select a PDF first.");
+  try {
+    setUploadingPdf(true); // Show loader
+    const formData = new FormData();
+    formData.append("file", pdfFile);
+
+    const res = await fetch("https://pdf-to-images-srmproject.onrender.com/split-pdf", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    setPdfImages(data.images); // [{ regNo, imagePath }]
+    alert("PDF uploaded and split successfully!");
+  } catch (err) {
+    console.error("PDF Upload Failed:", err);
+    alert("Failed to split PDF.");
+  }finally {
+    setUploadingPdf(false); // ✅ Hide loader
+  }
+};
+
+
   if (loading) return <div className="p-8 flex justify-center"><HamsterLoader/></div>;
 
   return (
+    
     <div className="relative">
+    <input
+  type="file"
+  accept="application/pdf"
+  onChange={(e) => setPdfFile(e.target.files[0])}
+  className="border p-2 rounded"
+/>
+<button
+  disabled={!pdfFile}
+  onClick={handlePdfUpload}
+  className="px-4 py-2 bg-[#0c4da2] text-white rounded hover:bg-purple-700"
+>
+  Upload PDF & Split
+</button>{uploadingPdf && (
+  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="bg-white rounded-xl p-8 shadow-lg flex flex-col items-center mx-2">
+      <HamsterLoader />
+      <span className="mt-4 text-blue-700 font-semibold text-lg">Uploading and processing PDF...</span>
+    </div>
+  </div>
+)}
+
+
       {sendingEmails && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-8 flex flex-col items-center shadow-lg">
@@ -182,7 +239,7 @@ export default function StudentsTable() {
                 setSelected(new Set(displayedStudents.map((s) => s.id)));
               }
             }}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4 py-2 bg-[#0c4da2]  text-white rounded hover:bg-blue-700"
             disabled={sendingEmails}
           >
             {selected.size === displayedStudents.length

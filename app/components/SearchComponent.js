@@ -5,14 +5,19 @@ import autoTable from "jspdf-autotable";
 
 // Renders one field: either as plain text or a URL based on isUrl
 const DetailItem = ({ label, value, isUrl }) => (
-  <div>
-    <span className="font-medium">{label}: </span>
+  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+    <span className="font-bold text-[#0c4da2] text-sm block mb-2">{label}:</span>
     {isUrl && value ? (
-      <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+      <a 
+        href={value} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="text-[#3a5b72] hover:text-[#0c4da2] underline font-medium transition-colors duration-200 break-all"
+      >
         {value}
       </a>
     ) : (
-      <span>{value || "-"}</span>
+      <span className="text-gray-700 font-medium">{value || <span className="text-gray-400 italic">N/A</span>}</span>
     )}
   </div>
 );
@@ -116,7 +121,7 @@ const generatePDF = (studentData, fieldConfig) => {
     body: tableRows,
     startY: 25,
     styles: { fontSize: 10, cellPadding: 2 },
-    headStyles: { fillColor: [30, 64, 175] },
+    headStyles: { fillColor: [12, 77, 162] }, // Updated to match #0c4da2
   });
 
   const achievements = studentData.achievementsMap;
@@ -141,7 +146,7 @@ const generatePDF = (studentData, fieldConfig) => {
       head: [["Title", "Link"]],
       body: achievementData,
       styles: { fontSize: 10, cellPadding: 2 },
-      headStyles: { fillColor: [34, 139, 34] },
+      headStyles: { fillColor: [58, 91, 114] }, // Updated to match #3a5b72
       columnStyles: {
         1: { cellWidth: 120 },
       },
@@ -154,50 +159,105 @@ const generatePDF = (studentData, fieldConfig) => {
 // Main UI Component
 export default function SearchComponent({ studentData }) {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold mb-6 text-center">Student Profile</h2>
-      <button
-        className="mb-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        onClick={() => generatePDF(studentData, FIELD_CONFIG)}
-      >
-        Download PDF
-      </button>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {FIELD_CONFIG.map(({ label, name, id }) => (
-          <DetailItem
-            key={name}
-            label={label}
-            value={studentData[name]}
-            isUrl={id === "link"}
-          />
-        ))}
+    <div className="relative min-h-screen overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-500"></div>
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#3a5b72] rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-pulse delay-1000"></div>
+      </div>
 
-        {/* Achievements Section */}
-        {studentData.achievementsMap && Object.keys(studentData.achievementsMap).length > 0 && (
-          <div className="mt-8 col-span-full">
-            <h3 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h3>
-            <ul className="list-disc list-inside">
-              {Object.values(studentData.achievementsMap).map((val, i) => {
-                const [title, link] = val.split("~");
-                return (
-                  <li key={i} className="mb-1">
-                    <strong>{title}</strong>{" "}
-                    {link && (
-                      <a
-                        href={link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline ml-2"
-                      >
-                        [View]
-                      </a>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
+      {/* Floating Geometric Shapes */}
+      <div className="absolute top-20 left-20 w-4 h-4 bg-[#0c4da2] transform rotate-45 animate-bounce delay-300"></div>
+      <div className="absolute top-40 right-32 w-6 h-6 bg-[#3a5b72] rounded-full animate-bounce delay-700"></div>
+      <div className="absolute bottom-40 left-32 w-5 h-5 bg-blue-400 transform rotate-45 animate-bounce delay-1000"></div>
+
+      <div className="relative z-10 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-100 m-4 overflow-hidden">
+        {/* Header gradient accent */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72]"></div>
+        
+        <div className="p-8">
+          {/* Header Section */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              <h2 className="text-3xl font-bold text-[#0c4da2] relative">
+                Student Profile
+                <div className="absolute -bottom-2 left-0 w-3/4 h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
+              </h2>
+            </div>
+
+            {/* Download Button */}
+            <button
+              className="px-8 py-3 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 hover:from-[#3a5b72] hover:to-[#0c4da2] flex items-center gap-3"
+              onClick={() => generatePDF(studentData, FIELD_CONFIG)}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-4-4m4 4l4-4m-4-10v4" />
+              </svg>
+              Download PDF
+            </button>
           </div>
-        )}
+
+          {/* Student Information Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {FIELD_CONFIG.map(({ label, name, id }) => (
+              <DetailItem
+                key={name}
+                label={label}
+                value={studentData[name]}
+                isUrl={id === "link"}
+              />
+            ))}
+          </div>
+
+          {/* Achievements Section */}
+          {studentData.achievementsMap && Object.keys(studentData.achievementsMap).length > 0 && (
+            <div className="bg-blue-50/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-200 shadow-lg">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-[#0c4da2]">Achievements</h3>
+                <div className="flex-1 h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full ml-4"></div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.values(studentData.achievementsMap).map((val, i) => {
+                  const [title, link] = val.split("~");
+                  return (
+                    <div key={i} className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-[#0c4da2] mb-2">{title}</h4>
+                          {link && (
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-[#3a5b72] hover:text-[#0c4da2] font-medium transition-colors duration-200"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                              View Evidence
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -300,3 +300,36 @@
   background-size: 600% 600%;
   animation: gradient-slide 8s ease infinite;
 }
+
+
+.diagonal-hover-box {
+  position: relative;
+  background: #d3edff;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.diagonal-hover-box::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: #3a5b72;
+  transform: translate(100%, -100%) rotate(45deg);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+  filter: blur(100px);
+}
+
+.diagonal-hover-box:hover::before {
+  transform: translate(-100%, 100%) rotate(45deg);
+}
+
+

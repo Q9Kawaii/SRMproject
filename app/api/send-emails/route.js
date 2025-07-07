@@ -8,7 +8,7 @@ console.log("Resend API Key:", process.env.RESEND_API_KEY);
 
 export async function POST(request) {
   try {
-    const { studentIds, type } = await request.json();
+    const { studentIds, type, imageMap } = await request.json();
 
     if (!Array.isArray(studentIds) || studentIds.length === 0) {
       console.warn("[API] No students selected");
@@ -82,6 +82,27 @@ export async function POST(request) {
 
         const htmlList = subjectEntries.map((item) => `<li>${item}</li>`).join("");
 
+        let attachments = [];
+
+if (imageMap?.[student.regNo]) {
+  try {
+    const imageUrl = imageMap[student.regNo];
+    const imageBuffer = await fetch(imageUrl).then((res) => res.arrayBuffer());
+    const base64 = Buffer.from(imageBuffer).toString("base64");
+
+    attachments.push({
+      filename: `${student.regNo}.jpg`,
+      content: base64,
+      type: "image/jpeg",
+      disposition: "attachment",
+    });
+  } catch (err) {
+    console.warn(`[ATTACHMENT FAIL] Couldn't fetch/convert image for ${student.regNo}:`, err.message);
+  }
+}
+
+
+
         const studentEmail = {
           from: "School Alerts <noreply@yashdingar.xyz>",
           to: student.email,
@@ -102,6 +123,7 @@ export async function POST(request) {
               </div>
             </div>
           `,
+          attachments,
         };
 
         const parentEmail = {
@@ -123,6 +145,7 @@ export async function POST(request) {
               </div>
             </div>
           `,
+          attachments,
         };
 
         const studentRes = await resend.emails.send(studentEmail);

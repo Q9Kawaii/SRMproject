@@ -5,6 +5,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
+import StudentAttendancePage from "./StudentAttendancePage";
 
 //hehe
 
@@ -481,37 +482,38 @@ const generatePDF = () => {
 
   const handleSave = async () => {
   try {
-
-    
     // 1. Calculate PLM score
     const totalScore = calculateTotalScore();
     
-    // 2. Create updated data WITH CGPA
+    // 2. Create updated data
     const updatedData = { 
       ...studentData, 
       PLM: totalScore,
-      // Keep CGPA if it was edited
       cgpa: studentData.cgpa 
     };
 
-    // 3. Collect ALL changed fields including CGPA
+    // 3. Collect ALL changed fields
     const changes = {};
     Object.keys(updatedData).forEach(key => {
-      // Compare with original data
       if (updatedData[key] !== originalData[key]) {
         changes[key] = updatedData[key];
       }
     });
 
-    // 4. Save to PendingUpdates
+    // 4. Save to PendingUpdates with filtered original values
     if (Object.keys(changes).length > 0) {
+      // ✅ Filter out undefined/null values from original data
+      const filteredOriginal = Object.fromEntries(
+        Object.keys(changes)
+          .map(k => [k, originalData[k]])
+          .filter(([key, value]) => value !== undefined && value !== null)
+      );
+
       const pendingRef = doc(db, "PendingUpdates", updatedData.regNo);
       await setDoc(pendingRef, {
-        regNo: updatedData.regNo,
+        regNo: updatedData.regNo || studentData.regNo,
         updates: changes,
-        original: Object.fromEntries(
-          Object.keys(changes).map(k => [k, originalData[k]])
-        ),
+        original: filteredOriginal, // ✅ Use filtered original
         status: "pending",
         timestamp: new Date().toISOString()
       }, { merge: true });
@@ -525,6 +527,7 @@ const generatePDF = () => {
     setError("Error submitting changes: " + err.message);
   }
 };
+
 
 
 
@@ -609,269 +612,361 @@ const generatePDF = () => {
 
   return (
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
-      <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10"
-          style={{
-            backgroundImage: 'url("/Dashboard-bg4.jpg")',
-            backgroundSize: '900px',
-            backgroundRepeat: "no-repeat",
-        backgroundPosition: '0% -55px',
-          }}
-        />
-      <div className="relative z-10 w-full max-w-3xl">
-          <h1 className="text-3xl sm:text-4xl font-bold text-blue-900 mb-3 lg:mb-15 lg:text-7xl">
-            Student Dashboard
-          </h1>
-        <p className="text-lg text-gray-800 font-medium mb-2 lg:text-3xl">
-        Welcome, {studentData?.name || "Student"}
-        </p>
-        <p className="text-sm text-blue-700 italic mb-4">
-          Track attendance, academics, and placement progress
-        </p>
-        <p className="text-xs text-gray-500 mb-6">
-          SRM Institute of Science and Technology – Empowering Students for the Future
-        </p>
+  {/* Animated Background Elements */}
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse"></div>
+    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-500"></div>
+    <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#3a5b72] rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-pulse delay-1000"></div>
+  </div>
 
-        <div className="mt-8 p-4 bg-white rounded-lg shadow-md">
-          {error && <p className="text-red-500 mb-2">{error}</p>}
+  {/* Floating Geometric Shapes */}
+  <div className="absolute top-20 left-20 w-4 h-4 bg-[#0c4da2] transform rotate-45 animate-bounce delay-300"></div>
+  <div className="absolute top-40 right-32 w-6 h-6 bg-[#3a5b72] rounded-full animate-bounce delay-700"></div>
+  <div className="absolute bottom-40 left-32 w-5 h-5 bg-blue-400 transform rotate-45 animate-bounce delay-1000"></div>
 
-
-
-          {/* --- Absence Reason Input for Low Attendance Alert --- */}
-{studentData?.attendanceAlert && !isEditing && (
-  <form
-    onSubmit={async (e) => {
-      e.preventDefault();
-      try {
-        await setDoc(
-          doc(getFirestore(), "User", studentData.regNo),
-          { absenceReason: studentData.absenceReason || "" },
-          { merge: true }
-        );
-        setError("Reason submitted!");
-      } catch (err) {
-        setError("Failed to submit reason: " + err.message);
-      }
+  <div
+    className="absolute inset-0 bg-cover bg-center bg-no-repeat -z-10 opacity-100"
+    style={{
+      backgroundImage: 'url("/Dashboard-bg4.jpg")',
+      backgroundSize: '900px',
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: '0% -55px',
     }}
-    className="mt-8 p-4 bg-yellow-100 rounded-lg shadow-md"
-  >
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Please provide a reason for your absenteeism:
-    </label>
-    <input
-      type="text"
-      name="absenceReason"
-      value={studentData.absenceReason || ""}
-      onChange={(e) =>
-        setStudentData((prev) => ({
-          ...prev,
-          absenceReason: e.target.value,
-        }))
-      }
-      className="w-full px-2 py-1 border rounded mb-2"
-      required
-    />
-    <button
-      type="submit"
-      className="px-4 py-2 bg-yellow-600 text-white rounded"
-    >
-      Submit Reason
-    </button>
-  </form>
+  />
+
+  <div className="relative z-10 w-full max-w-3xl">
+    {/* Header Section */}
+    <div className="inline-block p-6 bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl mb-8 border border-blue-100 hover:shadow-3xl transition-all duration-500 hover:-translate-y-1">
+      <h1 className="text-3xl sm:text-4xl font-bold mb-3 lg:mb-6 lg:text-7xl">
+        <span className="text-[#0c4da2] relative">
+          Student
+          <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
+        </span>{" "}
+        <span className="text-[#3a5b72]">Dashboard</span>
+      </h1>
+
+      <div className="flex items-center justify-center gap-3 mb-4">
+        <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center shadow-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+        </div>
+        <div className="w-16 h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
+      </div>
+
+      <p className="text-lg text-[#0c4da2] font-bold mb-2 lg:text-3xl">
+        Welcome, {studentData?.name || "Student"}
+      </p>
+      <p className="text-sm text-[#0c4da2] font-medium italic mb-4">
+        Track attendance, academics, and placement progress
+      </p>
+      <p className="text-xs text-gray-600">
+        SRM Institute of Science and Technology – Empowering Students for the Future
+      </p>
+    </div>
+
+    {/* Main Content */}
+    <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-100 overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72]"></div>
+      
+      <div className="p-8">
+        {error && (
+          <div className="mb-6 p-4 bg-red-50/90 backdrop-blur-sm border-l-4 border-red-500 rounded-r-xl shadow-lg">
+            <p className="text-red-600 font-medium">{error}</p>
+          </div>
+        )}
+
+        {/* Absence Reason Input for Low Attendance Alert */}
+        {studentData?.attendanceAlert && !isEditing && (
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                await setDoc(
+                  doc(getFirestore(), "User", studentData.regNo),
+                  { absenceReason: studentData.absenceReason || "" },
+                  { merge: true }
+                );
+                setError("Reason submitted!");
+              } catch (err) {
+                setError("Failed to submit reason: " + err.message);
+              }
+            }}
+            className="mb-8 p-6 bg-yellow-50/90 backdrop-blur-sm rounded-2xl shadow-lg border border-yellow-200"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <label className="block text-lg font-bold text-yellow-700">
+                Please provide a reason for your absenteeism:
+              </label>
+            </div>
+            <input
+              type="text"
+              name="absenceReason"
+              value={studentData.absenceReason || ""}
+              onChange={(e) =>
+                setStudentData((prev) => ({
+                  ...prev,
+                  absenceReason: e.target.value,
+                }))
+              }
+              className="w-full px-4 py-3 border-2 border-yellow-300 rounded-xl bg-white/90 backdrop-blur-sm focus:border-yellow-500 focus:outline-none transition-colors duration-300 mb-4"
+              required
+            />
+            <button
+              type="submit"
+              className="px-6 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+            >
+              Submit Reason
+            </button>
+          </form>
+        )}
+
+        {studentData && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (isEditing) handleSave();
+              else setIsEditing(true);
+            }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
+            {FIELD_CONFIG.map((field) => (
+              <div key={field.name} className="text-left">
+                <label className="block text-sm font-bold text-[#0c4da2] mb-2">
+                  {field.label}
+                </label>
+                {isEditing && !field.readOnly ? (
+                  <input
+                    type={field.type || "text"}
+                    name={field.name}
+                    value={studentData[field.name] || ""}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl bg-white/90 backdrop-blur-sm focus:border-[#0c4da2] focus:outline-none transition-colors duration-300"
+                  />
+                ) : (
+                  <div className="p-4 bg-gray-50/80 backdrop-blur-sm rounded-xl min-h-[50px] border border-gray-200 shadow-sm">
+                    {studentData[field.name] || <span className="text-gray-400 italic">N/A</span>}
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {/* Achievements Editable Section */}
+            {isEditing && (
+              <div className="md:col-span-2 mt-6">
+                <div className="bg-blue-50/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-200">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-xl font-bold text-[#0c4da2]">Achievements</h2>
+                  </div>
+
+                  {Object.entries(studentData.achievementsMap || {}).map(([key, value]) => {
+  const parts = value.split("~");
+  const title = parts[0] || "";
+  const link = parts[1] || "";
+  const verified = parts[2] || "0";
+  const timestamp = parts[3] || "";
+
+  return (
+    <div key={key} className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <input
+        type="text"
+        placeholder="Achievement Title"
+        value={title}
+        onChange={(e) => {
+          const updatedMap = { ...studentData.achievementsMap };
+          updatedMap[key] = `${e.target.value}~${link}~${verified}~${timestamp}`;
+          setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
+        }}
+        className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl bg-white/90 backdrop-blur-sm focus:border-[#0c4da2] focus:outline-none transition-colors duration-300"
+      />
+      <input
+        type="text"
+        placeholder="Google Drive Link"
+        value={link}
+        onChange={(e) => {
+          const updatedMap = { ...studentData.achievementsMap };
+          updatedMap[key] = `${title}~${e.target.value}~${verified}~${timestamp}`;
+          setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
+        }}
+        className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl bg-white/90 backdrop-blur-sm focus:border-[#0c4da2] focus:outline-none transition-colors duration-300"
+      />
+    </div>
+  );
+})}
+
+
+                  <button
+  type="button"
+  className="mt-4 px-6 py-3 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+  onClick={() => {
+    const newKey = `achi${Date.now()}`;
+    const updatedMap = {
+      ...(studentData.achievementsMap || {}),
+      [newKey]: `~~0~`, // 4 parts: empty title, empty link, unverified (0), empty timestamp
+    };
+    setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
+  }}
+>
+  + Add Achievement
+</button>
+                </div>
+              </div>
+            )}
+
+            {/* Achievements View Section */}
+            {studentData.achievementsMap && !isEditing && (
+  <div className="md:col-span-2 mt-6">
+    <div className="bg-blue-50/80 backdrop-blur-sm rounded-2xl p-6 border border-blue-200">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-[#0c4da2]">Achievements</h2>
+      </div>
+      <ul className="list-disc list-inside text-left space-y-2">
+        {Object.values(studentData.achievementsMap).map((val, i) => {
+          const parts = val.split("~");
+          const title = parts[0] || "";
+          const link = parts[1] || "";
+          const verified = parts[2] === "1";
+          
+          return (
+            <li key={i} className="text-gray-700 flex items-center justify-between">
+              <div>
+                <strong className="text-[#0c4da2]">{title}</strong>
+                {verified && <span className="ml-2 text-green-600 text-sm">✓ Verified</span>}
+                {link && (
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#3a5b72] hover:text-[#0c4da2] underline ml-2 font-medium transition-colors duration-200"
+                  >
+                    [View]
+                  </a>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
 )}
 
 
-          {studentData && (
-            <form
-  onSubmit={(e) => {
-    e.preventDefault();
-    if (isEditing) handleSave();
-    else setIsEditing(true);
-  }}
-  className="grid grid-cols-1 md:grid-cols-2 gap-4"
->
-  {FIELD_CONFIG.map((field) => (
-    <div key={field.name} className="text-left">
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {field.label}
-      </label>
-      {isEditing && !field.readOnly ? (
-        <input
-          type={field.type || "text"}
-          name={field.name}
-          value={studentData[field.name] || ""}
-          onChange={handleChange}
-          className="w-full px-2 py-1 border rounded"
-        />
-      ) : (
-        <div className="p-2 bg-gray-50 rounded min-h-[38px]">
-          {studentData[field.name] || <span className="text-gray-400">N/A</span>}
-        </div>
-      )}
-    </div>
-  ))}
-
-  {/* --- Achievements Editable Section --- */}
-  {isEditing && (
-    <div className="md:col-span-2 mt-4">
-      <h2 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h2>
-
-      {Object.entries(studentData.achievementsMap || {}).map(([key, value]) => {
-        const [title, link] = value.split("~");
-
-        return (
-          <div key={key} className="mb-3 grid grid-cols-1 md:grid-cols-2 gap-2">
-            <input
-              type="text"
-              placeholder="Achievement Title"
-              value={title}
-              onChange={(e) => {
-                const updatedMap = { ...studentData.achievementsMap };
-                updatedMap[key] = `${e.target.value}~${link}`;
-                setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
-              }}
-              className="w-full px-2 py-1 border rounded"
-            />
-            <input
-              type="text"
-              placeholder="Google Drive Link"
-              value={link}
-              onChange={(e) => {
-                const updatedMap = { ...studentData.achievementsMap };
-                updatedMap[key] = `${title}~${e.target.value}`;
-                setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
-              }}
-              className="w-full px-2 py-1 border rounded"
-            />
-          </div>
-        );
-      })}
-
-      <button
-        type="button"
-        className="mt-2 px-4 py-1 bg-blue-500 text-white rounded"
-        onClick={() => {
-          const newKey = `achi${Date.now()}`;
-          const updatedMap = {
-            ...(studentData.achievementsMap || {}),
-            [newKey]: `~`,
-          };
-          setStudentData((prev) => ({ ...prev, achievementsMap: updatedMap }));
-        }}
-      >
-        + Add Achievement
-      </button>
-    </div>
-  )}
-
-  {/* 👇 Achievements View Section */}
-        {studentData.achievementsMap && !isEditing && (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold text-blue-700 mb-2">Achievements</h2>
-            <ul className="list-disc list-inside text-left">
-              {Object.values(studentData.achievementsMap).map((val, i) => {
-                const [title, link] = val.split("~");
-                return (
-                  <li key={i} className="mb-1">
-                    <strong>{title}</strong>{" "}
-                    {link && (
-                      <a
-                        href={link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline ml-1"
-                      >
-                        [View]
-                      </a>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+            {/* Action Buttons */}
+            <div className="md:col-span-2 flex justify-end mt-8">
+              {isEditing ? (
+                <div className="flex space-x-4">
+                  <button
+                    type="submit"
+                    className="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    className="px-8 py-3 bg-white/90 backdrop-blur-sm text-gray-600 font-bold rounded-xl shadow-lg border-2 border-gray-300 hover:bg-gray-100 transform hover:-translate-y-0.5 transition-all duration-300"
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <div className="flex space-x-4">
+                  <button
+                    type="button"
+                    className="px-8 py-3 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 hover:from-[#3a5b72] hover:to-[#0c4da2]"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsEditing(true);
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                  <button
+                    type="button"
+                    className="px-8 py-3 bg-white/90 backdrop-blur-sm text-[#0c4da2] font-bold rounded-xl shadow-lg border-2 border-[#0c4da2] hover:bg-[#0c4da2] hover:text-white transform hover:-translate-y-0.5 transition-all duration-300 flex items-center"
+                    onClick={generatePDF}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Download PDF
+                  </button>
+                </div>
+              )}
+            </div>
+          </form>
         )}
+      </div>
+    </div>
 
-  {/* Buttons */}
-  <div className="md:col-span-2 flex justify-end mt-4">
-    {isEditing ? (
-      <>
-        <button
-          type="submit"
-          className="px-4 py-2 bg-green-600 text-white rounded mr-2"
-        >
-          Save Changes
-        </button>
-        <button
-          type="button"
-          className="px-4 py-2 bg-gray-500 text-white rounded"
-          onClick={() => setIsEditing(false)}
-        >
-          Cancel
-        </button>
-      </>
-    ) : (
-      <div className="flex space-x-2">
-        <button
-          type="button"
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-          onClick={(e) => {
-            e.preventDefault();
-            setIsEditing(true);
-          }}
-        >
-          Edit Profile
-        </button>
-        <button
-          type="button"
-          className="px-4 py-2 bg-purple-600 text-white rounded flex items-center"
-          onClick={generatePDF}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-2"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Download PDF
-        </button>
+    {/* Profile Score */}
+    {studentData && !isEditing && (
+      <div className="mt-8 p-6 bg-green-50/80 backdrop-blur-sm rounded-2xl shadow-lg border border-green-200">
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div className="text-2xl font-bold text-green-700">
+            Total Profile Score: {calculateTotalScore()}
+          </div>
+        </div>
       </div>
     )}
   </div>
-</form>
 
-          )}
-        </div>
-                {studentData && !isEditing && (
-          <div className="mt-6 text-lg font-semibold text-green-700">
-            Total Profile Score: {calculateTotalScore()}
+  {/* Decline Alert */}
+  {declineAlert && (
+    <div className="fixed top-4 right-4 z-50 bg-yellow-50/90 backdrop-blur-sm border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-r-xl shadow-2xl max-w-md">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="font-bold text-lg">Update Declined</div>
+          <p className="mt-1">{declineAlert.message}</p>
+          <div className="text-xs mt-2 text-yellow-600">
+            {declineAlert.timestamp && new Date(declineAlert.timestamp).toLocaleString()}
           </div>
-        )}
-
-        
-
-
-      </div>
-      {declineAlert && (
-      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 relative">
-        <div className="font-bold">Update Declined</div>
-        <p>{declineAlert.message}</p>
-        <div className="text-xs mt-1 text-yellow-600">
-          {declineAlert.timestamp && new Date(declineAlert.timestamp).toLocaleString()}
         </div>
         <button
           onClick={dismissAlert}
-          className="absolute top-2 right-2 text-yellow-700 hover:text-yellow-900"
+          className="ml-4 text-yellow-700 hover:text-yellow-900 font-bold text-xl"
         >
           ×
         </button>
       </div>
-    )}
     </div>
+  )}
+
+<div className="pt-10">
+  <StudentAttendancePage studentRegNo={studentData?.regNo}/>
+</div>
+
+</div>
+
   );
 }
