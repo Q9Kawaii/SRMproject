@@ -405,7 +405,7 @@ const SCORE_CONFIG = {
 
 
 
-export default function StudentsDashBoard() {
+export default function StudentsDashBoard({ regNo: propRegNo, section: propSection }) {
   const [declineAlert, setDeclineAlert] = useState(null);
   const [studentData, setStudentData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -530,12 +530,15 @@ const generatePDF = () => {
 
 
 
+useEffect(() => {
+  const auth = getAuth();
 
-  useEffect(() => {
-    const auth = getAuth();
+  const fetchData = async (user) => {
+    try {
+      // 🔽 Use prop if available, else fallback to Firestore
+      let registrationNumber = propRegNo;
 
-    const fetchData = async (user) => {
-      try {
+      if (!registrationNumber) {
         const userLoginRef = doc(db, "UsersLogin", user.uid);
         const userLoginSnap = await getDoc(userLoginRef);
 
@@ -545,42 +548,46 @@ const generatePDF = () => {
           return;
         }
 
-        const registrationNumber = userLoginSnap.data()?.regNo;
-        if (!registrationNumber) {
-          setError("Registration number missing.");
-          setLoading(false);
-          return;
-        }
-
-        const studentRef = doc(db, "User", registrationNumber);
-        const studentSnap = await getDoc(studentRef);
-
-        if (studentSnap.exists()) {
-  const data = { ...studentSnap.data(), regNo: registrationNumber };
-  setStudentData(data);
-  setOriginalData(data); // <-- Add this line!
-} else {
-  setStudentData({ regNo: registrationNumber });
-  setOriginalData({ regNo: registrationNumber }); // <-- Add this line!
-}
-
-      } catch (err) {
-        setError("Error fetching data: " + err.message);
-      } finally {
-        setLoading(false);
+        registrationNumber = userLoginSnap.data()?.regNo;
       }
-    };
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) fetchData(user);
-      else {
-        setError("User not logged in.");
+      if (!registrationNumber) {
+        setError("Registration number missing.");
         setLoading(false);
+        return;
       }
-    });
 
-    return () => unsubscribe();
-  }, [db]);
+      const studentRef = doc(db, "User", registrationNumber);
+      const studentSnap = await getDoc(studentRef);
+
+      if (studentSnap.exists()) {
+        const data = { ...studentSnap.data(), regNo: registrationNumber };
+        setStudentData(data);
+        setOriginalData(data);
+      } else {
+        setStudentData({ regNo: registrationNumber });
+        setOriginalData({ regNo: registrationNumber });
+      }
+
+    } catch (err) {
+      setError("Error fetching data: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (user) fetchData(user);
+    else {
+      setError("User not logged in.");
+      setLoading(false);
+    }
+  });
+
+  return () => unsubscribe();
+}, [db, propRegNo]);
+
+  
 
   useEffect(() => {
   if (!studentData?.regNo) return;
