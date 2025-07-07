@@ -158,25 +158,43 @@ pdfImages.forEach(({ regNo, imagePath }) => {
   const handlePdfUpload = async () => {
   if (!pdfFile) return alert("Please select a PDF first.");
   try {
-    setUploadingPdf(true); // Show loader
+    setUploadingPdf(true);
+    setPdfProcessingStatus("Uploading PDF...");
+    
     const formData = new FormData();
     formData.append("file", pdfFile);
 
+    setPdfProcessingStatus("Processing PDF with smart page selection...");
+    
+    // ✅ Use the smart selection endpoint
     const res = await fetch("https://pdf-to-images-srmproject.onrender.com/split-pdf", {
       method: "POST",
       body: formData,
     });
 
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
     const data = await res.json();
-    setPdfImages(data.images); // [{ regNo, imagePath }]
-    alert("PDF uploaded and split successfully!");
+    
+    if (data.status === "error") {
+      throw new Error(data.message);
+    }
+    
+    setPdfImages(data.images);
+    setPdfProcessingStatus(`Successfully processed ${data.totalStudents} students with ${data.images.reduce((sum, img) => sum + img.pagesProcessed, 0)} total pages`);
+    
+    setTimeout(() => setPdfProcessingStatus(""), 5000);
   } catch (err) {
     console.error("PDF Upload Failed:", err);
-    alert("Failed to split PDF.");
-  }finally {
-    setUploadingPdf(false); // ✅ Hide loader
+    setPdfProcessingStatus("Failed to process PDF: " + err.message);
+    alert("Failed to split PDF: " + err.message);
+  } finally {
+    setUploadingPdf(false);
   }
 };
+
 
 
   if (loading) return <div className="p-8 flex justify-center"><HamsterLoader/></div>;
