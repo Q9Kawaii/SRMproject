@@ -534,47 +534,51 @@ useEffect(() => {
   const auth = getAuth();
 
   const fetchData = async (user) => {
-    try {
-      // 🔽 Use prop if available, else fallback to Firestore
-      let registrationNumber = propRegNo;
+  try {
+    // 🔽 Use prop if available, else fallback to Firestore
+    let registrationNumber = propRegNo;
 
-      if (!registrationNumber) {
-        const userLoginRef = doc(db, "UsersLogin", user.uid);
-        const userLoginSnap = await getDoc(userLoginRef);
+    if (!registrationNumber) {
+      const userLoginRef = doc(db, "UsersLogin", user.uid);
+      const userLoginSnap = await getDoc(userLoginRef);
 
-        if (!userLoginSnap.exists()) {
-          setError("Registration number not found.");
-          setLoading(false);
-          return;
-        }
-
-        registrationNumber = userLoginSnap.data()?.regNo;
-      }
-
-      if (!registrationNumber) {
-        setError("Registration number missing.");
+      if (!userLoginSnap.exists()) {
+        setError("Registration number not found.");
         setLoading(false);
         return;
       }
 
-      const studentRef = doc(db, "User", registrationNumber);
-      const studentSnap = await getDoc(studentRef);
-
-      if (studentSnap.exists()) {
-        const data = { ...studentSnap.data(), regNo: registrationNumber };
-        setStudentData(data);
-        setOriginalData(data);
-      } else {
-        setStudentData({ regNo: registrationNumber });
-        setOriginalData({ regNo: registrationNumber });
-      }
-
-    } catch (err) {
-      setError("Error fetching data: " + err.message);
-    } finally {
-      setLoading(false);
+      registrationNumber = userLoginSnap.data()?.regNo;
     }
-  };
+
+    if (!registrationNumber) {
+      setError("Registration number missing.");
+      setLoading(false);
+      return;
+    }
+
+    const studentRef = doc(db, "User", registrationNumber);
+    const studentSnap = await getDoc(studentRef);
+
+    if (studentSnap.exists()) {
+      const data = { ...studentSnap.data(), regNo: registrationNumber };
+      setStudentData(data);
+      setOriginalData(data);
+    } else {
+      // Create a new document if it doesn't exist
+      const newStudentData = { regNo: registrationNumber };
+      await setDoc(studentRef, newStudentData);
+      setStudentData(newStudentData);
+      setOriginalData(newStudentData);
+    }
+
+  } catch (err) {
+    setError("Error fetching data: " + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user) fetchData(user);
