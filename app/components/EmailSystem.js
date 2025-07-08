@@ -9,6 +9,7 @@ import CompleteStudentForm from "./CompleteStudentForm";
 export default function EmailSystem() {
   const [showForm, setShowForm] = useState(false);
   const [showMarksTable, setShowMarksTable] = useState(false);
+  
 
   return (
     <div className="relative min-h-screen overflow-hidden">

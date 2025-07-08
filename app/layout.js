@@ -71,21 +71,6 @@ export default function RootLayout({ children }) {
 
                 {/* Menu Items - Simplified hover effects */}
                 <ul className="space-y-4">
-                  <li>
-                    <Link 
-                      href="#"
-                      className="group flex items-center gap-4 p-4 bg-white/80 rounded-xl shadow-md border border-blue-100 hover:shadow-lg hover:bg-[#0c4da2] hover:text-white transition-all duration-200"
-                    >
-                      <div className="w-10 h-10 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] group-hover:bg-white/20 rounded-full flex items-center justify-center shadow-md transition-all duration-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                      <span className="font-semibold text-[#0c4da2] group-hover:text-white transition-colors duration-200">
-                        Contact Us
-                      </span>
-                    </Link>
-                  </li>
                   
                   <li>
                     <Link 

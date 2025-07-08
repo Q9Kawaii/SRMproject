@@ -4,7 +4,7 @@ const team = [
   {
     name: "Yash Dingar",
     role: "Manager",
-    image: "/team/yash DP.png",
+    image: "/team/Yash.jpg",
     bio: "Leads and manages the project vision, communication and coordination. FullStack Developer",
     class: "",
     links: {
