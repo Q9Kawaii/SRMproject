@@ -317,7 +317,7 @@ pdfImages.forEach(({ regNo, imagePath }) => {
         </div>
         {!sectionFilter ? (
   <p className="text-red-600 font-semibold">
-    Please enter a section in the filter box above to view the student table. (Type all404 to show all sections)
+    Please enter a section in the filter box above to view the student table.
   </p>
 ) : (
   displayedStudents.length === 0 ? (
