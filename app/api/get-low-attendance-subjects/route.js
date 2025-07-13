@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 // Note: In your attendanceLogic.js, getLowAttendanceSubjects was commented out.
 // Ensure it's uncommented and exported if you intend to use it.
-import { getLowAttendanceSubjects } from '../../../attendanceLogic'; // Corrected path
+import { getLowAttendanceSubjects } from '../../../attendanceLogic';
 
 export async function POST(request) { // Changed to App Router POST handler
   try {

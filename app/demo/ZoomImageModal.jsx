@@ -1,8 +1,8 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import PropTypes from "prop-types";
 
 export default function ZoomImageModal({ imageSrc, onClose, alt }) {
-  const containerRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [origin, setOrigin] = useState({ x: 0, y: 0 });
   const [translate, setTranslate] = useState({ x: 0, y: 0 });
@@ -27,6 +27,7 @@ export default function ZoomImageModal({ imageSrc, onClose, alt }) {
   };
 
   const handleTouchStart = (e) => {
+    e.preventDefault();
     if (e.touches.length === 1) {
       setDragging(true);
       setOrigin({
@@ -42,6 +43,7 @@ export default function ZoomImageModal({ imageSrc, onClose, alt }) {
   };
 
   const handleTouchMove = (e) => {
+    e.preventDefault();
     if (e.touches.length === 1 && dragging) {
       setTranslate({
         x: e.touches[0].clientX - origin.x,
@@ -71,16 +73,18 @@ export default function ZoomImageModal({ imageSrc, onClose, alt }) {
     setOrigin({ x: e.clientX - translate.x, y: e.clientY - translate.y });
   };
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!dragging) return;
     setTranslate({ x: e.clientX - origin.x, y: e.clientY - origin.y });
-  };
+  }, [dragging, origin]);
 
-  const handleMouseUp = () => setDragging(false);
+  const handleMouseUp = useCallback(() => {
+    setDragging(false);
+  }, []);
 
   useEffect(() => {
     if (dragging) {
-      document.body.style.cursor = "grab";
+      document.body.style.cursor = "grabbing";
     } else {
       document.body.style.cursor = "";
     }
@@ -95,7 +99,6 @@ export default function ZoomImageModal({ imageSrc, onClose, alt }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 select-none"
-      ref={containerRef}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
@@ -134,17 +137,18 @@ export default function ZoomImageModal({ imageSrc, onClose, alt }) {
 
         {/* Image Container */}
         <div className="w-full h-full overflow-hidden flex items-center justify-center bg-transparent">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={imageSrc}
             alt={alt || "Zoomed Screenshot"}
             className="object-contain shadow-2xl rounded-xl cursor-grab active:cursor-grabbing"
             style={{
-              width: "1200px", // Fixed base width
+              width: "min(1200px, 90vw)",
               maxWidth: "2000px",
-              minWidth: "600px",
-              minHeight: "600px",
-              maxHeight: "1800px",
-              transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`, // Use CSS scale transform
+              minWidth: "300px",
+              minHeight: "300px",
+              maxHeight: "80vh",
+              transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
               transition: dragging ? "none" : "transform 0.2s ease-out",
               userSelect: "none",
               touchAction: "none",
@@ -158,3 +162,15 @@ export default function ZoomImageModal({ imageSrc, onClose, alt }) {
     </div>
   );
 }
+
+// PropTypes for type checking
+ZoomImageModal.propTypes = {
+  imageSrc: PropTypes.string.isRequired,
+  onClose: PropTypes.func.isRequired,
+  alt: PropTypes.string,
+};
+
+// Default props
+ZoomImageModal.defaultProps = {
+  alt: "Zoomed Screenshot",
+};

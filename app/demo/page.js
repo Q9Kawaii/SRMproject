@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { 
   Github, 
@@ -34,8 +35,8 @@ export default function ProjectShowcase() {
       before: 'Paper forms, manual approvals, time-consuming process',
       after: 'Online alerts, digital approvals, instant notifications'
     },
-    thumbnail: '/screenshots/attendance-thumb.png',      // Small preview image
-    flowchart: '/screenshots/attendance-flow.png',        // Large, scrollable image for modal
+    thumbnail: '/screenshots/attendance-thumb.png',
+    flowchart: '/screenshots/attendance-flow.png',
     impact: 'Reduced processing time by 80%'
   },
   {
@@ -117,7 +118,7 @@ export default function ProjectShowcase() {
           <div>
             <h2 className="text-3xl font-bold text-gray-900 mb-6">Project Overview</h2>
             <p className="text-lg text-gray-600 mb-6">
-              As a student at SRM Institute, We identified critical inefficiencies in our college's administrative processes. 
+              As a student at SRM Institute, We identified critical inefficiencies in our college&apos;s administrative processes. 
               Traditional paper-based systems for attendance warnings, parent communications, and placement data collection 
               were time-consuming and error-prone.
             </p>
@@ -156,104 +157,81 @@ export default function ProjectShowcase() {
           </div>
         </div>
 
-        {/* Features Section */}
+        <div id="features" className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Key Features</h2>
+            <p className="text-xl text-gray-600">
+              Three major automation solutions that transformed our college processes
+            </p>
+          </div>
 
-        {/* Features Section */}
-<div id="features" className="mb-16">
-  <div className="text-center mb-12">
-    <h2 className="text-4xl font-bold text-gray-900 mb-4">Key Features</h2>
-    <p className="text-xl text-gray-600">
-      Three major automation solutions that transformed our college processes
-    </p>
-  </div>
+          <div className="space-y-16">
+            {features.map((feature, index) => (
+              <div
+                key={feature.id}
+                className={`flex flex-col ${index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"} gap-8 items-center`}
+              >
+                <div className="flex-1">
+                  <div className="bg-white rounded-2xl shadow-xl p-8">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">{index + 1}</span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900">{feature.title}</h3>
+                    </div>
+                    <p className="text-gray-600 mb-6 text-lg">{feature.description}</p>
 
-  <div className="space-y-16">
-    {features.map((feature, index) => (
-      <div
-        key={feature.id}
-        className={`flex flex-col ${
-          index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
-        } gap-8 items-center`}
-      >
-        {/* Feature Info */}
-        <div className="flex-1">
-          <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">{index + 1}</span>
+                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                      <div className="p-4 bg-red-50 rounded-lg border border-red-200">
+                        <h4 className="font-semibold text-red-800 mb-2">Before (Manual)</h4>
+                        <p className="text-red-700 text-sm">{feature.beforeAfter.before}</p>
+                      </div>
+                      <div className="p-4 bg-green-50 rounded-lg border border-green-200">
+                        <h4 className="font-semibold text-green-800 mb-2">After (Automated)</h4>
+                        <p className="text-green-700 text-sm">{feature.beforeAfter.after}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-[#0c4da2] font-semibold">
+                      <CheckCircle className="w-5 h-5" />
+                      <span>{feature.impact}</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-8 shadow-xl">
+                    <div className="bg-white rounded-lg p-4 mb-4 flex flex-col items-center">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      </div>
+                      <img
+                        src={feature.thumbnail}
+                        alt={feature.title}
+                        className="cursor-zoom-in rounded shadow max-w-xs transition-transform hover:scale-105"
+                        onClick={() => {
+                          setZoomedImage(feature.flowchart);
+                          setZoomedAlt(feature.title);
+                        }}
+                      />
+                      <p className="mt-4 text-gray-500 text-sm">Click to expand flowchart</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900">
-                {feature.title}
-              </h3>
-            </div>
-            <p className="text-gray-600 mb-6 text-lg">{feature.description}</p>
-
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="p-4 bg-red-50 rounded-lg border border-red-200">
-                <h4 className="font-semibold text-red-800 mb-2">
-                  Before (Manual)
-                </h4>
-                <p className="text-red-700 text-sm">
-                  {feature.beforeAfter.before}
-                </p>
-              </div>
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <h4 className="font-semibold text-green-800 mb-2">
-                  After (Automated)
-                </h4>
-                <p className="text-green-700 text-sm">
-                  {feature.beforeAfter.after}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 text-[#0c4da2] font-semibold">
-              <CheckCircle className="w-5 h-5" />
-              <span>{feature.impact}</span>
-            </div>
+            ))}
           </div>
         </div>
-        {/* Feature Thumbnail */}
-        <div className="flex-1">
-          <div className="bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl p-8 shadow-xl">
-            <div className="bg-white rounded-lg p-4 mb-4 flex flex-col items-center">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              </div>
-              {/* Thumbnail Image */}
-              <img
-                src={feature.thumbnail}
-                alt={feature.title}
-                className="cursor-zoom-in rounded shadow max-w-xs transition-transform hover:scale-105"
-                onClick={() => {
-                  setZoomedImage(feature.flowchart);
-                  setZoomedAlt(feature.title);
-                }}
-              />
-              <p className="mt-4 text-gray-500 text-sm">
-                Click to expand flowchart
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
 
-{/* Zoom Modal */}
-{zoomedImage && (
-  <ZoomImageModal
-    imageSrc={zoomedImage}
-    alt={zoomedAlt}
-    onClose={() => setZoomedImage(null)}
-  />
-)}
+        {zoomedImage && (
+          <ZoomImageModal
+            imageSrc={zoomedImage}
+            alt={zoomedAlt}
+            onClose={() => setZoomedImage(null)}
+          />
+        )}
 
-
-        {/* Impact Section */}
         <div className="bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-3xl p-8 md:p-12 text-white mb-16">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">Project Impact</h2>
@@ -291,7 +269,6 @@ export default function ProjectShowcase() {
           </div>
         </div>
 
-        {/* Technical Implementation */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Technical Implementation</h2>
           <div className="grid md:grid-cols-3 gap-8">
@@ -319,22 +296,21 @@ export default function ProjectShowcase() {
           </div>
         </div>
 
-        {/* Call to Action */}
         <div className="text-center bg-white rounded-2xl shadow-xl p-8">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Interested in Learning More?</h2>
           <p className="text-xl text-gray-600 mb-8">
             This project showcases my ability to identify real-world problems and create scalable digital solutions.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="/" 
+            <Link
+              href="/"
               className="inline-flex items-center gap-2 bg-[#0c4da2] text-white px-8 py-4 rounded-xl font-semibold hover:bg-[#3a5b72] transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <Github className="w-5 h-5" />
               Visit the Page
-            </a>
-            <a 
-              href="https://github.com/Q9Kawaii" 
+            </Link>
+            <a
+              href="https://github.com/Q9Kawaii"
               className="inline-flex items-center gap-2 bg-transparent border-2 border-[#0c4da2] text-[#0c4da2] px-8 py-4 rounded-xl font-semibold hover:bg-[#0c4da2] hover:text-white transition-all duration-300"
             >
               <Mail className="w-5 h-5" />
@@ -343,14 +319,14 @@ export default function ProjectShowcase() {
           </div>
         </div>
       </div>
-      {zoomedImage && (
-  <ZoomImageModal
-    imageSrc={zoomedImage}
-    alt={zoomedAlt}
-    onClose={() => setZoomedImage(null)}
-  />
-)}
 
+      {zoomedImage && (
+        <ZoomImageModal
+          imageSrc={zoomedImage}
+          alt={zoomedAlt}
+          onClose={() => setZoomedImage(null)}
+        />
+      )}
     </div>
   );
 }
