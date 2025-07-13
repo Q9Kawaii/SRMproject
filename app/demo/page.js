@@ -100,13 +100,13 @@ export default function ProjectShowcase() {
                 <BookOpen className="w-5 h-5" />
                 Explore Features
               </a>
-              <a 
-                href="https://github.com/Q9Kawaii/SRMproject" 
-                className="inline-flex items-center gap-2 bg-transparent border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-[#0c4da2] transition-all duration-300"
-              >
-                <Github className="w-5 h-5" />
-                View Code
-              </a>
+              <Link
+              href="/"
+              className="inline-flex items-center gap-2 bg-[#0c4da2] text-white px-8 py-4 rounded-xl font-semibold hover:bg-[#3a5b72] transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <Github className="w-5 h-5" />
+              Visit the Page
+            </Link>
             </div>
           </div>
         </div>
