@@ -21,10 +21,8 @@ const TeacherVerificationTable = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    
     const formatDisplayValue = (value) => {
         if (value instanceof Timestamp) {
-            
             return value.toDate().toLocaleString();
         }
         
@@ -133,10 +131,7 @@ const TeacherVerificationTable = () => {
                         <div key={update.id} style={styles.card}>
                             <h3 style={styles.cardTitle}>{update.formType} Update for {update.regNo}</h3>
                             <p style={styles.cardInfo}>
-                                Submitted: {
-                                    
-                                    formatDisplayValue(update.timestamp)
-                                }
+                                Submitted: {formatDisplayValue(update.timestamp)}
                             </p>
 
                             <div style={styles.changesSection}>
@@ -148,10 +143,10 @@ const TeacherVerificationTable = () => {
                                         {Object.keys(update.updates).map((key) => (
                                             <li key={key} style={styles.changeItem}>
                                                 <span style={styles.fieldName}>{key}:</span>
-                                                {/* Use the helper function here to format original and updated values */}
-                                                <span style={styles.oldValue}>"{formatDisplayValue(update.original[key])}"</span>
+                                                {/* FIXED: Removed unescaped quotes */}
+                                                <span style={styles.oldValue}>{formatDisplayValue(update.original[key])}</span>
                                                 <span style={styles.arrow}>→</span>
-                                                <span style={styles.newValue}>"{formatDisplayValue(update.updates[key])}"</span>
+                                                <span style={styles.newValue}>{formatDisplayValue(update.updates[key])}</span>
                                             </li>
                                         ))}
                                     </ul>
