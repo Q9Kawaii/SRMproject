@@ -11,6 +11,8 @@ import HamsterLoader from "./HamsterLoader"; // ✅ Import hamster loader
 import AchievementsTable from "./AchievementsTable";
 import TeacherVerificationTable from "./TeacherVerificationTable";
 
+import { useRouter } from 'next/navigation';
+
 import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
 
 
@@ -20,6 +22,11 @@ export default function AdminDashBoard({ secRole }) {
   const [searchError, setSearchError] = useState("");
   const [loading, setLoading] = useState(false);
   const db = getFirestore();
+  const router = useRouter();
+
+  const handlePlacementMatrixRedirect = () => {
+    router.push('/placement-matrix');
+  };
 
   const handleSearch = async (regNo) => {
     try {

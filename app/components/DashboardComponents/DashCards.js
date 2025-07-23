@@ -13,6 +13,10 @@ export default function DashCards({ onCardClick, secRole }) {
     router.push(`/admin-attendance?role=${secRole}`);
   };
 
+  const goToPlacementMatrix = () => {
+    router.push('/placement-matrix');
+  };
+
   // Handle click events with proper event stopping
   const handleCardClick = (action, event) => {
     event.stopPropagation();
@@ -101,10 +105,10 @@ export default function DashCards({ onCardClick, secRole }) {
           <div className="absolute inset-0 rounded-3xl bg-[#0c4da2]/0 group-hover:bg-[#0c4da2]/5 transition-colors pointer-events-none" />
         </div>
 
-        {/* Placement Matrix Card */}
+        {/* Placement Matrix Card - Updated to redirect to /placement-matrix */}
         <div 
           className="group relative h-[220px] w-full rounded-3xl shadow-lg bg-white/80 backdrop-blur-sm border border-blue-100 flex flex-col items-center justify-center text-center px-10 transition-all duration-500 hover:-translate-y-1 hover:shadow-2xl cursor-pointer overflow-hidden"
-          onClick={(e) => handleCardClick("TeacherVerificationTable", e)}
+          onClick={(e) => handleCardClick(goToPlacementMatrix, e)}
         >
           <span className="absolute top-0 left-0 w-full h-1 rounded-t-3xl bg-gradient-to-r from-[#0c4da2] to-[#3a5b72]"></span>
           
@@ -118,7 +122,7 @@ export default function DashCards({ onCardClick, secRole }) {
             Placement Matrix
           </h1>
           <p className="text-sm text-gray-600">
-            Track placement statistics and<br />analyse performance!
+            Track placement statistics and<br />analyze performance!
           </p>
           
           <div className="absolute inset-0 rounded-3xl bg-[#0c4da2]/0 group-hover:bg-[#0c4da2]/5 transition-colors pointer-events-none" />

@@ -26,7 +26,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "resend": "^4.6.0",
-    "unpdf": "^1.0.6"
+    "unpdf": "^1.0.6",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
