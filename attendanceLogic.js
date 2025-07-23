@@ -671,6 +671,43 @@ async function generatePdfReport(section, month) {
   }
 }
 
+function getLowAttendanceSubjects(attendanceMap) {
+  try {
+    const lowAttendanceThreshold = 75; // 75% attendance threshold
+    const lowSubjects = [];
+
+    if (!attendanceMap || typeof attendanceMap !== 'object') {
+      return [];
+    }
+
+    // Process each subject in the attendance map
+    Object.entries(attendanceMap).forEach(([subject, attendanceData]) => {
+      if (attendanceData && typeof attendanceData === 'object') {
+        const { present = 0, total = 0 } = attendanceData;
+        
+        if (total > 0) {
+          const percentage = (present / total) * 100;
+          
+          if (percentage < lowAttendanceThreshold) {
+            lowSubjects.push({
+              subject: subject,
+              present: present,
+              total: total,
+              percentage: Math.round(percentage * 100) / 100, // Round to 2 decimal places
+              status: 'low'
+            });
+          }
+        }
+      }
+    });
+
+    return lowSubjects;
+  } catch (error) {
+    console.error('Error calculating low attendance subjects:', error);
+    return [];
+  }
+}
+
 // ✅ Fixed: Use ES6 exports instead of CommonJS
 export {
   fetchStudentsBySection,
@@ -683,4 +720,5 @@ export {
   bulkAlertStudents,
   getAttendanceMapForStudent,
   generatePdfReport,
+  getLowAttendanceSubjects,
 };
