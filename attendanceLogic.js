@@ -1,6 +1,7 @@
 // attendanceLogic.js
 import { adminDb as db } from './lib/firebase-admin.js';
-import puppeteer from 'puppeteer';
+import chromium from 'chrome-aws-lambda';
+import puppeteer from 'puppeteer-core';
 
 // import fs from 'fs';
 // import path from 'path';
@@ -740,7 +741,13 @@ export async function generatePdfReport(section, month) {
     const htmlContent = generateReportHtml(reportData, section, month);
 
     // Launch Puppeteer browser
-    browser = await puppeteer.launch({ headless: "new" }); // Use 'headless: "new"' for the new headless mode
+    browser = await puppeteer.launch({
+  args: chromium.args,
+  defaultViewport: chromium.defaultViewport,
+  executablePath: await chromium.executablePath || '/usr/bin/chromium-browser',
+  headless: chromium.headless,
+  ignoreHTTPSErrors: true,
+});
     const page = await browser.newPage();
 
     // Set the HTML content
