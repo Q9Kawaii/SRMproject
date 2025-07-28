@@ -1,3 +1,4 @@
+"use client"
 import React from 'react';
 import Image from "next/image";
 
@@ -61,7 +62,7 @@ export default function Footer() {
               
               <div className="bg-white/90 backdrop-blur-sm rounded-xl px-4 py-3 shadow-lg border border-blue-100 hover:shadow-xl transition-all duration-300">
                 <p className="text-[#0c4da2] font-medium text-sm md:text-base">
-                  yashxxxxxxx17@gmail.com
+                  srmportal2025@gmail.com
                 </p>
               </div>
             </div>

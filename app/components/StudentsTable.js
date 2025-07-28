@@ -94,45 +94,57 @@ export default function StudentsTable() {
   };
 
   const sendEmails = async () => {
-    if (!selected.size) return alert("Select students first");
+  if (!selected.size) return alert("Select students first");
 
-    try {
-      const imageMap = {};
-pdfImages.forEach(({ regNo, imagePath }) => {
-  imageMap[regNo] = imagePath;
-});
+  try {
+    // ✅ Build imageMap from `pdfImages`
+    const imageMap = {};
+    pdfImages.forEach(({ regNo, imagePath }) => {
+      const normalizedKey = regNo.trim().toLowerCase();
+      imageMap[normalizedKey] = imagePath;
+    });
 
-      setSendingEmails(true);
-      const response = await fetch("/api/send-emails", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentIds: Array.from(selected), type: "attendance", imageMap: imageMap, }),
-      });
+    const studentIds = [...selected];
+    const type = "attendance"; // or "marks" — change this based on your logic
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to send emails");
+    setSendingEmails(true);
+    console.log("🚀 Sending imageMap with keys:", Object.keys(imageMap));
 
-      const now = new Date();
-      const timeString = now.toLocaleString();
-      const logData = students.filter(s => selected.has(s.id)).map(s => ({
-        name: s.name,
-        regNo: s.regNo,
-        section: s.section,
-        studentEmail: s.email,
-        parentEmail: s.parentEmail,
-        lowSubjects: s.lowSubjects.join(", "),
-        sentTime: timeString,
-      }));
-      setSentEmailLog(logData);
-      alert("Emails sent successfully!");
-      setSelected(new Set());
-    } catch (error) {
-      console.error("Error sending emails:", error);
-      alert(`Error: ${error.message}`);
-    } finally {
-      setSendingEmails(false);
-    }
-  };
+    const response = await fetch("/api/send-emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        studentIds,
+        type,
+        imageMap,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Failed to send emails");
+
+    const now = new Date();
+    const timeString = now.toLocaleString();
+    const logData = students.filter(s => selected.has(s.id)).map(s => ({
+      name: s.name,
+      regNo: s.regNo,
+      section: s.section,
+      studentEmail: s.email,
+      parentEmail: s.parentEmail,
+      lowSubjects: s.lowSubjects.join(", "),
+      sentTime: timeString,
+    }));
+    setSentEmailLog(logData);
+    alert("Emails sent successfully!");
+    setSelected(new Set());
+  } catch (error) {
+    console.error("Error sending emails:", error);
+    alert(`Error: ${error.message}`);
+  } finally {
+    setSendingEmails(false);
+  }
+};
+
 
   const downloadEmailLog = () => {
     const doc = new jsPDF();
@@ -168,7 +180,7 @@ pdfImages.forEach(({ regNo, imagePath }) => {
 
     setPdfProcessingStatus("Processing PDF with smart page selection...");
     
-    const res = await fetch("https://pdf-to-images-srmproject.onrender.com/split-pdf", {
+    const res = await fetch("https://pdf-to-images-fastapi-backend.onrender.com/split-pdf", {
       method: "POST",
       body: formData,
     });

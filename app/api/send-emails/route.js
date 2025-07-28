@@ -83,12 +83,24 @@ export async function POST(request) {
         const htmlList = subjectEntries.map((item) => `<li>${item}</li>`).join("");
 
         let attachments = [];
-
-if (imageMap?.[student.regNo]) {
+const regNoKey = (student.regNo ?? "").trim().toLowerCase();
+console.log("ATTACHMENT CHECK", { regNo: student.regNo, regNoKey, found: !!imageMap[regNoKey] });
+if (regNoKey && imageMap?.[regNoKey]) {
   try {
-    const imageUrl = imageMap[student.regNo];
+    const imageUrl = imageMap[regNoKey];
     const imageBuffer = await fetch(imageUrl).then((res) => res.arrayBuffer());
-    const base64 = Buffer.from(imageBuffer).toString("base64");
+    console.log("🧪 Image buffer byteLength:", imageBuffer.byteLength);
+    console.log("[ATTACHMENT DEBUG]", { regNoKey, imageUrl });
+const base64 = Buffer.from(imageBuffer).toString("base64");
+if (!imageBuffer || imageBuffer.byteLength === 0) {
+  console.warn("⚠️ Empty image buffer for", imageUrl);
+  throw new Error("Empty image buffer");
+}
+
+
+    if (!imageBuffer || imageBuffer.byteLength === 0) {
+  console.warn("⚠️ Empty image buffer for", imageUrl);
+}
 
     attachments.push({
       filename: `${student.regNo}.jpg`,
@@ -153,6 +165,8 @@ if (imageMap?.[student.regNo]) {
 
         console.log(`[EMAIL] Student Email (${student.email}):`, studentRes);
         console.log(`[EMAIL] Parent Email (${student.parentEmail}):`, parentRes);
+        console.log("ATTACHMENTS SENT:", attachments.map(a => a.filename));
+
 
         if (!studentRes?.id || !parentRes?.id) {
           console.warn(`[SEND FAIL] ${student.name}`, {

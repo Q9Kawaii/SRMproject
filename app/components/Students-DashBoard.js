@@ -701,30 +701,29 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
             )}
           </div>
         </div>
-
-        {/* Enhanced Profile Score */}
+        {/* Enhanced Profile Score
         {studentData && !isEditing && (
-          <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-green-200">
-            <div className="flex items-center justify-center gap-4">
-              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-green-700">
-                  {calculateTotalScore()}/5.0
+            <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-green-200">
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
                 </div>
-                <div className="text-lg font-semibold text-green-600">
-                  Basic Profile Score
-                </div>
-                <div className="text-sm text-gray-600">
-                  Based on 10th & 12th percentages
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-700">
+                    {calculateTotalScore()}/5.0
+                  </div>
+                  <div className="text-lg font-semibold text-green-600">
+                    Basic Profile Score
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Based on 10th & 12th percentages
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+        )} */}
       </div>
 
       {/* Enhanced Decline Alert */}
