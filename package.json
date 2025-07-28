@@ -23,6 +23,7 @@
     "pdf2json": "^3.1.6",
     "pdfjs-dist": "^5.3.31",
     "pdfkit": "^0.17.1",
+    "puppeteer": "^24.15.0",
     "puppeteer-core": "^10.4.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
