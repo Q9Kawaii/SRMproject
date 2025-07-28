@@ -1,7 +1,7 @@
 // attendanceLogic.js
 import { adminDb as db } from './lib/firebase-admin.js';
-import puppeteer from 'puppeteer';
-
+import chromium from '@sparticuz/chromium';
+import puppeteer from 'puppeteer-core';
 // import fs from 'fs';
 // import path from 'path';
 // const fontkit = require('fontkit');
@@ -720,45 +720,39 @@ export async function generatePdfReport(section, month) {
       return null; // Return null if no data to generate a report
     }
 
-    // Define colors here so they are accessible to the footerTemplate
+    // ...your colors and HTML code as before...
     const colors = {
-      primary: '#6366f1',       // Modern indigo
-      secondary: '#4f46e5',     // Deeper indigo
-      accent: '#8b5cf6',        // Purple accent
-      text: '#1f2937',          // Rich dark gray
-      lightText: '#6b7280',     // Medium gray
-      background: '#f8fafc',    // Subtle light gray
-      cardBg: '#ffffff',        // Pure white
-      success: '#10b981',       // Modern green
-      warning: '#f59e0b',       // Warm amber
-      error: '#ef4444',         // Modern red
-      border: '#e5e7eb',        // Light border
-      shadow: 'rgba(0, 0, 0, 0.06)' // Subtle shadow
+      primary: '#6366f1',
+      secondary: '#4f46e5',
+      accent: '#8b5cf6',
+      text: '#1f2937',
+      lightText: '#6b7280',
+      background: '#f8fafc',
+      cardBg: '#ffffff',
+      success: '#10b981',
+      warning: '#f59e0b',
+      error: '#ef4444',
+      border: '#e5e7eb',
+      shadow: 'rgba(0, 0, 0, 0.06)',
     };
 
-    // Generate the HTML content
     const htmlContent = generateReportHtml(reportData, section, month);
 
-    // Launch Puppeteer browser
-    browser = await puppeteer.launch({ headless: "new" }); // Use 'headless: "new"' for the new headless mode
+   browser = await puppeteer.launch({
+  args: chromium.args,
+  defaultViewport: chromium.defaultViewport,
+  executablePath: await chromium.executablePath(), // ✅ FIXED
+  headless: chromium.headless,
+});
+
     const page = await browser.newPage();
-
-    // Set the HTML content
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' }); // Wait for network to be idle
-
-    // Generate PDF
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     const pdfBuffer = await page.pdf({
       format: 'A4',
-      printBackground: true, // Crucial for background colors and gradients
-      margin: {
-        top: '25mm',
-        right: '25mm',
-        bottom: '25mm',
-        left: '25mm',
-      },
-      // Add header and footer for page numbers (more reliable than custom HTML)
+      printBackground: true,
+      margin: { top: '25mm', right: '25mm', bottom: '25mm', left: '25mm' },
       displayHeaderFooter: true,
-      headerTemplate: '<div style="font-size: 8px; width: 100%; text-align: center; margin-bottom: 5px;"></div>', // Empty header
+      headerTemplate: '<div style="font-size: 8px; width: 100%; text-align: center; margin-bottom: 5px;"></div>',
       footerTemplate: `
         <div style="font-family: 'RobotoBold', sans-serif; font-size: 9px; width: 100%; text-align: center; color: ${colors.primary};">
           <span class="pageNumber"></span> / <span class="totalPages"></span>
