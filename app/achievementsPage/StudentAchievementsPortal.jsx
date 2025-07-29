@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { User, Award, Plus, ChevronDown, ChevronUp, Calendar, MapPin, Building, ExternalLink, Upload, Check, X, BookOpen, Trophy, Users, Briefcase, Star, Shield, DollarSign, FileText, Heart, Clock } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
