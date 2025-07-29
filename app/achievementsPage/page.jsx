@@ -1,12 +1,18 @@
 "use client";
+import { Suspense } from "react";
 import { useSearchParams } from 'next/navigation';
-import StudentAchievementsPortal from './StudentAchievementsPortal'; // adjust import as needed
+import StudentAchievementsPortal from './StudentAchievementsPortal';
 
-export default function AchievementsPage() {
+function AchievementsPageContent() {
   const searchParams = useSearchParams();
   const regNo = searchParams.get('regNo');
+  return <StudentAchievementsPortal studentRegNo={regNo} />;
+}
 
+export default function AchievementsPage() {
   return (
-    <StudentAchievementsPortal studentRegNo={regNo} />
+    <Suspense fallback={<div>Loading achievements...</div>}>
+      <AchievementsPageContent />
+    </Suspense>
   );
 }
