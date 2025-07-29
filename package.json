@@ -11,6 +11,8 @@
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@sparticuz/chromium": "^138.0.2",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "firebase": "^11.9.0",
     "firebase-admin": "^13.4.0",
     "framer-motion": "^12.18.1",
@@ -26,6 +28,7 @@
     "puppeteer-core": "^20.9.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "resend": "^4.6.0",
     "unpdf": "^1.0.6",
     "xlsx": "^0.18.5"

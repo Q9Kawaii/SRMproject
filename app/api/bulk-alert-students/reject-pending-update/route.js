@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { approvePendingUpdate } from '@/app/components/achievementFns';
-
+import { rejectPendingUpdate } from '@/app/components/achievementFns';
 
 export async function POST(req) {
   try {
@@ -13,10 +12,10 @@ export async function POST(req) {
       });
     }
 
-    const response = await approvePendingUpdate(regNo);
+    const response = await rejectPendingUpdate(regNo);
     return NextResponse.json(response);
   } catch (err) {
-    console.error("API error in approve-pending-update:", err);
+    console.error("API error in reject-pending-update:", err);
     return NextResponse.json({
       success: false,
       message: "Server error"

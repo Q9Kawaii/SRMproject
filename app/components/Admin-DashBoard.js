@@ -14,6 +14,7 @@ import TeacherVerificationTable from "./TeacherVerificationTable";
 import { useRouter } from 'next/navigation';
 
 import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
+import AdminAchievementDashboard from "./AdminAchievementDashboard";
 
 
 export default function AdminDashBoard({ secRole }) {
@@ -63,7 +64,8 @@ export default function AdminDashBoard({ secRole }) {
       case "emailSystem":
         return <EmailSystem />;
       case "Achievements":
-        return <AchievementsTable/>
+        // return <AchievementsTable/>
+        return <AdminAchievementDashboard/>
       case "TeacherVerificationTable" :
         return <TeacherVerificationTable/>
       default:

@@ -4,6 +4,7 @@ import { approvePendingUpdate } from '@/app/components/achievementFns';
 
 export async function POST(req) {
   try {
+    console.log("[API] /api/approve-pending-update HIT");
     const { regNo } = await req.json();
 
     if (!regNo) {

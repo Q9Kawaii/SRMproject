@@ -6,6 +6,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import StudentAttendancePage from "./StudentAttendancePage";
 import { useRouter } from "next/navigation";
+import StudentAchievementsPortal from "../achievementsPage/page";
 
 const FIELD_CONFIG = [
   // Basic Details :
@@ -111,6 +112,8 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
       field.label, 
       studentData[field.name] || "-"
     ]);
+
+    
 
     // Generate table
     autoTable(doc, {
@@ -292,6 +295,14 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
     
     return () => unsubscribe();
   }, [studentData?.regNo]);
+
+  const handleAchievementsRedirect = () => {
+    if (studentData?.regNo) {
+      router.push(`/achievementsPage?regNo=${encodeURIComponent(studentData.regNo)}`);
+    } else {
+      setError("Registration number not available for redirect.");
+    }
+  };
 
   if (loading) {
     return (
@@ -621,6 +632,13 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
                     </div>
                   </div>
                 )}
+
+                <button
+          onClick={handleAchievementsRedirect}
+          className="px-8 py-3 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+        >
+          Go to Achievements Portal
+        </button>
 
                 {/* Enhanced Action Buttons */}
                 <div className="md:col-span-2 flex justify-end mt-10">

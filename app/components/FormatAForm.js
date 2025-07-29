@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, doc, setDoc, getDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
-
+import ScoreBox from './Score';
 const FormatAForm = ({ prefilledRegistrationNumber }) => {
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false); 
@@ -435,6 +435,12 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                         {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
                     </button>
                 )}
+                {(formDataA.tenthPercentage || formDataA.twelfthPercentage) && (
+        <ScoreBox
+          tenthPercentage={formDataA.tenthPercentage}
+          twelfthPercentage={formDataA.twelfthPercentage}
+        />
+      )}
             </div>
         </form>
     );
