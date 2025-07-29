@@ -683,4 +683,5 @@ export {
   bulkAlertStudents,
   getAttendanceMapForStudent,
   generatePdfReport,
+  getLowAttendanceSubjects,
 };
