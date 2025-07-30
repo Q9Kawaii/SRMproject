@@ -52,35 +52,6 @@ _Add relevant screenshots or UI GIFs here to visually showcase the portal._
 
 ---
 
-## 🔧 Setup Instructions
-
-1. **Clone the repo**  
-   ```bash
-   git clone https://github.com/yourusername/your-repo-name.git
-   cd your-repo-name
-   ```
-
-2. **Install dependencies**  
-   ```bash
-   npm install
-   ```
-
-3. **Create environment variables**  
-   Create a `.env.local` file and add:
-   ```
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   RESEND_API_KEY=your_resend_key
-   ```
-
-4. **Run the development server**  
-   ```bash
-   npm run dev
-   ```
-
----
-
 ## 📬 Contact
 
 For questions, collaborations, or feedback:  
