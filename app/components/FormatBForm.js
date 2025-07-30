@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, doc, setDoc, getDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
-
+import ScoreBox from './Score';
 const FormatBForm = ({ prefilledRegistrationNumber }) => {
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -517,6 +517,42 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                         {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
                     </button>
                 )}
+                <ScoreBox
+                    tenthPercentage={formDataB.tenthPercentage}
+                    twelfthPercentage={formDataB.twelfthPercentage}
+                    twelfthPercentagePoints={formDataB.twelfthPercentagePoints}
+                    tenthPercentagePoints={formDataB.tenthPercentagePoints}
+                    cgpaPoints={formDataB.cgpaPoints}
+                    githubContributionsPoints={formDataB.githubContributionsPoints}
+                    githubFrequencyPoints={formDataB.githubFrequencyPoints}
+                    communityProjectsPoints={formDataB.communityProjectsPoints}
+                    collaborationsPoints={formDataB.collaborationsPoints}
+                    codingPracticeCPoints={formDataB.codingPracticeCPoints}
+                    codingPracticeQuestionsPoints={formDataB.codingPracticeQuestionsPoints}
+                    internshipIITNITSRMPoints={formDataB.internshipIITNITSRMPoints}
+                    internshipFortune500Points={formDataB.internshipFortune500Points}
+                    internshipSmallCompaniesPoints={formDataB.internshipSmallCompaniesPoints}
+                    internshipLessThan3MonthsPoints={formDataB.internshipLessThan3MonthsPoints}
+                    internshipPaidPoints={formDataB.internshipPaidPoints}
+                    certificationCiscoPoints={formDataB.certificationCiscoPoints}
+                    certificationNPTELPoints={formDataB.certificationNPTELPoints}
+                    certificationCourseraPoints={formDataB.certificationCourseraPoints}
+                    certificationPgmmgCertPoints={formDataB.certificationPgmmgCertPoints}
+                    certificationUdemyElabPoints={formDataB.certificationUdemyElabPoints}
+                    projectsIITDRDOPoints={formDataB.projectsIITDRDOPoints}
+                    projectsGovtPoints={formDataB.projectsGovtPoints}
+                    projectsMobileWebAppPoints={formDataB.projectsMobileWebAppPoints}
+                    projectsMiniProjectPoints={formDataB.projectsMiniProjectPoints}
+                    fsdProjectPoints={formDataB.fsdProjectPoints}
+                    codingCompetitionFirstPoints={formDataB.codingCompetitionFirstPoints}
+                    codingCompetitionSecondPoints={formDataB.codingCompetitionSecondPoints}
+                    codingCompetitionThirdPoints={formDataB.codingCompetitionThirdPoints}
+                    codingCompetitionParticipatedPoints={formDataB.codingCompetitionParticipatedPoints}
+                    inhouseEachProjectPoints={formDataB.inhouseEachProjectPoints}
+                    professionalBodiesMembershipPoints={formDataB.professionalBodiesMembershipPoints}
+                    assessmentMarksPoints={formDataB.assessmentMarksPoints}
+                    totalPoints={formDataB.totalPoints}
+                />
             </div>
         </form>
     );

@@ -4,23 +4,26 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
 // Renders one field: either as plain text or a URL based on isUrl
-const DetailItem = ({ label, value, isUrl }) => (
-  <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-blue-100 shadow-sm hover:shadow-md transition-all duration-300">
-    <span className="font-bold text-[#0c4da2] text-sm block mb-2">{label}:</span>
-    {isUrl && value ? (
-      <a 
-        href={value} 
-        target="_blank" 
-        rel="noopener noreferrer" 
+const DetailItem = ({ label, value, isUrl }) => {
+  let displayValue;
+
+  if (typeof value === "object" && value !== null) {
+    displayValue = <span className="text-gray-400 italic">[Object]</span>;
+  } else if (isUrl && typeof value === "string") {
+    displayValue = (
+      <a
+        href={value}
+        target="_blank"
+        rel="noopener noreferrer"
         className="text-[#3a5b72] hover:text-[#0c4da2] underline font-medium transition-colors duration-200 break-all"
       >
         {value}
       </a>
-    ) : (
-      <span className="text-gray-700 font-medium">{value || <span className="text-gray-400 italic">N/A</span>}</span>
-    )}
-  </div>
-);
+    );
+  } else {
+    displayValue = value || <span className="text-gray-400 italic">N/A</span>;
+  }
+}
 
 // Full field config with ids where needed
 const FIELD_CONFIG = [
@@ -100,7 +103,6 @@ const FIELD_CONFIG = [
   { label: "Third Prize", name: "thirdprize" },
   { label: "Participated", name: "participated" },
   { label: "Inhouse Projects", name: "inhouseprojects" },
-  { label: "Placed via SRM Placement Process", name: "internshipViaSRM" },
   { label: "Date Of Admission", name: "dateOfAdmission", type: "date" },
   { label: "Total placement marks", name: "PLM" },
 ];

@@ -120,12 +120,12 @@ export default function AdminDashBoard({ secRole }) {
       </p>
     </div>
 
-    {/* Search Section */}
-    <div className="mb-8">
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-all duration-300">
-        <SearchBar onSearch={handleSearch} />
-      </div>
-    </div>
+    {/* Search Section
+    // <div className="mb-8">
+    //   <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-all duration-300">
+    //     <SearchBar onSearch={handleSearch} />
+    //   </div>
+    // </div> */}
 
     {/* Loading and Error States */}
     {loading && (
