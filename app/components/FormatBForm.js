@@ -19,6 +19,8 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         facultyAdvisorName: '',
 
         twelfthPercentagePoints: '',
+        tenthPercentagePoints: '', 
+
         cgpaPoints: '',
 
         githubContributionsPoints: '',
@@ -26,6 +28,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         communityProjectsPoints: '',
         collaborationsPoints: '',
 
+        codingPracticeCPoints: '', 
         codingPracticeQuestionsPoints: '',
 
         internshipIITNITSRMPoints: '',
@@ -82,7 +85,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                         delete cleanedData.timestamp;
 
                         
-                        const formBKeys = Object.keys(formDataB); // Get all keys defined in formDataB's initial state
+                        const formBKeys = Object.keys(formDataB); 
                         const filteredData = {};
                         for (const key of formBKeys) {
                             if (cleanedData.hasOwnProperty(key)) {
@@ -296,10 +299,14 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 2: 12th Percentage (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 2: 12th Percentage & 10th Percentage (Enter Points)</h3>
                 <label style={styles.label}>
                     {inputCounter++}. 12th % (Max 2.5 Points):
                     <input type="number" name="twelfthPercentagePoints" value={formDataB.twelfthPercentagePoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
+                </label>
+                <label style={styles.label}>
+                    {inputCounter++}. 10th % (Max 2.5 Points):
+                    <input type="number" name="tenthPercentagePoints" value={formDataB.tenthPercentagePoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
@@ -333,7 +340,11 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
 
             <div style={styles.inputGroup}>
                 <h3 style={styles.groupTitle}>Section 5: Coding Practice Platform (Enter Points)</h3>
-                <h4 style={styles.minorGroupTitle}>C</h4>
+                
+                <label style={styles.label}>
+                    {inputCounter++}. C (Max 5 Points):
+                    <input type="number" name="codingPracticeCPoints" value={formDataB.codingPracticeCPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
+                </label>
                 <label style={styles.label}>
                     {inputCounter++}. No of Medium and Difficult Questions Solved (Max 5 Points):
                     <input type="number" name="codingPracticeQuestionsPoints" value={formDataB.codingPracticeQuestionsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
