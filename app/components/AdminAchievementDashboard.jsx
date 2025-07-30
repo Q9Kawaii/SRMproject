@@ -507,6 +507,19 @@
             setError(null);
         }, [searchIdentifier, displayMode]);
 
+        useEffect(() => {
+  if (
+    selectedSearchType &&
+    (selectedSearchType === 'batch' || searchIdentifier.trim() !== '')
+  ) {
+    const delayDebounce = setTimeout(() => {
+      fetchData();
+    }, 500); // wait 500ms after user stops typing
+
+    return () => clearTimeout(delayDebounce); // cancel if user keeps typing
+  }
+}, [searchIdentifier, selectedSearchType, displayMode, fetchData]);
+
         return (
             <div className="min-h-screen p-6 bg-gray-50 font-sans antialiased">
                 <Toaster />
@@ -566,19 +579,7 @@
                             disabled={selectedSearchType === 'batch'}
                             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
-                        <motion.button
-                            type="submit"
-                            whileTap={{ scale: 0.95 }}
-                            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 w-full md:w-auto"
-                            disabled={loading || (selectedSearchType !== 'batch' && !searchIdentifier)}
-                        >
-                            {loading ? (
-                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                            ) : (
-                                <Search className="h-5 w-5" />
-                            )}
-                            Search
-                        </motion.button>
+                        
                     </form>
                 </motion.div>
 
