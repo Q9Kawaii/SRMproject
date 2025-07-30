@@ -340,87 +340,97 @@ export async function getPendingUpdates(identifier, type) {
 // Iterates through pendingItems and applies each individually
 export async function approvePendingUpdate(regNo) {
   try {
+    console.log(`[approvePendingUpdate] Called with regNo:`, regNo);
+
     const pendingRef = doc(db, "pendingAchievements", regNo);
     const pendingSnap = await getDoc(pendingRef);
 
     if (!pendingSnap.exists()) {
-  return { success: true, message: "No pending update to approve. Already done." };
-}
+      console.log(`[approvePendingUpdate] No pendingAchievements doc found for ${regNo}`);
+      return { success: true, message: "No pending update to approve. Already done." };
+    }
 
     const pendingItems = pendingSnap.data().pendingItems || [];
+    console.log(`[approvePendingUpdate] Fetched pendingItems (${pendingItems.length}):`, pendingItems);
+
     if (pendingItems.length === 0) {
+      console.log(`[approvePendingUpdate] Pending items array EMPTY for ${regNo}, deleting doc.`);
       await deleteDoc(pendingRef); // Clean up if somehow empty array
       return { success: true, message: "No pending items to approve." };
     }
 
     const userRef = doc(db, "User", regNo);
-    // CHANGE THIS LINE: from const to let
-    let userSnap = await getDoc(userRef); // <--- Changed from const to let
+    let userSnap = await getDoc(userRef);
 
-    // If user does not exist, create a basic user document
+    // User creation if not exists
     if (!userSnap.exists()) {
-      const basicInfo = await getBasicStudentInfo(regNo); // Attempt to get info if user exists in another context
+      console.log(`[approvePendingUpdate] No User doc for ${regNo}. Will create basic document.`);
+      const basicInfo = await getBasicStudentInfo(regNo); // This should always exist!
       await setDoc(userRef, {
         regNo: regNo,
-        name: basicInfo.data.name || 'Unknown Student', // Placeholder if no info
-        section: basicInfo.data.section || 'Unknown Section', // Placeholder
-        achievements: {} // Initialize as empty object of arrays
+        name: basicInfo?.data?.name || 'Unknown Student',
+        section: basicInfo?.data?.section || 'Unknown Section',
+        achievements: {}
       });
-      // Re-fetch snapshot after creation
       const newUserSnap = await getDoc(userRef);
-      userSnap = newUserSnap; // Update userSnap reference (now allowed)
+      userSnap = newUserSnap;
+      console.log(`[approvePendingUpdate] Created new User doc for ${regNo}.`);
     }
 
     const userData = userSnap.data();
-    const currentAchievements = userData.achievements || {}; // This is the object of arrays
-
+    const currentAchievements = userData.achievements || {};
     const updatedAchievements = { ...currentAchievements };
 
+    // Step through all pendingItems
     for (const pendingItem of pendingItems) {
       const { id, category, data } = pendingItem;
 
       if (!id || !category || !data) {
-    console.warn(`⛔ Skipping malformed pending item for ${regNo}:`, pendingItem);
-    continue;
-  }
-
-      // Ensure the category array exists
-      if (!updatedAchievements[category]) {
-        updatedAchievements[category] = [];
-      } else if (!Array.isArray(updatedAchievements[category])) {
-         console.warn(`Category '${category}' for ${regNo} was not an array. Converting.`);
-         updatedAchievements[category] = [updatedAchievements[category]];
+        console.warn(`[approvePendingUpdate] ⛔ Skipping malformed pending item for ${regNo}:`, pendingItem);
+        continue;
       }
 
-      // Find if an item with this ID already exists in the approved achievements for this category
+      // Ensure the category array exists and warn if not
+      if (!updatedAchievements[category]) {
+        updatedAchievements[category] = [];
+        console.log(`[approvePendingUpdate] Created new category array: '${category}'`);
+      } else if (!Array.isArray(updatedAchievements[category])) {
+        console.warn(`[approvePendingUpdate] Category '${category}' for ${regNo} was not an array! Fixing.`);
+        updatedAchievements[category] = [updatedAchievements[category]];
+      }
+
+      // Check if achievement with same id exists (edit)
       const existingAchievementIndex = updatedAchievements[category].findIndex(
         (ach) => ach.id === id
       );
 
       if (existingAchievementIndex !== -1) {
-        // This is an EDIT: Replace the existing achievement with the new data
+        console.log(`[approvePendingUpdate] ↻ Editing existing achievement in category '${category}' at index ${existingAchievementIndex}:`, updatedAchievements[category][existingAchievementIndex]);
         updatedAchievements[category][existingAchievementIndex] = { ...data, id };
       } else {
-        // This is a NEW achievement: Add it to the array
+        console.log(`[approvePendingUpdate] ➕ Adding new achievement to category '${category}':`, { ...data, id });
         updatedAchievements[category].push({ ...data, id });
       }
     }
 
-    // Update user doc with merged achievements
+    // Write merged achievements
+    console.log(`[approvePendingUpdate] Writing merged achievements for ${regNo}:`, updatedAchievements);
+
     await updateDoc(userRef, {
-      achievements: updatedAchievements
+      achievements: updatedAchievements,
     });
 
-    // Delete pending document for this student
+    // Delete pending document
     await deleteDoc(pendingRef);
+    console.log(`[approvePendingUpdate] Deleted pendingAchievements doc for ${regNo}`);
 
     return { success: true, message: "All pending updates approved and applied." };
-
   } catch (err) {
-    console.error("Error approving update:", err);
+    console.error("[approvePendingUpdate] ❌ Error:", err);
     return { success: false, message: "Failed to approve update" };
   }
 }
+
 
 
 //! Reject pending update: simply deletes the student's entry in pendingAchievements
