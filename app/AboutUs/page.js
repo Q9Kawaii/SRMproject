@@ -33,13 +33,13 @@ const advisors = [
   },
   {
     name: "Dr. Priya S",
-    role: "Associate Professor",
+    role: "Assistant Professor",
     image: "/team/DrPriyaS.png",
     links: { visit: "https://www.srmist.edu.in/faculty/ms-s-priya/" },
   },
   {
     name: "Dr. Abirami G",
-    role: "Associate Professor",
+    role: "Assistant Professor",
     image: "/team/DrAbiramiG.png",
     links: { visit: "https://www.srmist.edu.in/faculty/g-abirami-2/" },
   },
