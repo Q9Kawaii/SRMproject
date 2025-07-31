@@ -21,7 +21,8 @@ const getLowAttendanceSubjects = (attendanceMap) => {
 const AdminAttendancePage = () => {
   const searchParams = useSearchParams();
   const secRole = searchParams.get('role') || "FA";
-  const [section, setSection] = useState('');
+  const sectionFromUrl = searchParams.get('section') || "";
+  const [section, setSection] = useState(secRole === "AA" ? "" : sectionFromUrl);
   const [students, setStudents] = useState([]);
   const [filteredStudents, setFilteredStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -41,6 +42,10 @@ const AdminAttendancePage = () => {
       return () => clearTimeout(timer);
     }
   }, [message]);
+
+  useEffect(() => {
+  if (secRole !== "AA") setSection(sectionFromUrl);
+}, [secRole, sectionFromUrl]);
 
   // Function to fetch and enrich student data based on section
   // This now fetches all necessary absent record details upfront for display
@@ -378,7 +383,16 @@ const confirmBulkAlert = async () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">Attendance Management</h1>
-              <p className="text-gray-600 mt-1">Admin Dashboard - <span className="font-medium text-blue-600">{secRole}</span> View</p>
+              <p className="text-gray-600 mt-1">
+  Admin Dashboard - <span className="font-medium text-blue-600">{secRole}</span> View
+  {section && (
+    <>
+      {" | Section: "}
+      <span className="font-medium text-green-700">{section}</span>
+    </>
+  )}
+</p>
+
             </div>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -463,14 +477,16 @@ const confirmBulkAlert = async () => {
               <div className="flex items-center border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-transparent transition-all duration-200">
                 <Search className="text-gray-400 ml-3" size={20} />
                 <input
-                  type="text"
-                  id="section-search"
-                  className="flex-1 p-3 bg-transparent outline-none text-gray-700 placeholder-gray-400"
-                  placeholder="e.g., A, B, C"
-                  value={section}
-                  onChange={(e) => setSection(e.target.value.toUpperCase())}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSectionSearch()}
-                />
+  type="text"
+  id="section-search"
+  className="flex-1 p-3 bg-transparent outline-none text-gray-700 placeholder-gray-400"
+  placeholder="e.g., A, B, C"
+  value={section}
+  readOnly={secRole !== "AA"}   // Readonly for FA, editable for AA
+  onChange={secRole === "AA" ? (e) => setSection(e.target.value.toUpperCase()) : undefined}
+  onKeyPress={secRole === "AA" ? (e) => e.key === 'Enter' && handleSectionSearch() : undefined}
+/>
+
               </div>
             </div>
             <motion.button

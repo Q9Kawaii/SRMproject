@@ -299,198 +299,189 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 2: 12th Percentage & 10th Percentage (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 2: 12th Percentage & 10th Percentage</h3>
                 <label style={styles.label}>
-                    {inputCounter++}. 12th % (Max 2.5 Points):
+                    {inputCounter++}. 12th % :
                     <input type="number" name="twelfthPercentagePoints" value={formDataB.twelfthPercentagePoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. 10th % (Max 2.5 Points):
+                    {inputCounter++}. 10th % :
                     <input type="number" name="tenthPercentagePoints" value={formDataB.tenthPercentagePoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 3: CGPA (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 3: CGPA</h3>
                 <label style={styles.label}>
-                    {inputCounter++}. CGPA (Max 5 Points):
+                    {inputCounter++}. CGPA:
                     <input type="number" name="cgpaPoints" value={formDataB.cgpaPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 4: Github Profile (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 4: Github Profile</h3>
                 <label style={styles.label}>
-                    {inputCounter++}. No of Contributions / Repositories (Max 5 Points):
+                    {inputCounter++}. No of Contributions / Repositories :
                     <input type="number" name="githubContributionsPoints" value={formDataB.githubContributionsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Frequency of Contributions / Repositories - Monthly (Max 2 Points):
+                    {inputCounter++}. Frequency of Contributions / Repositories - Monthly:
                     <input type="number" name="githubFrequencyPoints" value={formDataB.githubFrequencyPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Projects Done for Community (Max 3 Points):
+                    {inputCounter++}. Projects Done for Community:
                     <input type="number" name="communityProjectsPoints" value={formDataB.communityProjectsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. No of Collaborations (Max 5 Points):
+                    {inputCounter++}. No of Collaborations:
                     <input type="number" name="collaborationsPoints" value={formDataB.collaborationsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 5: Coding Practice Platform (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 5: Coding Practice Platform</h3>
                 
                 <label style={styles.label}>
-                    {inputCounter++}. C (Max 5 Points):
+                    {inputCounter++}. C :
                     <input type="number" name="codingPracticeCPoints" value={formDataB.codingPracticeCPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. No of Medium and Difficult Questions Solved (Max 5 Points):
+                    {inputCounter++}. No of Medium and Difficult Questions Solved :
                     <input type="number" name="codingPracticeQuestionsPoints" value={formDataB.codingPracticeQuestionsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 6: Internships (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 6: Internships</h3>
                 <label style={styles.label}>
-                    {inputCounter++}. IIT, NIT, SRM Internship Cycle (Max 5 Points):
+                    {inputCounter++}. IIT, NIT, SRM Internship Cycle:
                     <input type="number" name="internshipIITNITSRMPoints" value={formDataB.internshipIITNITSRMPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Fortune 500 Companies (Max 4 Points):
+                    {inputCounter++}. Fortune 500 Companies:
                     <input type="number" name="internshipFortune500Points" value={formDataB.internshipFortune500Points} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Small Companies (Max 3 Points):
+                    {inputCounter++}. Small Companies:
                     <input type="number" name="internshipSmallCompaniesPoints" value={formDataB.internshipSmallCompaniesPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Less than 3 Months (Max 2 Points):
+                    {inputCounter++}. Less than 3 Months:
                     <input type="number" name="internshipLessThan3MonthsPoints" value={formDataB.internshipLessThan3MonthsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Paid Intern (Max 1 Point):
+                    {inputCounter++}. Paid Intern:
                     <input type="number" name="internshipPaidPoints" value={formDataB.internshipPaidPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 7: Skillset & Standard Certifications (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 7: Skillset & Standard Certifications </h3>
                 <label style={styles.label}>
-                    {inputCounter++}. CISCO, CCNA, CCNP, MCNA, MCNP, Matlab, Redhat, IBM (Max 5 Points):
+                    {inputCounter++}. CISCO, CCNA, CCNP, MCNA, MCNP, Matlab, Redhat, IBM :
                     <input type="number" name="certificationCiscoPoints" value={formDataB.certificationCiscoPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. NPTEL (Max 3 Points):
+                    {inputCounter++}. NPTEL:
                     <input type="number" name="certificationNPTELPoints" value={formDataB.certificationNPTELPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Coursera (Max 2 Points):
+                    {inputCounter++}. Coursera:
                     <input type="number" name="certificationCourseraPoints" value={formDataB.certificationCourseraPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Programming Cert (Max 1 Point):
+                    {inputCounter++}. Programming Cert:
                     <input type="number" name="certificationPgmmgCertPoints" value={formDataB.certificationPgmmgCertPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Udemy / Elab (Max 0.5 Points):
+                    {inputCounter++}. Udemy / Elab:
                     <input type="number" name="certificationUdemyElabPoints" value={formDataB.certificationUdemyElabPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 8: Projects Done (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 8: Projects Done</h3>
                 <label style={styles.label}>
-                    {inputCounter++}. IIT, NIT, DRDO Projects (Max 5 Points):
+                    {inputCounter++}. IIT, NIT, DRDO Projects:
                     <input type="number" name="projectsIITDRDOPoints" value={formDataB.projectsIITDRDOPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Govt Projects (Max 4 Points):
+                    {inputCounter++}. Govt Projects:
                     <input type="number" name="projectsGovtPoints" value={formDataB.projectsGovtPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Mobile & Web App Projects (Max 3 Points):
+                    {inputCounter++}. Mobile & Web App Projects :
                     <input type="number" name="projectsMobileWebAppPoints" value={formDataB.projectsMobileWebAppPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Mini Project (Max 2 Points):
+                    {inputCounter++}. Mini Project :
                     <input type="number" name="projectsMiniProjectPoints" value={formDataB.projectsMiniProjectPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 9: Full Stack Developer (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 9: Full Stack Developer </h3>
                 <label style={styles.label}>
-                    {inputCounter++}. FSD Project (Max 5 Points):
+                    {inputCounter++}. FSD Project :
                     <input type="number" name="fsdProjectPoints" value={formDataB.fsdProjectPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 10: Coding Competition & Hackathons Won (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 10: Coding Competition & Hackathons Won </h3>
                 <label style={styles.label}>
-                    {inputCounter++}. First Prize (Max 5 Points):
+                    {inputCounter++}. First Prize :
                     <input type="number" name="codingCompetitionFirstPoints" value={formDataB.codingCompetitionFirstPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Second Prize (Max 4 Points):
+                    {inputCounter++}. Second Prize :
                     <input type="number" name="codingCompetitionSecondPoints" value={formDataB.codingCompetitionSecondPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Third Prize (Max 3 Points):
+                    {inputCounter++}. Third Prize :
                     <input type="number" name="codingCompetitionThirdPoints" value={formDataB.codingCompetitionThirdPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Participated (Max 2 Points):
+                    {inputCounter++}. Participated :
                     <input type="number" name="codingCompetitionParticipatedPoints" value={formDataB.codingCompetitionParticipatedPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 11: Inhouse Projects (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 11: Inhouse Projects</h3>
                 <label style={styles.label}>
-                    {inputCounter++}. Total Points for Inhouse Projects (Each Project Max 4 Points):
+                    {inputCounter++}. Inhouse Projects:
                     <input type="number" name="inhouseEachProjectPoints" value={formDataB.inhouseEachProjectPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                    <p style={styles.infoText}>*Enter your calculated points based on the number of projects.</p>
-                </label>
+                    </label>
             </div>
 
             <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 12: Membership of Professional Bodies (Enter Points)</h3>
+                <h3 style={styles.groupTitle}>Section 12: Membership of Professional Bodies </h3>
                 <label style={styles.label}>
-                    {inputCounter++}. Professional Bodies Membership (Enter -2 for deduction, 0 otherwise):
+                    {inputCounter++}. Professional Bodies Membership:
                     <input type="number" name="professionalBodiesMembershipPoints" value={formDataB.professionalBodiesMembershipPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
             <div style={styles.inputGroup}>
                 <h3 style={styles.groupTitle}>Section 13: Assessment Marks (SHL / NCET)</h3>
-                <p style={styles.infoText}>Enter your points based on the following scale:</p>
+                
                 <ul style={styles.pointScaleList}>
-                    <li>90 to 100 Marks – 10 Points</li>
-                    <li>80 to 89 Marks – 09 Points</li>
-                    <li>70 to 79 Marks – 08 Points</li>
-                    <li>65 to 69 Marks – 07 Points</li>
-                    <li>60 to 64 Marks – 06 Points</li>
-                    <li>55 to 59 Marks – 05 Points</li>
-                    <li>50 to 54 Marks – 04 Points</li>
-                    <li>40 to 49 Marks – 03 Points</li>
-                    <li>30 to 39 Marks – 02 Points</li>
-                    <li>25 to 29 Marks - 01 Points</li>
-                    <li>Less than 25 Marks - 0 Points</li>
+                    <li>90 to 100 Marks – 10 </li>
+                    <li>80 to 89 Marks – 09 </li>
+                    <li>70 to 79 Marks – 08 </li>
+                    <li>65 to 69 Marks – 07 </li>
+                    <li>60 to 64 Marks – 06 </li>
+                    <li>55 to 59 Marks – 05 </li>
+                    <li>50 to 54 Marks – 04 </li>
+                    <li>40 to 49 Marks – 03 </li>
+                    <li>30 to 39 Marks – 02 </li>
+                    <li>25 to 29 Marks - 01 </li>
+                    <li>Less than 25 Marks - 0 </li>
                 </ul>
                 <label style={styles.label}>
-                    {inputCounter++}. Your Assessment Points:
+                    {inputCounter++}. Your Assessment Marks:
                     <input type="number" name="assessmentMarksPoints" value={formDataB.assessmentMarksPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
-            </div>
-
-            <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Total Score</h3>
-                <label style={styles.label}>
-                    Total Points (Sum of all points entered from section 2 till 13):
-                    <input type="number" name="totalPoints" value={formDataB.totalPoints} onChange={handleInputChange} style={{ ...styles.input, ...styles.totalInput }} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
 
@@ -505,6 +496,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                         </button>
                     </>
                 ) : (
+                <>
                     <button
                         type="button"
                         onClick={handleEdit}
@@ -516,43 +508,44 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     >
                         {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
                     </button>
+                    <ScoreBox
+                        tenthPercentage={formDataB.tenthPercentage}
+                        twelfthPercentage={formDataB.twelfthPercentage}
+                        twelfthPercentagePoints={formDataB.twelfthPercentagePoints}
+                        tenthPercentagePoints={formDataB.tenthPercentagePoints}
+                        cgpaPoints={formDataB.cgpaPoints}
+                        githubContributionsPoints={formDataB.githubContributionsPoints}
+                        githubFrequencyPoints={formDataB.githubFrequencyPoints}
+                        communityProjectsPoints={formDataB.communityProjectsPoints}
+                        collaborationsPoints={formDataB.collaborationsPoints}
+                        codingPracticeCPoints={formDataB.codingPracticeCPoints}
+                        codingPracticeQuestionsPoints={formDataB.codingPracticeQuestionsPoints}
+                        internshipIITNITSRMPoints={formDataB.internshipIITNITSRMPoints}
+                        internshipFortune500Points={formDataB.internshipFortune500Points}
+                        internshipSmallCompaniesPoints={formDataB.internshipSmallCompaniesPoints}
+                        internshipLessThan3MonthsPoints={formDataB.internshipLessThan3MonthsPoints}
+                        internshipPaidPoints={formDataB.internshipPaidPoints}
+                        certificationCiscoPoints={formDataB.certificationCiscoPoints}
+                        certificationNPTELPoints={formDataB.certificationNPTELPoints}
+                        certificationCourseraPoints={formDataB.certificationCourseraPoints}
+                        certificationPgmmgCertPoints={formDataB.certificationPgmmgCertPoints}
+                        certificationUdemyElabPoints={formDataB.certificationUdemyElabPoints}
+                        projectsIITDRDOPoints={formDataB.projectsIITDRDOPoints}
+                        projectsGovtPoints={formDataB.projectsGovtPoints}
+                        projectsMobileWebAppPoints={formDataB.projectsMobileWebAppPoints}
+                        projectsMiniProjectPoints={formDataB.projectsMiniProjectPoints}
+                        fsdProjectPoints={formDataB.fsdProjectPoints}
+                        codingCompetitionFirstPoints={formDataB.codingCompetitionFirstPoints}
+                        codingCompetitionSecondPoints={formDataB.codingCompetitionSecondPoints}
+                        codingCompetitionThirdPoints={formDataB.codingCompetitionThirdPoints}
+                        codingCompetitionParticipatedPoints={formDataB.codingCompetitionParticipatedPoints}
+                        inhouseEachProjectPoints={formDataB.inhouseEachProjectPoints}
+                        professionalBodiesMembershipPoints={formDataB.professionalBodiesMembershipPoints}
+                        assessmentMarksPoints={formDataB.assessmentMarksPoints}
+                        totalPoints={formDataB.totalPoints}
+                    />
+                </>
                 )}
-                <ScoreBox
-                    tenthPercentage={formDataB.tenthPercentage}
-                    twelfthPercentage={formDataB.twelfthPercentage}
-                    twelfthPercentagePoints={formDataB.twelfthPercentagePoints}
-                    tenthPercentagePoints={formDataB.tenthPercentagePoints}
-                    cgpaPoints={formDataB.cgpaPoints}
-                    githubContributionsPoints={formDataB.githubContributionsPoints}
-                    githubFrequencyPoints={formDataB.githubFrequencyPoints}
-                    communityProjectsPoints={formDataB.communityProjectsPoints}
-                    collaborationsPoints={formDataB.collaborationsPoints}
-                    codingPracticeCPoints={formDataB.codingPracticeCPoints}
-                    codingPracticeQuestionsPoints={formDataB.codingPracticeQuestionsPoints}
-                    internshipIITNITSRMPoints={formDataB.internshipIITNITSRMPoints}
-                    internshipFortune500Points={formDataB.internshipFortune500Points}
-                    internshipSmallCompaniesPoints={formDataB.internshipSmallCompaniesPoints}
-                    internshipLessThan3MonthsPoints={formDataB.internshipLessThan3MonthsPoints}
-                    internshipPaidPoints={formDataB.internshipPaidPoints}
-                    certificationCiscoPoints={formDataB.certificationCiscoPoints}
-                    certificationNPTELPoints={formDataB.certificationNPTELPoints}
-                    certificationCourseraPoints={formDataB.certificationCourseraPoints}
-                    certificationPgmmgCertPoints={formDataB.certificationPgmmgCertPoints}
-                    certificationUdemyElabPoints={formDataB.certificationUdemyElabPoints}
-                    projectsIITDRDOPoints={formDataB.projectsIITDRDOPoints}
-                    projectsGovtPoints={formDataB.projectsGovtPoints}
-                    projectsMobileWebAppPoints={formDataB.projectsMobileWebAppPoints}
-                    projectsMiniProjectPoints={formDataB.projectsMiniProjectPoints}
-                    fsdProjectPoints={formDataB.fsdProjectPoints}
-                    codingCompetitionFirstPoints={formDataB.codingCompetitionFirstPoints}
-                    codingCompetitionSecondPoints={formDataB.codingCompetitionSecondPoints}
-                    codingCompetitionThirdPoints={formDataB.codingCompetitionThirdPoints}
-                    codingCompetitionParticipatedPoints={formDataB.codingCompetitionParticipatedPoints}
-                    inhouseEachProjectPoints={formDataB.inhouseEachProjectPoints}
-                    professionalBodiesMembershipPoints={formDataB.professionalBodiesMembershipPoints}
-                    assessmentMarksPoints={formDataB.assessmentMarksPoints}
-                    totalPoints={formDataB.totalPoints}
-                />
             </div>
         </form>
     );

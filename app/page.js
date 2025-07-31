@@ -24,6 +24,8 @@ export default function Home() {
   const [newUserUID, setNewUserUID] = useState("");
   const [isNewUser, setIsNewUser] = useState(false);
   const [secRole, setSecRole] = useState(null);
+  const [SectionofFA, setSectionofFA] = useState(null);
+
 
   const copyToClipboard = (text) => navigator.clipboard.writeText(text);
 
@@ -41,6 +43,7 @@ export default function Home() {
             if (role === "teacher") {
               setUserRole("teacher");
               setSecRole(data.SecRole);
+              setSectionofFA(data.section),
               setIsNewUser(false);
               setSectionPrompt(false);
             } else if (role === "student") {
@@ -321,7 +324,7 @@ export default function Home() {
   return (
     <div className="dashboard-container p-4">
       <div className="flex justify-end mb-4"></div>
-      {userRole === "teacher" && <AdminDashBoardd secRole={secRole}/>}
+      {userRole === "teacher" && <AdminDashBoardd secRole={secRole} SectionofFA={SectionofFA}/>}
       {userRole === "student" && <StudentsDashBoard regNo={regNo} section={section} />}
       {!userRole && <div className="error">No role assigned</div>}
     </div>

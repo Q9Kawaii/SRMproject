@@ -6,13 +6,13 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import HamsterLoader from "./HamsterLoader";
 
-export default function StudentsTable() {
+export default function StudentsTable({SectionofFA}) {
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [sendingEmails, setSendingEmails] = useState(false);
   const [filterLowAttendance, setFilterLowAttendance] = useState(false);
-  const [sectionFilter, setSectionFilter] = useState("");
+  const [sectionFilter, setSectionFilter] = useState(SectionofFA || "");
   const [sentEmailLog, setSentEmailLog] = useState([]);
   const [regNoFilter, setRegNoFilter] = useState("");
   const [pdfFile, setPdfFile] = useState(null);
@@ -69,7 +69,8 @@ export default function StudentsTable() {
   const matchLow = filterLowAttendance ? s.lowSubjects.length > 0 : true;
   
   // Special case: if "all404" is entered, show all sections
-  const matchSection = sectionFilter
+  
+  const matchSection = sectionFilter 
     ? sectionFilter.toLowerCase() === "all404" 
       ? true  // Show all sections
       : s.section?.toLowerCase().includes(sectionFilter.toLowerCase())
@@ -312,10 +313,11 @@ export default function StudentsTable() {
           <input
             type="text"
             placeholder="Filter by Section (e.g. A, B1)"
-            value={sectionFilter}
+            value={SectionofFA}
             onChange={(e) => setSectionFilter(e.target.value)}
             className="border p-2 rounded w-64"
             disabled={sendingEmails}
+            readOnly
           />
           <input
   type="text"

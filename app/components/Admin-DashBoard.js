@@ -17,7 +17,7 @@ import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
 import AdminAchievementDashboard from "./AdminAchievementDashboard";
 
 
-export default function AdminDashBoard({ secRole }) {
+export default function AdminDashBoard({ secRole, SectionofFA }) {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [searchResult, setSearchResult] = useState(null);
   const [searchError, setSearchError] = useState("");
@@ -62,10 +62,10 @@ export default function AdminDashBoard({ secRole }) {
       case "uploadAttendance":
         return <UploadSystem />;
       case "emailSystem":
-        return <EmailSystem />;
+        return <EmailSystem secRole={secRole} SectionofFA={SectionofFA}/>;
       case "Achievements":
         // return <AchievementsTable/>
-        return <AdminAchievementDashboard/>
+        return <AdminAchievementDashboard secRole={secRole} SectionofFA={SectionofFA}/>
       case "TeacherVerificationTable" :
         return <TeacherVerificationTable/>
       default:
@@ -103,7 +103,7 @@ export default function AdminDashBoard({ secRole }) {
         </div>
       <h1 className="text-3xl sm:text-4xl font-bold mb-3 lg:mb-6 lg:text-7xl">
         <span className="text-[#0c4da2] relative">
-          {secRole}
+          {secRole} of {SectionofFA}
           <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
         </span>{" "}
         <span className="text-[#3a5b72]">Dashboard </span>
@@ -161,7 +161,7 @@ export default function AdminDashBoard({ secRole }) {
     <div className="absolute bottom-10 left-10 w-40 h-40 bg-[#3a5b72] rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-pulse delay-700"></div>
   </div>
   
-  <DashCards secRole={secRole} onCardClick={handleCardClick} />
+  <DashCards secRole={secRole} SectionofFA={SectionofFA} onCardClick={handleCardClick} />
 </div>
 
 {/* Main Content Area */}

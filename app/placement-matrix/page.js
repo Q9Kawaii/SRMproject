@@ -18,7 +18,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  
   const router = useRouter();
 
   useEffect(() => {
@@ -31,21 +30,21 @@ export default function HomePage() {
           if (userDocSnap.exists()) {
             const userData = userDocSnap.data();
             setUserRole(userData.role);
-
-            // Extract registration number for students
-            if (userData.role === 'student' && currentUser.email.endsWith('@srmist.edu.in')) {
+            if (
+              userData.role === 'student' &&
+              currentUser.email?.endsWith('@srmist.edu.in')
+            ) {
               const displayName = currentUser.displayName;
-              const regNumMatch = displayName ? displayName.match(/\((RA\d{13})\)/) : null;
-              
+              const regNumMatch = displayName
+                ? displayName.match(/\((RA\d{13})\)/)
+                : null;
               if (regNumMatch && regNumMatch[1]) {
                 setPrefilledRegNum(regNumMatch[1].toUpperCase());
-                console.log(`Successfully Extracted Registration Number: ${regNumMatch[1].toUpperCase()}`);
               }
             }
           }
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
         setError('Failed to load user data. Please refresh the page.');
       } finally {
         setLoading(false);
@@ -57,13 +56,11 @@ export default function HomePage() {
 
   const handleBackToDashboard = () => {
     setIsSubmitting(true);
-    if (userRole === 'teacher') {
-      router.push('/');
-    } else {
-      router.push('/');
-    }
+    router.push('/');
   };
-
+  const handleRefresh = () => {
+    window.location.reload();
+  };
   const handleFormatSelection = (format) => {
     if (isSubmitting) return;
     setSelectedFormat(format);
@@ -71,245 +68,134 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <div className="text-xl text-gray-600">Loading Placement Matrix...</div>
+      <div className="flex justify-center items-center min-h-screen bg-slate-50">
+        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+          <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-lg text-slate-600 font-medium">Loading Placement Matrix...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <button 
+    <div className="max-w-3xl sm:max-w-4xl md:max-w-5xl mx-auto my-5 p-6 bg-white rounded-xl shadow-lg border border-slate-200 min-h-[75vh]">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8 pb-4 border-b-2 border-slate-100">
+        <button
           onClick={handleBackToDashboard}
           disabled={isSubmitting}
-          style={{
-            ...styles.backButton,
-            opacity: isSubmitting ? 0.6 : 1,
-            cursor: isSubmitting ? 'not-allowed' : 'pointer'
-          }}
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:bg-slate-50 transition-colors disabled:opacity-60"
         >
-          ← Back to Dashboard
+          <span>←</span>
+          Back
         </button>
-        <h1 style={styles.heading}>Placement Matrix</h1>
+        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 select-none">
+          <span className="text-lg md:text-2xl">📊</span>
+          Placement Matrix
+        </h1>
+        <button
+          onClick={handleRefresh}
+          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:bg-slate-50 transition-colors"
+        >
+          <span>🔄</span>
+          Refresh
+        </button>
       </div>
 
+      {/* Error */}
       {error && (
-        <div style={styles.errorBanner}>
-          <p style={styles.errorText}>{error}</p>
+        <div className="flex items-center gap-2 bg-red-100 border border-red-300 rounded-lg p-4 mb-6">
+          <span>⚠️</span>
+          <span className="text-red-700 font-medium">{error}</span>
         </div>
       )}
 
+      {/* Teacher View */}
       {userRole === 'teacher' ? (
         <>
-          <h2 style={styles.subHeading}>Teacher Verification Panel</h2>
-          <div style={styles.teacherInfo}>
-            <p>Review and verify student placement form submissions below.</p>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg md:text-xl font-bold text-slate-700">Verification Panel</h2>
+            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs md:text-sm font-medium">Teacher</span>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg mb-6 border-l-4 border-blue-400 flex items-start gap-2 text-sm">
+            <span className="text-lg">💡</span>
+            <span className="text-slate-600">
+              Review and verify student placement form submissions below.
+            </span>
           </div>
           <TeacherVerificationTable />
-          <div style={styles.exportSection}>
-            <h3 style={styles.exportHeading}>Export Options</h3>
-            <div style={styles.exportButtons}>
-              <ExportButtonFormA/>
-              <ExportButtonFormB/>
+          <div className="mt-8 p-6 bg-slate-50 rounded-lg border border-slate-200 shadow">
+            <h3 className="text-base font-bold text-slate-700 mb-1 text-center flex items-center justify-center gap-2">
+              <span>📥</span> Export Options
+            </h3>
+            <div className="flex gap-4 justify-center mt-3 flex-wrap">
+              <ExportButtonFormA />
+              <ExportButtonFormB />
             </div>
           </div>
         </>
       ) : (
+        /* Student View */
         <>
-          <h2 style={styles.subHeading}>Student Placement Forms</h2>
-          <div style={styles.studentInfo}>
-            <p>Choose a format below to fill out your placement information. All fields are required for complete submission.</p>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg md:text-xl font-bold text-slate-700">Your Placement Forms</h2>
+            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs md:text-sm font-medium">Student</span>
           </div>
-          
-          <div style={styles.buttonContainer}>
+          <div className="bg-green-50 p-4 rounded-lg mb-6 border-l-4 border-green-400 flex items-start gap-2 text-sm">
+            <span className="text-lg">📝</span>
+            <span className="text-slate-600">
+              Choose a format below to fill out your placement information.<br className="hidden sm:block" />
+              All fields are required for complete submission.
+            </span>
+          </div>
+
+          {/* Format Selection Buttons */}
+          <div className="flex justify-center mb-6 gap-4 flex-wrap">
             <button
               onClick={() => handleFormatSelection('A')}
               disabled={isSubmitting}
-              style={{
-                ...styles.button,
-                ...(selectedFormat === 'A' && styles.activeButton),
-                opacity: isSubmitting ? 0.6 : 1,
-                cursor: isSubmitting ? 'not-allowed' : 'pointer'
-              }}
+              className={`
+                flex flex-col items-center min-w-[140px] md:min-w-[180px] px-5 py-3 rounded-lg border-2 transition-all font-semibold text-blue-700
+                ${selectedFormat === 'A'
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg -translate-y-1'
+                  : 'bg-blue-50 border-blue-400 hover:bg-blue-100'}
+                ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+              `}
             >
               Format A
-              <div style={styles.buttonDescription}>Academic & Technical Focus</div>
+              <div className={`mt-1 text-xs ${selectedFormat === 'A' ? 'text-white' : 'text-blue-700/80'}`}>
+                Academic & Technical Focus
+              </div>
             </button>
             <button
               onClick={() => handleFormatSelection('B')}
               disabled={isSubmitting}
-              style={{
-                ...styles.button,
-                ...(selectedFormat === 'B' && styles.activeButton),
-                opacity: isSubmitting ? 0.6 : 1,
-                cursor: isSubmitting ? 'not-allowed' : 'pointer'
-              }}
+              className={`
+                flex flex-col items-center min-w-[140px] md:min-w-[180px] px-5 py-3 rounded-lg border-2 transition-all font-semibold text-blue-700
+                ${selectedFormat === 'B'
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg -translate-y-1'
+                  : 'bg-blue-50 border-blue-400 hover:bg-blue-100'}
+                ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+              `}
             >
               Format B
-              <div style={styles.buttonDescription}>Comprehensive Portfolio</div>
+              <div className={`mt-1 text-xs ${selectedFormat === 'B' ? 'text-white' : 'text-blue-700/80'}`}>
+                Comprehensive Portfolio
+              </div>
             </button>
           </div>
 
-          {selectedFormat === 'A' && (
-            <div style={styles.formContainer}>
+          {/* Selected Form */}
+          <div className={selectedFormat ? "mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200" : ""}>
+            {selectedFormat === 'A' && (
               <FormatAForm prefilledRegistrationNumber={prefilledRegNum} />
-            </div>
-          )}
-          {selectedFormat === 'B' && (
-            <div style={styles.formContainer}>
+            )}
+            {selectedFormat === 'B' && (
               <FormatBForm prefilledRegistrationNumber={prefilledRegNum} />
-            </div>
-          )}
+            )}
+          </div>
         </>
       )}
     </div>
   );
 }
-
-const styles = {
-  container: {
-    maxWidth: '1000px',
-    margin: '40px auto',
-    padding: '30px',
-    border: '1px solid #e0e0e0',
-    borderRadius: '12px',
-    boxShadow: '0 6px 25px rgba(0,0,0,0.1)',
-    backgroundColor: '#ffffff',
-    fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, sans-serif',
-    lineHeight: '1.6',
-    color: '#333',
-    minHeight: '80vh',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '40px',
-    paddingBottom: '20px',
-    borderBottom: '2px solid #f0f0f0',
-  },
-  heading: {
-    textAlign: 'center',
-    color: '#1a202c',
-    fontSize: '2.8em',
-    fontWeight: '700',
-    flexGrow: 1,
-    margin: '0 20px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-  },
-  backButton: {
-    padding: '10px 18px',
-    fontSize: '0.95em',
-    borderRadius: '8px',
-    border: '1px solid #6b7280',
-    backgroundColor: '#f9fafb',
-    color: '#374151',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    fontWeight: '500',
-  },
-  subHeading: {
-    color: '#4a5568',
-    borderBottom: '2px solid #e2e8f0',
-    paddingBottom: '15px',
-    marginBottom: '30px',
-    fontSize: '1.9em',
-    fontWeight: '600',
-  },
-  teacherInfo: {
-    backgroundColor: '#f7fafc',
-    padding: '15px 20px',
-    borderRadius: '8px',
-    marginBottom: '25px',
-    borderLeft: '4px solid #4299e1',
-  },
-  studentInfo: {
-    backgroundColor: '#f0fff4',
-    padding: '15px 20px',
-    borderRadius: '8px',
-    marginBottom: '25px',
-    borderLeft: '4px solid #48bb78',
-  },
-  buttonContainer: {
-    display: 'flex',
-    justifyContent: 'center',
-    marginBottom: '50px',
-    gap: '25px',
-    flexWrap: 'wrap',
-  },
-  button: {
-    padding: '18px 35px',
-    fontSize: '18px',
-    borderRadius: '10px',
-    border: '2px solid #3b82f6',
-    backgroundColor: '#eff6ff',
-    color: '#1d4ed8',
-    cursor: 'pointer',
-    transition: 'all 0.3s ease',
-    fontWeight: '600',
-    position: 'relative',
-    minWidth: '200px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  activeButton: {
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
-    borderColor: '#3b82f6',
-    transform: 'translateY(-2px)',
-    boxShadow: '0 8px 20px rgba(59, 130, 246, 0.3)',
-  },
-  buttonDescription: {
-    fontSize: '12px',
-    marginTop: '5px',
-    opacity: 0.8,
-    fontWeight: '400',
-  },
-  formContainer: {
-    marginTop: '30px',
-    padding: '25px',
-    backgroundColor: '#fafafa',
-    borderRadius: '10px',
-    border: '1px solid #e2e8f0',
-  },
-  exportSection: {
-    marginTop: '40px',
-    padding: '25px',
-    backgroundColor: '#f8fafc',
-    borderRadius: '10px',
-    border: '1px solid #e2e8f0',
-  },
-  exportHeading: {
-    fontSize: '1.4em',
-    fontWeight: '600',
-    color: '#2d3748',
-    marginBottom: '20px',
-    textAlign: 'center',
-  },
-  exportButtons: {
-    display: 'flex',
-    gap: '20px',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-  },
-  errorBanner: {
-    backgroundColor: '#fed7d7',
-    border: '1px solid #fc8181',
-    borderRadius: '8px',
-    padding: '15px',
-    marginBottom: '25px',
-  },
-  errorText: {
-    color: '#c53030',
-    margin: 0,
-    fontWeight: '500',
-  },
-};

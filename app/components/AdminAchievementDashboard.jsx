@@ -171,7 +171,7 @@
         }
     };
 
-    export default function AdminAchievementDashboard() {
+    export default function AdminAchievementDashboard({ secRole, SectionofFA }) {
         // const router = useRouter(); // Uncomment if using Next.js Pages Router
 
         const [selectedSearchType, setSelectedSearchType] = useState('regNo'); // 'regNo' | 'section' | 'batch'
@@ -350,13 +350,21 @@
             try {
                 if (displayMode === 'approved') {
                     if (selectedSearchType === 'regNo' || selectedSearchType === 'section') {
-                        if (!searchIdentifier) {
-                            toast.error(`Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`);
-                            setLoading(false); // Stop loading if validation fails
-                            return;
-                        }
-                        url = '/api/get-user-or-section-achievements';
-                        payload = { identifier: searchIdentifier, type: selectedSearchType };
+                        const effectiveIdentifier =
+  selectedSearchType === "section" && secRole === "FA"
+    ? SectionofFA
+    : searchIdentifier;
+
+if (!effectiveIdentifier) {
+    toast.error(
+      `Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`
+    );
+    setLoading(false);
+    return;
+}
+url = '/api/get-user-or-section-achievements';
+payload = { identifier: effectiveIdentifier, type: selectedSearchType };
+
                         const response = await apiCall(url, payload);
                         if (response && response.data) {
                             tempResults = Array.isArray(response.data) ? response.data : [response.data];
@@ -507,18 +515,18 @@
             setError(null);
         }, [searchIdentifier, displayMode]);
 
-        useEffect(() => {
-  if (
-    selectedSearchType &&
-    (selectedSearchType === 'batch' || searchIdentifier.trim() !== '')
-  ) {
-    const delayDebounce = setTimeout(() => {
-      fetchData();
-    }, 500); // wait 500ms after user stops typing
+//         useEffect(() => {
+//   if (
+//     selectedSearchType &&
+//     (selectedSearchType === 'batch' || searchIdentifier.trim() !== '')
+//   ) {
+//     const delayDebounce = setTimeout(() => {
+//       fetchData();
+//     }, 500); // wait 500ms after user stops typing
 
-    return () => clearTimeout(delayDebounce); // cancel if user keeps typing
-  }
-}, [searchIdentifier, selectedSearchType, displayMode, fetchData]);
+//     return () => clearTimeout(delayDebounce); // cancel if user keeps typing
+//   }
+// }, [searchIdentifier, selectedSearchType, displayMode, fetchData]);
 
         return (
             <div className="min-h-screen p-6 bg-gray-50 font-sans antialiased">
@@ -571,14 +579,41 @@
                             </div>
                         </div>
 
-                        <input
-                            type="text"
-                            placeholder={selectedSearchType === 'regNo' ? 'Enter Registration Number' : selectedSearchType === 'section' ? 'Enter Section (e.g., A, B)' : 'Search not applicable for Batch'}
-                            value={searchIdentifier}
-                            onChange={(e) => setSearchIdentifier(e.target.value)}
-                            disabled={selectedSearchType === 'batch'}
-                            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                        />
+                       <input
+  type="text"
+  placeholder={selectedSearchType === 'regNo'
+    ? 'Enter Registration Number'
+    : selectedSearchType === 'section'
+      ? 'Enter Section (e.g., A, B)'
+      : 'Search not applicable for Batch'}
+  value={
+    selectedSearchType === 'section' && secRole === 'FA'
+      ? SectionofFA || ''
+      : searchIdentifier
+  }
+  onChange={
+    selectedSearchType === 'section' && secRole === 'FA'
+      ? undefined 
+      : (e) => setSearchIdentifier(e.target.value)
+  }
+  readOnly={selectedSearchType === 'section' && secRole === 'FA'}
+  disabled={selectedSearchType === 'batch'}
+  className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+/>
+
+<div className="flex justify-end mt-2">
+    <button
+      type="submit"
+      disabled={
+        (selectedSearchType === 'regNo' && !searchIdentifier.trim()) ||
+        (selectedSearchType === 'section' && secRole === 'AA' && !searchIdentifier.trim())
+      }
+      className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:bg-gray-400"
+    >
+      Search
+    </button>
+  </div>
+
                         
                     </form>
                 </motion.div>

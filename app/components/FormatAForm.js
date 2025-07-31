@@ -7,9 +7,9 @@ import { collection, addDoc, doc, setDoc, getDoc, serverTimestamp, query, where,
 
 const FormatAForm = ({ prefilledRegistrationNumber }) => {
     const [loading, setLoading] = useState(false);
-    const [isEditing, setIsEditing] = useState(false); 
-    const [initialFormData, setInitialFormData] = useState({}); 
-    const [hasPendingChanges, setHasPendingChanges] = useState(false); 
+    const [isEditing, setIsEditing] = useState(false);
+    const [initialFormData, setInitialFormData] = useState({});
+    const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const [formDataA, setFormDataA] = useState({
         registrationNumber: '', fullName: '', gender: '', nriStudent: '', dateOfBirth: '',
         department: '', specialization: '', section: '', srmistMailId: '', personalMailId: '',
@@ -24,7 +24,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
         currentApplicationName: '', fsdExperience: '', currentFsdName: '', codingCompetition: '',
         hackathons: '', nameOfHackathons: '', otherCodingEventAwards: '', inhouseProjects: '',
         achievements: '', professionalBodiesMembership: '', assessmentMarks: '', careerOption: '',
-        dreamCompanyPlacement: '', placementRankingMarks: '', file10th12thMarksheetUrl: '',
+        dreamCompanyPlacement: '', file10th12thMarksheetUrl: '',
     });
 
     useEffect(() => {
@@ -211,6 +211,18 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <input type="text" name="dateOfBirth" value={formDataA.dateOfBirth} onChange={handleInputChange} required style={styles.input} placeholder="YYYY-MM-DD" disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
+                    {inputCounter++}. Department:
+                    <input type="text" name="department" value={formDataA.department} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
+                </label>
+                <label style={styles.label}>
+                    {inputCounter++}. Specialization:
+                    <input type="text" name="specialization" value={formDataA.specialization} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
+                </label>
+                <label style={styles.label}>
+                    {inputCounter++}. Section:
+                    <input type="text" name="section" value={formDataA.section} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
+                </label>
+                <label style={styles.label}>
                     {inputCounter++}. SRMIST Mail ID:
                     <input type="text" name="srmistMailId" value={formDataA.srmistMailId} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
@@ -219,7 +231,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <input type="text" name="personalMailId" value={formDataA.personalMailId} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Mobile Number:
+                    {inputCounter++}. Mobile Number (Contact + Whatsapp):
                     <input type="text" name="mobileNumber" value={formDataA.mobileNumber} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
@@ -258,18 +270,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
 
             <div style={styles.inputGroup}>
                 <h3 style={styles.groupTitle}>Academic Details</h3>
-                <label style={styles.label}>
-                    {inputCounter++}. Department:
-                    <input type="text" name="department" value={formDataA.department} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
-                <label style={styles.label}>
-                    {inputCounter++}. Specialization:
-                    <input type="text" name="specialization" value={formDataA.specialization} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
-                <label style={styles.label}>
-                    {inputCounter++}. Section:
-                    <input type="text" name="section" value={formDataA.section} onChange={handleInputChange} required style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
+                
                 <label style={styles.label}>
                     {inputCounter++}. 10th Percentage:
                     <input type="text" name="tenthPercentage" value={formDataA.tenthPercentage} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
@@ -287,7 +288,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <input type="text" name="studiedDiploma" value={formDataA.studiedDiploma} onChange={handleInputChange} style={styles.input} placeholder="e.g., Yes or No" disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. 12th Percentage:
+                    {inputCounter++}. 12th Percentage / Diploma Percentage:
                     <input type="text" name="twelfthPercentage" value={formDataA.twelfthPercentage} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
@@ -307,11 +308,11 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <input type="text" name="cgpaUptoSixthSem" value={formDataA.cgpaUptoSixthSem} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. No of Standing:
+                    {inputCounter++}. No of Standing Arrears:
                     <input type="text" name="numberOfStanding" value={formDataA.numberOfStanding} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. History of Arrears (Mention if any, else N/A):
+                    {inputCounter++}. History of Arrears (Backlogs):
                     <input type="text" name="historyOfArrears" value={formDataA.historyOfArrears} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
             </div>
@@ -323,11 +324,11 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <input type="text" name="githubProfileLink" value={formDataA.githubProfileLink} onChange={handleInputChange} placeholder="https://github.com/yourprofile" style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Coding Practice (Platforms/Regularity):
+                    {inputCounter++}. Coding Practice Platform(Give in Order):
                     <input type="text" name="codingPractice" value={formDataA.codingPractice} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Internship Experience (Describe briefly):
+                    {inputCounter++}. Internship Experience :
                     <input type="text" name="internshipExperience" value={formDataA.internshipExperience} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
@@ -339,7 +340,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <input type="text" name="industrialTrainingCompleted" value={formDataA.industrialTrainingCompleted} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
-                    {inputCounter++}. Programming Skillset (e.g., Python, Java, C++, JavaScript):
+                    {inputCounter++}. Programming Skillset:
                     <input type="text" name="programmingSkillset" value={formDataA.programmingSkillset} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
                 <label style={styles.label}>
@@ -402,14 +403,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. Career Option:
                     <input type="text" name="careerOption" value={formDataA.careerOption} onChange={handleInputChange} placeholder="e.g., Software Engineer, Data Scientist, Higher Studies" style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
-                <label style={styles.label}>
-                    {inputCounter++}. Dream Company Option for Placement (Mention any one Company with Salary Package more than 10 Lakhs per Annum) (IF HIGHER STUDIES MENTION NA):
-                    <input type="text" name="dreamCompanyPlacement" value={formDataA.dreamCompanyPlacement} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
-                <label style={styles.label}>
-                    {inputCounter++}. Placement Ranking Marks(100):
-                    <input type="text" name="placementRankingMarks" value={formDataA.placementRankingMarks} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
+                
             </div>
 
             <div style={styles.buttonContainer}>

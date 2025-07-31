@@ -6,7 +6,7 @@ import StudentsTable from "./StudentsTable";
 import MarksTable from "./MarksTable";
 import CompleteStudentForm from "./CompleteStudentForm";
 
-export default function EmailSystem() {
+export default function EmailSystem({ SectionofFA }) {
   const [showForm, setShowForm] = useState(false);
   const [showMarksTable, setShowMarksTable] = useState(false);
   
@@ -71,7 +71,7 @@ export default function EmailSystem() {
               ) : showMarksTable ? (
                 <MarksTable />
               ) : (
-                <StudentsTable />
+                <StudentsTable SectionofFA={SectionofFA}/>
               )}
             </div>
           </div>
