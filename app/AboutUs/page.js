@@ -2,55 +2,73 @@ import React from "react";
 
 const advisors = [
   {
-    name: "Bharani sir",
-    role: "Chairman",
-    image: "/team/fake.png",
-    links: { visit: "#" },
+    name: "Dr. Revathi Venkataraman",
+    role: "Chairperson",
+    image: "/team/DrRevathiVenkataraman.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-revathi-venkataraman/" },
   },
   {
-    name: "Deepan sir",
-    role: "Associate Chairman",
-    image: "/team/fake.png",
-    links: { visit: "#" },
+    name: "Dr. Pushpalatha M",
+    role: "Associate Chairperson",
+    image: "/team/DrPushpalathaM.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-m-pushpalatha/" },
   },
   {
-    name: "Priya mam",
-    role: "HOD",
-    image: "/team/fake.png",
-    links: { visit: "#" },
+    name: "Dr. Niranjana G",
+    role: "Head Of Department",
+    image: "/team/DrNiranjanaG.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-g-niranjana/" },
   },
   {
-    name: "Abirami mam",
-    role: "AA",
-    image: "/team/fake.png",
-    links: { visit: "#" },
+    name: "Dr. Baranidharan B",
+    role: "Professor",
+    image: "/team/DrBaranidharanB.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-b-baranidharan/" },
+  },
+  {
+    name: "Dr. Deeban Chakravarthy V",
+    role: "Associate Professor",
+    image: "/team/DrDeebanChakravarthyV.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-v-deeban-chakravarthy/" },
+  },
+  {
+    name: "Dr. Priya S",
+    role: "Associate Professor",
+    image: "/team/DrPriyaS.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/ms-s-priya/" },
+  },
+  {
+    name: "Dr. Abirami G",
+    role: "Associate Professor",
+    image: "/team/DrAbiramiG.png",
+    links: { visit: "https://www.srmist.edu.in/faculty/g-abirami-2/" },
   },
 ];
 
 const mentors = [
   {
-    name: "Dr. R. Hariharan",
-    role: "Faculty Advisor",
+    name: "Dr. Hariharan R",
+    role: "Assistant Professor",
     image: "/team/DR.Hariharan.jpg",
-    links: { visit: "#" },
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-hariharan-r/" },
   },
   {
-    name: "Mohideen Sir",
-    role: "Faculty Advisor",
+    name: "Dr. Mohideen Abdulkader M",
+    role: "Assistant Professor",
     image: "/team/MohideenSir.jpg",
-    links: { visit: "#" },
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-mohideen-abdulkader-m/" },
   },
   {
-    name: "Iswarya Ma'am",
-    role: "Faculty Advisor",
+    name: "Dr. Ishwarya K",
+    role: "Assistant Professor",
     image: "/team/ishwaryamaan.jpg",
-    links: { visit: "#" },
+    links: { visit: "https://www.srmist.edu.in/faculty/dr-ishwarya-k/" },
   },
   {
-    name: "Umamahswari Ma'am",
-    role: "Faculty Advisor",
+    name: "Dr. Umamageswari B",
+    role: "Assistant Professor",
     image: "/team/Uma.jpg",
-    links: { visit: "#" },
+    links: { visit: "https://www.srmist.edu.in/faculty/ms-umamageswari-b/" },
   },
 ];
 
@@ -62,7 +80,7 @@ const team = [
     bio: "Leads and manages the project vision, communication and coordination. FullStack Developer",
     links: {
       github: "https://github.com/Q9Kawaii",
-      linkedin: "#",
+      linkedin: "https://www.linkedin.com/in/yash-dingar-946688276/",
       instagram: "https://www.instagram.com/q9kawaii/",
     },
   },
@@ -103,18 +121,19 @@ const team = [
 
 const Section = ({ title, members }) => {
   const isFaculty = title === "Advisors" || title === "Mentors";
+  const isAdvisors = title === "Advisors";
 
   return (
     <div className="mb-20">
       <h3 className="text-2xl font-bold text-[#0c4da2] text-center mb-10 underline decoration-blue-300 underline-offset-4">
         {title}
       </h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className={`grid grid-cols-1 sm:grid-cols-2 ${isAdvisors ? "lg:grid-cols-5" : "lg:grid-cols-4"} gap-8`}>
         {members.map((member, index) => {
           const cardContent = (
-            <div className="p-8 flex flex-col items-center text-center">
-              <div className="relative mb-6">
-                <div className="w-36 h-36 rounded-full bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] p-1 shadow-2xl">
+            <div className={`flex flex-col items-center text-center ${isAdvisors ? "p-4" : "p-8"}`}>
+              <div className="relative mb-4">
+                <div className={`${isAdvisors ? "w-24 h-24" : "w-36 h-36"} rounded-full bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] p-1 shadow-2xl`}>
                   <img
                     src={member.image}
                     alt={member.name}
@@ -124,7 +143,7 @@ const Section = ({ title, members }) => {
                 <div className="absolute -top-2 -right-2 w-6 h-6 bg-[#3a5b72] rounded-full opacity-60 animate-pulse"></div>
                 <div className="absolute -bottom-2 -left-2 w-4 h-4 bg-[#0c4da2] rounded-full opacity-60 animate-pulse delay-300"></div>
               </div>
-              <h3 className="text-xl font-bold text-[#0c4da2] mb-2">{member.name}</h3>
+              <h3 className={`${isAdvisors ? "text-lg" : "text-xl"} font-bold text-[#0c4da2] mb-2`}>{member.name}</h3>
               <div className="mb-4">
                 <span className="inline-block px-4 py-2 bg-blue-50/80 backdrop-blur-sm text-[#3a5b72] font-medium rounded-full text-sm border border-blue-200">
                   {member.role}
@@ -136,9 +155,8 @@ const Section = ({ title, members }) => {
               <div className="flex gap-4 justify-center">
                 {isFaculty ? (
                   <span className="px-4 py-2 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white rounded-full text-sm font-medium shadow-md hover:shadow-lg transition-all duration-300">
-  Visit Page
-</span>
-
+                    Visit Page
+                  </span>
                 ) : (
                   <>
                     {member.links.github && (
@@ -221,13 +239,9 @@ export default function AboutUs() {
   return (
     <div className="relative min-h-screen overflow-hidden py-16 px-4 sm:px-8 lg:px-20 -mb-20">
       <div className="relative z-10">
-        {/* Optional: Header or background blobs can go here */}
-
         <Section title="Advisors" members={advisors} />
         <Section title="Mentors" members={mentors} />
         <Section title="Team" members={team} />
-
-        {/* Optional: Footer */}
       </div>
     </div>
   );
