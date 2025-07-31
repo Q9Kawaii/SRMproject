@@ -306,14 +306,15 @@ const StudentAttendancePage = ({ studentRegNo }) => {
             </div>
             
             <motion.button
-              whileHover={{ scale: 1.05, rotate: 90 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={refreshData}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-xl shadow-blue-200 font-semibold"
-            >
-              <RefreshCw size={18} />
-              Refresh
-            </motion.button>
+  whileHover={{ scale: 1.05 }}
+  whileTap={{ scale: 0.95 }}
+  onClick={refreshData}
+  className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-2xl hover:from-blue-700 hover:to-indigo-800 transition-all duration-300 shadow-xl shadow-blue-200 font-semibold"
+>
+  <RefreshCw size={18} />
+  Refresh
+</motion.button>
+
           </div>
         </div>
       </motion.div>

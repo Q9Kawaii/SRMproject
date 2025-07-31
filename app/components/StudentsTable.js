@@ -361,7 +361,6 @@ export default function StudentsTable({SectionofFA}) {
                     <th className="p-2 text-center">Parent Email</th>
                     <th className="p-2 text-center">Low Attendance Subjects</th>
                     <th className="p-2 text-center">All Subjects Attendance</th>
-                    <th className="p-2 text-center">Delete</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -407,16 +406,6 @@ export default function StudentsTable({SectionofFA}) {
                               </div>
                             ))
                           : "—"}
-                      </td>
-                      
-                      <td className="p-2">
-                        <button
-                          onClick={() => deleteStudent(s.id)}
-                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                          disabled={sendingEmails}
-                        >
-                          Delete
-                        </button>
                       </td>
                     </tr>
                   ))}

@@ -342,35 +342,6 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
           </p>
         </div>
 
-        {/* Enhanced Placement Matrix Button */}
-        <div className="mb-8 flex justify-center">
-          <button
-            onClick={handlePlacementMatrixRedirect}
-            className="group relative h-[120px] w-full max-w-lg rounded-3xl shadow-xl bg-gradient-to-r from-blue-50 to-indigo-50 backdrop-blur-sm border-2 border-blue-200 flex items-center justify-center text-center px-10 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl cursor-pointer overflow-hidden"
-          >
-            <span className="absolute top-0 left-0 w-full h-2 rounded-t-3xl bg-gradient-to-r from-[#0c4da2] to-[#3a5b72]"></span>
-            
-            <div className="w-16 h-16 mr-6 flex items-center justify-center rounded-full shadow-lg bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V8a2 2 0 012-2V6" />
-              </svg>
-            </div>
-            
-            <div className="text-left">
-              <h3 className="font-bold text-2xl text-[#0c4da2] mb-2">
-                Placement Matrix
-              </h3>
-              <p className="text-sm text-gray-600 mb-1">
-                Fill placement forms and track progress
-              </p>
-              <p className="text-xs text-gray-500">
-                Click to access Format A & B forms
-              </p>
-            </div>
-            
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-[#0c4da2]/0 to-[#3a5b72]/0 group-hover:from-[#0c4da2]/5 group-hover:to-[#3a5b72]/5 transition-all duration-300 pointer-events-none" />
-          </button>
-        </div>
 
         {/* Main Content */}
         <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-blue-100 overflow-hidden">
@@ -553,61 +524,7 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
                   </div>
                 )}
 
-                {/* Enhanced Achievements View Section */}
-                {/* {studentData.achievementsMap && !isEditing && (
-                  <div className="md:col-span-2 mt-8">
-                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 backdrop-blur-sm rounded-2xl p-6 border-2 border-blue-200">
-                      <div className="flex items-center gap-3 mb-6">
-                        <div className="w-12 h-12 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h2 className="text-xl font-bold text-[#0c4da2]">Achievements & Awards</h2>
-                          <p className="text-sm text-gray-600">{Object.keys(studentData.achievementsMap).length} achievements recorded</p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        {Object.values(studentData.achievementsMap).map((val, i) => {
-                          const parts = val.split("~");
-                          const title = parts[0] || "";
-                          const link = parts[1] || "";
-                          const verified = parts[2] === "1";
-                          
-                          return (
-                            <div key={i} className="flex items-center justify-between p-4 bg-white/80 rounded-xl border border-blue-100">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full ${verified ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
-                                <div>
-                                  <strong className="text-[#0c4da2] text-lg">{title || 'Untitled Achievement'}</strong>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    {verified && <span className="text-green-600 text-sm font-medium">✓ Verified</span>}
-                                    {!verified && <span className="text-yellow-600 text-sm font-medium">⏳ Pending Verification</span>}
-                                    {link && (
-                                      <a
-                                        href={link}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-[#3a5b72] hover:text-[#0c4da2] underline text-sm font-medium transition-colors duration-200 flex items-center gap-1"
-                                      >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                        </svg>
-                                        View Certificate
-                                      </a>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )} */}
+                
 
 <button
   onClick={handleAchievementsRedirect}
@@ -623,6 +540,24 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
     </div>
     <span className="text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
       Achievements Portal
+    </span>
+    <span className="text-blue-600 group-hover:translate-x-1 transition-transform duration-300">→</span>
+  </div>
+</button>
+<button
+  onClick={handlePlacementMatrixRedirect}
+  className="group relative px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-slate-800 font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 hover:bg-white/20 hover:border-white/30"
+  style={{
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+    backdropFilter: 'blur(10px)'
+  }}
+>
+  <div className="flex items-center gap-3">
+    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+      <span className="text-white text-sm">🎖️</span>
+    </div>
+    <span className="text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
+      Placement Matrix
     </span>
     <span className="text-blue-600 group-hover:translate-x-1 transition-transform duration-300">→</span>
   </div>

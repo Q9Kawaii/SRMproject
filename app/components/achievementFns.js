@@ -251,6 +251,7 @@ export async function getUserOrSectionAchievements(identifier, type) {
 // import { getBasicStudentInfo } from './achievementFns'; // Or the correct path to getBasicStudentInfo if it's in another file
 
 //! Fetch pending updates either for a student or for a section
+//! Fetch pending updates either for a student or for a section
 export async function getPendingUpdates(identifier, type) {
   try {
     const pendingRef = collection(db, "pendingAchievements");
@@ -260,42 +261,34 @@ export async function getPendingUpdates(identifier, type) {
       const snap = await getDoc(docRef);
 
       if (!snap.exists()) {
-        // --- THIS IS THE NEW / MODIFIED BLOCK ---
-        const basicInfo = await getBasicStudentInfo(identifier); // Still attempt to get basic info
-
-        // Ensure basicInfo.data is available; otherwise, default to a minimal structure
+        const basicInfo = await getBasicStudentInfo(identifier);
         const studentData = basicInfo.success ? basicInfo.data : { regNo: identifier, name: "Unknown", section: "Unknown" };
 
         return {
-          success: true, // IMPORTANT: Changed from 'false' to 'true'. This indicates a successful lookup, even if no document was found.
-          message: "No pending update found for this student",
-          data: { // IMPORTANT: Data is now an object for consistency
-            ...studentData, // Includes basic student info
-            pendingItems: [] // CRITICAL: Ensures 'pendingItems' is an empty array when no document exists
+          success: true,
+          // Remove the message property entirely
+          data: {
+            ...studentData,
+            pendingItems: []
           }
         };
-        // --- END OF NEW / MODIFIED BLOCK ---
       }
 
-      // If document exists, this part remains largely the same,
-      // ensuring 'pendingItems' is an array from the Firestore data.
+      // If document exists, this part remains the same
       const basicInfo = await getBasicStudentInfo(identifier);
 
       return {
         success: true,
         message: "Pending update found",
         data: {
-          ...basicInfo.data, // Include student's basic info
-          pendingItems: snap.data().pendingItems || [] // Get the array of pending items from the document
+          ...basicInfo.data,
+          pendingItems: snap.data().pendingItems || []
         }
       };
     }
 
     if (type === "section") {
-      // This section remains unchanged as its previous logic already returned
-      // an array of objects suitable for the Admin Dashboard's section view.
       const querySnap = await getDocs(pendingRef);
-
       const pendingList = [];
 
       for (const docSnap of querySnap.docs) {
@@ -307,7 +300,7 @@ export async function getPendingUpdates(identifier, type) {
           basicInfo.data.section === identifier
         ) {
           const studentPendingItems = docSnap.data().pendingItems || [];
-          if (studentPendingItems.length > 0) { // Only add if there are actual pending items
+          if (studentPendingItems.length > 0) {
             pendingList.push({
               ...basicInfo.data,
               pendingItems: studentPendingItems
@@ -319,21 +312,18 @@ export async function getPendingUpdates(identifier, type) {
       return {
         success: true,
         message: "Pending updates for section fetched",
-        data: pendingList // This is an array of student objects, each with a pendingItems array
+        data: pendingList
       };
     }
 
-    // Fallback for invalid type
     return { success: false, message: "Invalid query type", data: {} };
 
   } catch (err) {
     console.error("Error fetching pending updates:", err);
-    // --- THIS IS THE NEW / MODIFIED BLOCK FOR CATCH ---
-    // Ensure that even on an error, the 'data' structure is consistent
     return { success: false, message: "Error fetching data", data: { pendingItems: [] } };
-    // --- END OF NEW / MODIFIED BLOCK ---
   }
 }
+
 
 //! Approve and apply pending update to main User doc
 

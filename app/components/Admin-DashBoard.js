@@ -103,7 +103,7 @@ export default function AdminDashBoard({ secRole, SectionofFA }) {
         </div>
       <h1 className="text-3xl sm:text-4xl font-bold mb-3 lg:mb-6 lg:text-7xl">
         <span className="text-[#0c4da2] relative">
-          {secRole} of {SectionofFA}
+          {secRole}
           <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
         </span>{" "}
         <span className="text-[#3a5b72]">Dashboard </span>

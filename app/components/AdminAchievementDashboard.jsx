@@ -292,7 +292,7 @@
 
         // --- End Utility Functions ---
 
-        const apiCall = useCallback(async (url, data) => {
+        const apiCall = useCallback(async (url, data, options = {}) => {
     setLoading(true);
     setError(null);
     try {
@@ -300,40 +300,42 @@
         console.log("📦 Payload:", data);
 
         const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
         });
 
-        const responseText = await response.text(); // Read as raw text first
-        // console.log("📥 Raw response:", responseText);
-
+        const responseText = await response.text();
         let responseData;
         try {
-        responseData = JSON.parse(responseText);
+            responseData = JSON.parse(responseText);
         } catch (e) {
-        console.error("❌ Response not JSON:", responseText);
-        throw new Error("Server returned invalid JSON");
+            console.error("❌ Response not JSON:", responseText);
+            throw new Error("Server returned invalid JSON");
         }
 
         if (!response.ok || !responseData.success) {
-        throw new Error(responseData.message || `HTTP error! Status: ${response.status}`);
+            throw new Error(responseData.message || `HTTP error! Status: ${response.status}`);
         }
 
-        if (responseData.message) {
-        toast.success(responseData.message);
+        // Only show success message if not silenced and message exists
+        if (responseData.message && !options.silent) {
+            toast.success(responseData.message);
         }
 
         return responseData;
     } catch (err) {
         console.error("🔥 API Call Error:", err);
-        setError(err.message || "An unexpected error occurred.");
-        toast.error(err.message || "Operation failed!");
+        if (!options.silent) {
+            setError(err.message || "An unexpected error occurred.");
+            toast.error(err.message || "Operation failed!");
+        }
         return null;
     } finally {
         setLoading(false);
     }
-    }, []);
+}, []);
+
     // No dependencies for apiCall, as it's a generic utility
 
         const fetchData = useCallback(async () => {
@@ -378,27 +380,27 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                         }
                     }
                 } else if (displayMode === 'pending') {
-                    if (selectedSearchType === 'regNo' || selectedSearchType === 'section') {
-                        if (!searchIdentifier) {
-                            toast.error(`Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`);
-                            setLoading(false); // Stop loading if validation fails
-                            return;
-                        }
-                        url = '/api/get-pending-updates';
-                        payload = { identifier: searchIdentifier, type: selectedSearchType };
-                        const response = await apiCall(url, payload);
-                        if (response && response.data) {
-                            // Backend should ideally return an array, even if empty, or an object with pendingItems array
-                            const studentsWithPending = Array.isArray(response.data) ? response.data : (response.data.pendingItems ? [response.data] : []);
-                            tempResults = studentsWithPending.filter(s => s.pendingItems && s.pendingItems.length > 0);
-                        }
-                    } else if (selectedSearchType === 'batch') {
+    if (selectedSearchType === 'regNo' || selectedSearchType === 'section') {
+        if (!searchIdentifier) {
+            toast.error(`Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`);
+            setLoading(false);
+            return;
+        }
+        url = '/api/get-pending-updates';
+        payload = { identifier: searchIdentifier, type: selectedSearchType };
+        const response = await apiCall(url, payload);
+        if (response && response.data) {
+            // Only process if there are actual pending items
+            const studentsWithPending = Array.isArray(response.data) ? response.data : (response.data.pendingItems && response.data.pendingItems.length > 0 ? [response.data] : []);
+            tempResults = studentsWithPending.filter(s => s.pendingItems && s.pendingItems.length > 0);
+        }
+    } else if (selectedSearchType === 'batch') {
                         // For batch pending, fetch all students first, then check each for pending updates
                         const allStudentsResponse = await apiCall('/api/get-all-students-achievements', {});
                         if (allStudentsResponse && allStudentsResponse.data) {
                             const allStudentRegNos = allStudentsResponse.data.map(s => s.regNo);
                             const pendingPromises = allStudentRegNos.map(async (regNo) => {
-                                const pendingRes = await apiCall('/api/get-pending-updates', { identifier: regNo, type: 'regNo' });
+                                const pendingRes = await apiCall('/api/get-pending-updates', { identifier: regNo, type: 'regNo' },{ silent: true });
                                 // Ensure structure matches what filter expects: { regNo, pendingItems: [] }
                                 // return pendingRes && pendingRes.data ? pendingRes.data : null;
                                 if (pendingRes && pendingRes.success && pendingRes.data && Array.isArray(pendingRes.data.pendingItems)) {
@@ -565,7 +567,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                     />
                                     <span className="text-gray-700">Section</span>
                                 </label>
-                                <label className="flex items-center space-x-2 cursor-pointer">
+                                {/* <label className="flex items-center space-x-2 cursor-pointer">
                                     <input
                                         type="radio"
                                         name="searchType"
@@ -575,7 +577,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                         className="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="text-gray-700">Batch (All Students)</span>
-                                </label>
+                                </label> */}
                             </div>
                         </div>
 

@@ -41,7 +41,7 @@ export default function EmailSystem({ SectionofFA }) {
         </div>
 
         {/* Control Buttons */}
-        <div className="mb-8 w-full flex flex-col sm:flex-row sm:justify-center gap-6">
+        {/* <div className="mb-8 w-full flex flex-col sm:flex-row sm:justify-center gap-6">
           <button
             onClick={() => setShowForm((prev) => !prev)}
             className="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-500 hover:from-[#3a5b72] hover:to-[#0c4da2] overflow-hidden"
@@ -58,7 +58,7 @@ export default function EmailSystem({ SectionofFA }) {
             </div>
             <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </button>
-        </div>
+        </div> */}
 
         {/* Content Area */}
         <div className="w-full relative">
