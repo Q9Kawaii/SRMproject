@@ -13,7 +13,7 @@ const FIELD_CONFIG = [
   { label: "Registration Number", name: "regNo", readOnly: true },
   { label: "Name Of Student", name: "name" },
   { label: "Gender", name: "gender" },
-  { label: "NRI Student", name: "isNRI" },
+  // { label: "NRI Student", name: "isNRI" },
   { label: "Date of Birth (D.O.B.)", name: "dob", type: "date" },
   { label: "Department", name: "department" },
   { label: "Specialization", name: "specialization" },
@@ -28,41 +28,17 @@ const FIELD_CONFIG = [
   { label: "Mother Email ID", name: "motherEmail", type: "email" },
   { label: "Guardian Contact Number", name: "guardianPhone", type: "tel" },
   { label: "Name of Faculty Advisor", name: "advisorName" },
-  { label: "Languages Known", name: "languages" },
-  { label: "10th %age", name: "percent10", type: "number" },
-  { label: "10th Medium of Instruction", name: "10thMediumofInstruction" },
-  { label: "10th Board Of Studies", name: "board10" },
-  { label: "Studied Diploma", name: "studiedDiploma" },
-  { label: "12th %age", name: "percent12", type: "number" },
-  { label: "12th Medium of Instruction", name: "12thMediumofInstruction" },
-  { label: "12th Board Of Studies", name: "board12" },
-  { label: "Copy of 10th & 12th Marksheet", name: "Copyof10th&12thMarksheet" },
+  // { label: "Languages Known", name: "languages" },
+  // { label: "10th %age", name: "percent10", type: "number" },
+  // { label: "10th Medium of Instruction", name: "10thMediumofInstruction" },
+  // { label: "10th Board Of Studies", name: "board10" },
+  // { label: "Studied Diploma", name: "studiedDiploma" },
+  // { label: "12th %age", name: "percent12", type: "number" },
+  // { label: "12th Medium of Instruction", name: "12thMediumofInstruction" },
+  // { label: "12th Board Of Studies", name: "board12" },
+  // { label: "Copy of 10th & 12th Marksheet", name: "Copyof10th&12thMarksheet" },
   { label: "Date Of Admission", name: "dateOfAdmission", type: "date" },
 ];
-
-const SCORE_CONFIG = {
-  // 10th Percentage – Max 2.5 Marks
-  percent10: (val) => {
-    if (!val || val === "0") return 0;
-    const n = parseFloat(val);
-    if (n >= 96) return 2.5;
-    if (n >= 91) return 2;
-    if (n >= 86) return 1.5;
-    if (n >= 75) return 1;
-    return 0.5;
-  },
-
-  // 12th Percentage – Max 2.5 Marks
-  percent12: (val) => {
-    if (!val || val === "0") return 0;
-    const n = parseFloat(val);
-    if (n >= 96) return 2.5;
-    if (n >= 91) return 2;
-    if (n >= 86) return 1.5;
-    if (n >= 75) return 1;
-    return 0.5;
-  },
-};
 
 export default function StudentsDashBoard({ regNo: propRegNo, section: propSection }) {
   const [declineAlert, setDeclineAlert] = useState(null);
@@ -578,7 +554,7 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
                 )}
 
                 {/* Enhanced Achievements View Section */}
-                {studentData.achievementsMap && !isEditing && (
+                {/* {studentData.achievementsMap && !isEditing && (
                   <div className="md:col-span-2 mt-8">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 backdrop-blur-sm rounded-2xl p-6 border-2 border-blue-200">
                       <div className="flex items-center gap-3 mb-6">
@@ -631,14 +607,31 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
                       </div>
                     </div>
                   </div>
-                )}
+                )} */}
 
-                <button
-          onClick={handleAchievementsRedirect}
-          className="px-8 py-3 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
-        >
-          Go to Achievements Portal
-        </button>
+<button
+  onClick={handleAchievementsRedirect}
+  className="group relative px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-slate-800 font-semibold rounded-2xl shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300 hover:bg-white/20 hover:border-white/30"
+  style={{
+    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+    backdropFilter: 'blur(10px)'
+  }}
+>
+  <div className="flex items-center gap-3">
+    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+      <span className="text-white text-sm">🎖️</span>
+    </div>
+    <span className="text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">
+      Achievements Portal
+    </span>
+    <span className="text-blue-600 group-hover:translate-x-1 transition-transform duration-300">→</span>
+  </div>
+</button>
+
+
+
+
+
 
                 {/* Enhanced Action Buttons */}
                 <div className="md:col-span-2 flex justify-end mt-10">
@@ -719,29 +712,6 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
             )}
           </div>
         </div>
-        {/* Enhanced Profile Score
-        {studentData && !isEditing && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 backdrop-blur-sm rounded-2xl shadow-lg border-2 border-green-200">
-              <div className="flex items-center justify-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-700">
-                    {calculateTotalScore()}/5.0
-                  </div>
-                  <div className="text-lg font-semibold text-green-600">
-                    Basic Profile Score
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    Based on 10th & 12th percentages
-                  </div>
-                </div>
-              </div>
-            </div>
-        )} */}
       </div>
 
       {/* Enhanced Decline Alert */}
