@@ -108,16 +108,16 @@ const team = [
     },
   },
   {
-    name: "###########",
-    role: "Team Member",
-    image: "/team/fake.png",
-    bio: "##################",
+    name: "Abishek Skanda G",
+    role: "Developer",
+    image: "/team/skanda.jpg",
+    bio: "Programming enthusiast",
     links: {
-      github: "#",
-      linkedin: "#",
-      instagram: "#",
-    },
-  },
+      github: "https://github.com/ItsSkanda",
+      linkedin: "https://www.linkedin.com/in/abishek-skanda-g-751140326/",
+      instagram: "https://www.instagram.com/abishekskanda",
+    },
+  },
 ];
 
 const Section = ({ title, members }) => {
