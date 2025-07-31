@@ -96,14 +96,15 @@ const team = [
     },
   },
   {
-    name: "###########",
+    name: "Mahik Jain",
     role: "Team Member",
-    image: "/team/fake.png",
-    bio: "##################",
+    image: "/team/MahikJain.jpg",
+    bio: "Keen Programmer",
     links: {
-      github: "#",
-      linkedin: "#",
-      instagram: "#",
+      github: "https://github.com/MJ-1112",
+      linkedin: "https://www.linkedin.com/in/mahik-jain-b6a28b324/",
+      instagram: "https://www.instagram.com/jain_mahik/",
+      visit: "https://my-portfolio-chi-ochre-77.vercel.app/ ",
     },
   },
   {
