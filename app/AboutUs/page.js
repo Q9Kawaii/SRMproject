@@ -77,7 +77,7 @@ const team = [
     name: "Yash Dingar",
     role: "Manager",
     image: "/team/Yash.jpg",
-    bio: "Leads and manages the project vision, communication and coordination. FullStack Developer",
+    bio: "Team Lead | Full Stack Web who loves turning ideas into real-world solutions. Let’s connect and build awesome things together!",
     links: {
       github: "https://github.com/Q9Kawaii",
       linkedin: "https://www.linkedin.com/in/yash-dingar-946688276/",
@@ -88,7 +88,7 @@ const team = [
     name: "Anurag Anand",
     role: "Team Member",
     image: "/team/Anurag Anand.jpg",
-    bio: "Code so clean you could eat off it. Don’t, though. Just trying to make cool stuff that helps.",
+    bio: "Full Stack Web + ML Developer Love to build solutions with real world impact . Let's connect and build cool stuff together !",
     links: {
       github: "https://github.com/Frostyanand",
       linkedin: "https://www.linkedin.com/in/frostyanand",
@@ -98,7 +98,7 @@ const team = [
   {
     name: "###########",
     role: "Team Member",
-    image: "/team/frosty.jpg",
+    image: "/team/fake.png",
     bio: "##################",
     links: {
       github: "#",
@@ -109,7 +109,7 @@ const team = [
   {
     name: "###########",
     role: "Team Member",
-    image: "/team/technos.jpg",
+    image: "/team/fake.png",
     bio: "##################",
     links: {
       github: "#",
