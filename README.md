@@ -1,4 +1,4 @@
-# 🎓 Student & Faculty Portal – SRM Placement & Attendance System
+# 🎓 Student & Faculty Portal – SRM Placement & Attendance System 12345
 
 A full-featured web portal built using **Next.js**, **Tailwind CSS**, and **Firebase** to simplify and automate several workflows between students, faculty, and academic administrators.
 
