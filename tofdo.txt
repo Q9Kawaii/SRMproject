@@ -20,7 +20,8 @@ research over AWS - all of us (mahik texted to see in to it so he will carry on 
 
 
 *yesterdays problem
-the section sorting messup in achievements - anurag please check if its happening again, if it does tell me and i will see to it - it could be my mistake.
+the section sorting messup in achievements - anurag please check if its happening again,  
+if it does tell me and i will see to it - it could be my mistake.
 
 
 
@@ -28,8 +29,14 @@ the section sorting messup in achievements - anurag please check if its happenin
 what you guys have to do is, first anurag - update the existing files, there were some changes i made in ur files, so its better to copy the whole repo and then run it in ur local machine - this is for all 3 of u - clone the repo or fork it. Then do the changes to ur respective files now you guys have to keep track of what files u are changing. After the update u can send me the whole file which i can replace in my app. 
 
     ANURAG will be working on - escalation to aa | remarks for rejection of achievements | FA and AA remarks for low attendance | AA remarks should be  
-    visible to FA | [ Verified and Farward ], [ verified and accepted ] buttons in - upload attendance page | proof link in achievements. All the changes are to be done in i guess... upload attendance page and achievements section (i still want to the achievements to render at the bottom coz its easy to pass props that way) so update ur code and tell me and yea in case you need to pass some extra props u can change the other file as per ur need but again "KEEP A RECORD OF WHAT U ARE CHANGING". 
+    visible to FA | [ Verified and Farward ], [ verified and accepted ] buttons in - upload attendance page | proof link in achievements. All the changes  
+    are to be done in i guess... upload attendance page and achievements section (i still want to the achievements to render at the bottom coz its easy to  
+    pass props that way) so update ur code and tell me and yea in case you need to pass some extra props u can change the other file as per ur need but again  
+    "KEEP A RECORD OF WHAT U ARE CHANGING". 
 
-    MAKHIK AND SKANDA will be working on the proof link in placement matrix plus i still want to explain some stuff to you gyus in placement matrix related to the inputs and all so i may want you both to come on meet today eve | and mahik and as u wish to research over aws i request to also prepare the bill like structure for our project include everything from domain to render dyp. 
+    MAKHIK AND SKANDA will be working on the proof link in placement matrix plus i still want to explain some stuff to you gyus in placement matrix related  
+    to the inputs and all so i may want you both to come on meet today eve | and mahik and as u wish to research over aws i request to also prepare the bill  
+    like structure for our project include everything from domain to render dyp.
 
-    YASH will be working on email should be sent to FA, student, parent | seperate page for AA where he can see the sent emails by fa of different sections | letter to parent cc to FA | and as soon as im done with my part i will assist you guys - but you are self capable, now i have started trusting u guys.
+    YASH will be working on email should be sent to FA, student, parent | seperate page for AA where he can see the sent emails by fa of different sections |  
+    letter to parent cc to FA | and as soon as im done with my part i will assist you guys - but you are self capable, now i have started trusting u guys.
