@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import HamsterLoader from "./HamsterLoader";
 
-export default function StudentsTable({SectionofFA}) {
+
+
+export default function StudentsTable({SectionofFA, nameOfFA}) {
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState(new Set());
   const [loading, setLoading] = useState(true);
@@ -19,6 +21,11 @@ export default function StudentsTable({SectionofFA}) {
   const [pdfImages, setPdfImages] = useState([]);
   const [uploadingPdf, setUploadingPdf] = useState(false);
   const [pdfProcessingStatus, setPdfProcessingStatus] = useState("");
+  const [sendingAALog, setSendingAALog] = useState(false);
+  const [aaLogSent, setAALogSent] = useState(false);
+
+
+
 
 
 
@@ -34,7 +41,11 @@ export default function StudentsTable({SectionofFA}) {
     }
   };
 
+
+
   
+
+
 
   useEffect(() => {
     async function fetchStudents() {
@@ -65,6 +76,8 @@ export default function StudentsTable({SectionofFA}) {
     fetchStudents();
   }, []);
 
+
+
   const displayedStudents = students.filter((s) => {
   const matchLow = filterLowAttendance ? s.lowSubjects.length > 0 : true;
   
@@ -86,6 +99,8 @@ export default function StudentsTable({SectionofFA}) {
 
 
 
+
+
   const toggle = (id) => {
     setSelected((prev) => {
       const next = new Set(prev);
@@ -94,8 +109,50 @@ export default function StudentsTable({SectionofFA}) {
     });
   };
 
+
+const sendLogToAA = async () => {
+
+  console.log("🔵 sendLogToAA called");
+  console.log("📝 nameOfFA:", nameOfFA);
+  console.log("📝 SectionofFA:", SectionofFA);
+
+  
+  try {
+    // Get selected students' names
+    const selectedStudents = students
+      .filter(s => selected.has(s.id))
+      .map(s => s.name);
+    
+    // Create document name
+    const docName = `${nameOfFA}___${SectionofFA}`;
+    
+    // Prepare log data
+    const logData = {
+      log: {
+        students: selectedStudents,
+        timestamp: new Date().toISOString()
+      }
+    };
+    
+    // Save to Firebase
+    await setDoc(doc(db, "EmailLogForAA", docName), logData);
+    
+    setAALogSent(true);
+    
+    // Hide success message after 3 seconds
+    setTimeout(() => setAALogSent(false), 3000);
+    
+  } catch (error) {
+    console.error("Error sending log to AA:", error);
+    // Don't show alert here, just log the error
+  }
+};
+
+
   const sendEmails = async () => {
   if (!selected.size) return alert("Select students first");
+
+
 
   try {
     // ✅ Build imageMap from `pdfImages`
@@ -105,11 +162,17 @@ export default function StudentsTable({SectionofFA}) {
       imageMap[normalizedKey] = imagePath;
     });
 
+
+
     const studentIds = [...selected];
     const type = "attendance"; // or "marks" — change this based on your logic
 
+
+
     setSendingEmails(true);
     console.log("🚀 Sending imageMap with keys:", Object.keys(imageMap));
+
+
 
     const response = await fetch("/api/send-emails", {
       method: "POST",
@@ -121,8 +184,15 @@ export default function StudentsTable({SectionofFA}) {
       }),
     });
 
+
+
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Failed to send emails");
+
+    // Send log to AA after emails are sent successfully
+    await sendLogToAA();
+
+
 
     const now = new Date();
     const timeString = now.toLocaleString();
@@ -145,6 +215,8 @@ export default function StudentsTable({SectionofFA}) {
     setSendingEmails(false);
   }
 };
+
+
 
 
   const downloadEmailLog = () => {
@@ -170,6 +242,8 @@ export default function StudentsTable({SectionofFA}) {
     doc.save("attendance-email-log.pdf");
   };
 
+
+
   const handlePdfUpload = async () => {
   if (!pdfFile) return alert("Please select a PDF first.");
   try {
@@ -179,6 +253,8 @@ export default function StudentsTable({SectionofFA}) {
     const formData = new FormData();
     formData.append("file", pdfFile);
 
+
+
     setPdfProcessingStatus("Processing PDF with smart page selection...");
     
     const res = await fetch("https://pdf-to-images-fastapi-backend.onrender.com/split-pdf", {
@@ -186,9 +262,13 @@ export default function StudentsTable({SectionofFA}) {
       body: formData,
     });
 
+
+
     if (!res.ok) {
       throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     }
+
+
 
     const data = await res.json();
     
@@ -214,14 +294,18 @@ export default function StudentsTable({SectionofFA}) {
 
 
 
+
+
   if (loading) return <div className="p-8 flex justify-center"><HamsterLoader/></div>;
+
+
 
   return (
     
      <div className="relative">
     {/* PDF Upload Section */}
     <div className="mb-4 p-4 border rounded bg-gray-50">
-      <h3 className="font-semibold mb-2">Upload Letter To Parent</h3>
+      <h3 className="font-semibold mb-2">Upload Letter To Parent </h3>
       <div className="flex gap-2 items-center">
         <input
           type="file"
@@ -255,6 +339,8 @@ export default function StudentsTable({SectionofFA}) {
       )}
     </div>
 
+
+
     {/* PDF Upload Loading Modal */}
     {uploadingPdf && (
       <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
@@ -266,6 +352,16 @@ export default function StudentsTable({SectionofFA}) {
         </div>
       </div>
     )}
+
+
+    {/* AA Log Success Message */}
+    {aaLogSent && (
+      <div className="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50">
+        ✅ Log sent to AA successfully!
+      </div>
+    )}
+
+
 
 
 
@@ -280,8 +376,12 @@ export default function StudentsTable({SectionofFA}) {
         </div>
       )}
 
+
+
       <div className="p-6 bg-white rounded shadow">
         <h2 className="text-xl font-bold mb-4">Students</h2>
+
+
 
         <div className="flex flex-wrap gap-4 mb-4">
           <button
@@ -293,6 +393,8 @@ export default function StudentsTable({SectionofFA}) {
               ? "Show All Students"
               : "Filter Low Attendance (<75%)"}
           </button>
+
+
 
           <button
             onClick={() => {
@@ -309,6 +411,8 @@ export default function StudentsTable({SectionofFA}) {
               ? "Deselect All"
               : "Select All"}
           </button>
+
+
 
           <input
             type="text"
@@ -327,6 +431,8 @@ export default function StudentsTable({SectionofFA}) {
   className="border p-2 rounded w-64"
   disabled={sendingEmails}
 />
+
+
 
         </div>
         {!sectionFilter ? (

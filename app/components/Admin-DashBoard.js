@@ -17,7 +17,7 @@ import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
 import AdminAchievementDashboard from "./AdminAchievementDashboard";
 
 
-export default function AdminDashBoard({ secRole, SectionofFA }) {
+export default function AdminDashBoard({ secRole, SectionofFA, nameOfFA }) {
   const [selectedComponent, setSelectedComponent] = useState(null);
   const [searchResult, setSearchResult] = useState(null);
   const [searchError, setSearchError] = useState("");
@@ -51,27 +51,40 @@ export default function AdminDashBoard({ secRole, SectionofFA }) {
   };
 
   const handleCardClick = (type) => {
-    setSelectedComponent(type);
-    setSearchResult(null);
-  };
+  // Special handling for AA role clicking Email System
+  if (type === "emailSystem" && secRole === "AA") {
+    router.push('/AAlogsForFAs');
+    return;
+  }
+  
+  setSelectedComponent(type);
+  setSearchResult(null);
+};
+
 
   const renderComponent = () => {
-    if (searchResult) return <SearchComponent studentData={searchResult} />;
+  if (searchResult) return <SearchComponent studentData={searchResult} />;
 
-    switch (selectedComponent) {
-      case "uploadAttendance":
-        return <UploadSystem />;
-      case "emailSystem":
-        return <EmailSystem secRole={secRole} SectionofFA={SectionofFA}/>;
-      case "Achievements":
-        // return <AchievementsTable/>
-        return <AdminAchievementDashboard secRole={secRole} SectionofFA={SectionofFA}/>
-      case "TeacherVerificationTable" :
-        return <TeacherVerificationTable/>
-      default:
+  switch (selectedComponent) {
+    case "uploadAttendance":
+      return <UploadSystem />;
+    case "emailSystem":
+      // Double check: if somehow AA reaches here, redirect
+      if (secRole === "AA") {
+        router.push('/AAlogsForFAs');
         return null;
-    }
-  };
+      }
+      return <EmailSystem secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA}/>;
+      
+    case "Achievements":
+      return <AdminAchievementDashboard secRole={secRole} SectionofFA={SectionofFA} />
+    case "TeacherVerificationTable":
+      return <TeacherVerificationTable/>
+    default:
+      return null;
+  }
+};
+
 
   return (
     <>
@@ -113,7 +126,7 @@ export default function AdminDashBoard({ secRole, SectionofFA }) {
       
 
       <p className="text-lg text-[#0c4da2] font-bold mb-2 lg:text-3xl">
-        Welcome {secRole},
+        Welcome {nameOfFA},
       </p>
       <p className="text-sm text-gray-700 mb-6 lg:text-[20px] font-medium">
         Search for a student by registration number to view their full profile.
@@ -161,7 +174,7 @@ export default function AdminDashBoard({ secRole, SectionofFA }) {
     <div className="absolute bottom-10 left-10 w-40 h-40 bg-[#3a5b72] rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-pulse delay-700"></div>
   </div>
   
-  <DashCards secRole={secRole} SectionofFA={SectionofFA} onCardClick={handleCardClick} />
+  <DashCards secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA} onCardClick={handleCardClick} />
 </div>
 
 {/* Main Content Area */}

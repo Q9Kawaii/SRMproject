@@ -3,17 +3,18 @@ pop up nitification for students
 PWA ( progressive web app )
 
 
-escalation to aa - anurag
 remarks for rejection of achievements - anurag
+escalation to aa - anurag
 FA and AA remarks for low attendance - anurag
 AA remarks should be visible to FA - anurag
 [ Verified and Farward ], [ verified and accepted ] buttons in - upload attendance page - anurag
-proof link in achievements - anurag 
+proof link in achievements - anurag
+
 proof link in placement - mahik and skanda
 
 email should be sent to FA, student, parent - yash
-seperate page for AA where he can see the sent emails by fa of different sections - to trach FA - yash
 letter to parent cc to FA - yash
+seperate page for AA where he can see the sent emails by fa of different sections - to trach FA - yash ✅
 
 research over AWS - all of us (mahik texted to see in to it so he will carry on with it )
 

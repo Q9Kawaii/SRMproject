@@ -2,7 +2,7 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 
-export default function DashCards({ onCardClick, secRole, SectionofFA }) {
+export default function DashCards({ onCardClick, secRole, SectionofFA, nameOfFA }) {
   const router = useRouter();
 
   const goToAdminAttendance = () => {
@@ -10,7 +10,6 @@ export default function DashCards({ onCardClick, secRole, SectionofFA }) {
       alert("No secRole assigned. Contact admin.");
       return;
     }
-    console.log({ secRole, SectionofFA });
 
     router.push(`/admin-attendance?role=${secRole}&section=${SectionofFA}`)
   };
