@@ -26,7 +26,9 @@ if it does tell me and i will see to it - it could be my mistake.
 
 
 *remarks
-what you guys have to do is, first anurag - update the existing files, there were some changes i made in ur files, so its better to copy the whole repo and then run it in ur local machine - this is for all 3 of u - clone the repo or fork it. Then do the changes to ur respective files now you guys have to keep track of what files u are changing. After the update u can send me the whole file which i can replace in my app. 
+what you guys have to do is, first anurag - update the existing files, there were some changes i made in ur files, so its better to copy the whole repo and  
+then run it in ur local machine - this is for all 3 of u - clone the repo or fork it. Then do the changes to ur respective files now you guys have to keep  
+track of what files u are changing. After the update u can send me the whole file which i can replace in my app.
 
     ANURAG will be working on - escalation to aa | remarks for rejection of achievements | FA and AA remarks for low attendance | AA remarks should be  
     visible to FA | [ Verified and Farward ], [ verified and accepted ] buttons in - upload attendance page | proof link in achievements. All the changes  
