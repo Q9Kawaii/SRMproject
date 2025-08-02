@@ -1,6 +1,5 @@
 import React from "react";
-
-const advisors = [
+const HOD = [
   {
     name: "Dr. Revathi Venkataraman",
     role: "Chairperson",
@@ -19,6 +18,8 @@ const advisors = [
     image: "/team/DrNiranjanaG.png",
     links: { visit: "https://www.srmist.edu.in/faculty/dr-g-niranjana/" },
   },
+]
+const advisors = [
   {
     name: "Dr. Baranidharan B",
     role: "Professor",
