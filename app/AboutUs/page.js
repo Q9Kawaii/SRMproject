@@ -128,7 +128,7 @@ const Section = ({ title, members }) => {
   const isAdvisors = title === "Advisors";
 
   return (
-    <div className="mb-24 px-4">
+    <d iv className="mb-24 px-4">
       {/* Enhanced Section Header */}
       <div className="text-center mb-16">
         <div className="relative inline-block">
@@ -288,7 +288,7 @@ const Section = ({ title, members }) => {
           );
         })}
       </div>
-    </div>
+    </d>
   );
 };
 
