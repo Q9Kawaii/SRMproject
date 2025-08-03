@@ -160,9 +160,9 @@ const Section = ({ title, members }) => {
                   />
                 </div>
                 {/* Decorative Elements */}
-                {/* <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-80 animate-pulse shadow-lg"></div>
+                <div className="absolute -top-3 -right-3 w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full opacity-80 animate-pulse shadow-lg"></div>
                 <div className="absolute -bottom-3 -left-3 w-6 h-6 bg-gradient-to-br from-[#0c4da2] to-[#3a5b72] rounded-full opacity-70 animate-pulse delay-500 shadow-lg"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full opacity-60 animate-ping delay-1000"></div> */}
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full opacity-60 animate-ping delay-1000"></div>
               </div>
 
               {/* Enhanced Text Content */}
