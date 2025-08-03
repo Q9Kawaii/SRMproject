@@ -381,17 +381,25 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                     }
                 } else if (displayMode === 'pending') {
     if (selectedSearchType === 'regNo' || selectedSearchType === 'section') {
-        if (!searchIdentifier) {
-            toast.error(`Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`);
+        const effectiveIdentifier =
+            selectedSearchType === "section" && secRole === "FA"
+                ? SectionofFA
+                : searchIdentifier;
+
+        if (!effectiveIdentifier) {
+            toast.error(
+              `Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`
+            );
             setLoading(false);
             return;
         }
         url = '/api/get-pending-updates';
-        payload = { identifier: searchIdentifier, type: selectedSearchType };
+        payload = { identifier: effectiveIdentifier, type: selectedSearchType };
         const response = await apiCall(url, payload);
         if (response && response.data) {
-            // Only process if there are actual pending items
-            const studentsWithPending = Array.isArray(response.data) ? response.data : (response.data.pendingItems && response.data.pendingItems.length > 0 ? [response.data] : []);
+            const studentsWithPending = Array.isArray(response.data)
+                ? response.data
+                : (response.data.pendingItems && response.data.pendingItems.length > 0 ? [response.data] : []);
             tempResults = studentsWithPending.filter(s => s.pendingItems && s.pendingItems.length > 0);
         }
     } else if (selectedSearchType === 'batch') {
