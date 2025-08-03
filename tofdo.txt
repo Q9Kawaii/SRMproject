@@ -14,6 +14,7 @@ proof link in placement - mahik and skanda
 
 email should be sent to FA, student, parent - yash
 letter to parent cc to FA - yash
+Add buttons ui in Upload attendance [ Verified and Farward ], [ verified and accepted ] buttons - yash
 seperate page for AA where he can see the sent emails by fa of different sections - to trach FA - yash ✅
 
 research over AWS - all of us (mahik texted to see in to it so he will carry on with it )

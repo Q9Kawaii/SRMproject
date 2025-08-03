@@ -715,7 +715,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                             </motion.div>
 
                             {/* Download Excel Button */}
-                            {(selectedSearchType === 'batch' || searchIdentifier) && searchResults.length > 0 && (
+                            {(selectedSearchType === 'batch' || selectedSearchType === 'section' || searchIdentifier) && searchResults.length > 0 && (
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleDownloadExcel}
