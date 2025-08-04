@@ -3,16 +3,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import FormatAForm from './components/FormatAForm';
-import FormatBForm from './components/FormatBForm';
-import TeacherVerificationTable from './components/TeacherVerificationTable'; 
-import Login from './components/Login';
-import { auth, db } from '../lib/firebase';
+import FormatAForm from '../components/FormatAForm';
+import FormatBForm from '../components/FormatBForm';
+import TeacherVerificationTable from '../components/TeacherVerificationTable'; 
+import Login from '../components/Login';
+import { auth, db } from '../../lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import ExportButtonFormA from './components/ExportButtonFormA';
-import ExportButtonFormB from './components/ExportButtonFormB';
-import ApprovedProofs from './components/ApprovedProofs';
+import ExportButtonFormA from '../components/ExportButtonFormA';
+import ExportButtonFormB from '../components/ExportButtonFormB';
+import ApprovedProofs from '../components/ApprovedProofs';
 
 
 export default function HomePage() {
