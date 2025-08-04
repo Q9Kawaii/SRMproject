@@ -1,8 +1,10 @@
+// P_Matrix/app/components/TeacherVerificationTable.js
 "use client";
 
 import React, { useEffect, useState } from 'react';
 import { db } from '../../lib/firebase';
 import {
+    deleteField,
     collection,
     query,
     where,
@@ -20,17 +22,45 @@ const TeacherVerificationTable = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    
     const formatDisplayValue = (value) => {
-        if (value instanceof Timestamp) {
-            return value.toDate().toLocaleString();
-        }
-        
-        if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
-            return 'N/A';
-        }
-        
-        return String(value);
+    if (value instanceof Timestamp) {
+        return value.toDate().toLocaleString();
+    }
+
+    if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
+        return 'N/A';
+    }
+
+    // If value is an object (but not an array), show as a styled list
+    if (typeof value === 'object' && !Array.isArray(value)) {
+        return (
+            <ul style={{ marginLeft: '1em', paddingLeft: '0.5em' }}>
+                {Object.entries(value).map(([key, val]) => (
+                    <li key={key}>
+                        <strong>{key}:</strong>{' '}
+                        {typeof val === 'string' && val.startsWith('http') ? (
+                            <a href={val} target="_blank" rel="noopener noreferrer" style={{ color: '#2980b9' }}>
+                                View Link
+                            </a>
+                        ) : (
+                            <span>{String(val)}</span>
+                        )}
+                    </li>
+                ))}
+            </ul>
+        );
+    }
+
+    // For arrays, return them as a joined list
+    if (Array.isArray(value)) {
+        return value.length ? value.join(', ') : 'N/A';
+    }
+
+    return String(value);
     };
+
+
 
     const fetchPendingUpdates = async () => {
         setLoading(true);
@@ -57,56 +87,60 @@ const TeacherVerificationTable = () => {
     }, []);
 
     const handleApprove = async (pendingUpdateId, regNo, formType, updates, original) => {
-        setLoading(true);
-        const batch = writeBatch(db);
+    setLoading(true);
+    const batch = writeBatch(db);
 
-        try {
-            const formDocRef = doc(db, "User", regNo, formType, regNo);
-            batch.set(formDocRef, { ...updates, timestamp: serverTimestamp() }, { merge: true });
+    try {
+        // 1. Update the form under /User/{regNo}/{formType}/{regNo}
+        const formDocRef = doc(db, "User", regNo, formType, regNo);
+        batch.set(formDocRef, { ...updates, timestamp: serverTimestamp() }, { merge: true });
 
-            const studentDocRef = doc(db, "User", regNo);
-            const studentUpdates = { lastApprovedSubmission: serverTimestamp() };
-            
-            batch.set(studentDocRef, updates, { merge: true });
-            
-            const newOriginal = { ...original, ...updates };
-            const pendingUpdateRef = doc(db, "PendingUpdates", pendingUpdateId);
-            batch.update(pendingUpdateRef, { 
-                status: "approved", 
-                approvedAt: serverTimestamp(),
-                original: newOriginal,
-                updates: {} // Set updates to a blank object
-            });
+        // 2. Update the main /User/{regNo} doc
+        const studentDocRef = doc(db, "User", regNo);
+        batch.set(studentDocRef, { ...updates, lastApprovedSubmission: serverTimestamp() }, { merge: true });
 
-            await batch.commit();
-            alert(`Approved ${formType} update for ${regNo}.`);
-            fetchPendingUpdates();
-        } catch (error) {
-            console.error("Error approving update:", error);
-            alert("Failed to approve update. Please check console.");
-        } finally {
-            setLoading(false);
-        }
-    };
+        // 3. Update PendingUpdates:
+        const pendingUpdateRef = doc(db, "PendingUpdates", pendingUpdateId);
+
+        batch.update(pendingUpdateRef, {
+            status: "approved",
+            approvedAt: serverTimestamp(),
+            original: { ...original, ...updates }, // Replace old original
+            updates: deleteField(), // 🔥 Actually remove updates field
+        });
+
+        await batch.commit();
+        alert(`Approved ${formType} update for ${regNo}.`);
+        fetchPendingUpdates();
+    } catch (error) {
+        console.error("Error approving update:", error);
+        alert("Failed to approve update. Please check console.");
+    } finally {
+        setLoading(false);
+    }
+};
+
+
 
     const handleDecline = async (pendingUpdateId, regNo, formType) => {
-        setLoading(true);
-        try {
-            const pendingUpdateRef = doc(db, "PendingUpdates", pendingUpdateId);
-            await updateDoc(pendingUpdateRef, {
-                status: "declined",
-                declinedAt: serverTimestamp(),
-                updates: {} 
-            });
-            alert(`Declined ${formType} update for ${regNo}.`);
-            fetchPendingUpdates();
-        } catch (error) {
-            console.error("Error declining update:", error);
-            alert("Failed to decline update. Please check console.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    setLoading(true);
+    try {
+        const pendingUpdateRef = doc(db, "PendingUpdates", pendingUpdateId);
+        await updateDoc(pendingUpdateRef, {
+            status: "declined",
+            declinedAt: serverTimestamp(),
+            updates: deleteField(), // 🔥 Actually remove updates field on decline
+        });
+        alert(`Declined ${formType} update for ${regNo}.`);
+        fetchPendingUpdates();
+    } catch (error) {
+        console.error("Error declining update:", error);
+        alert("Failed to decline update. Please check console.");
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     if (loading) {
         return <div style={styles.loading}>Loading pending updates...</div>;
@@ -130,7 +164,10 @@ const TeacherVerificationTable = () => {
                         <div key={update.id} style={styles.card}>
                             <h3 style={styles.cardTitle}>{update.formType} Update for {update.regNo}</h3>
                             <p style={styles.cardInfo}>
-                                Submitted: {formatDisplayValue(update.timestamp)}
+                                Submitted: {
+                                    
+                                    formatDisplayValue(update.timestamp)
+                                }
                             </p>
 
                             <div style={styles.changesSection}>
@@ -139,16 +176,16 @@ const TeacherVerificationTable = () => {
                                     <p>No specific field changes recorded (might be initial submission or minor change).</p>
                                 ) : (
                                     <ul style={styles.changeList}>
-                                        {Object.keys(update.updates).map((key) => (
-                                            <li key={key} style={styles.changeItem}>
-                                                <span style={styles.fieldName}>{key}:</span>
-                                                {/* Fixed: Replaced unescaped quotes with &quot; */}
-                                                <span style={styles.oldValue}>&quot;{formatDisplayValue(update.original[key])}&quot;</span>
-                                                <span style={styles.arrow}>→</span>
-                                                <span style={styles.newValue}>&quot;{formatDisplayValue(update.updates[key])}&quot;</span>
-                                            </li>
-                                        ))}
+                                    {Object.keys(update.updates).map((key) => (
+                                        <li key={key} style={styles.changeItem}>
+                                        <span style={styles.fieldName}>{key}:</span>
+                                        <span style={styles.oldValue}>{formatDisplayValue(update.original[key])}</span>
+                                        <span style={styles.arrow}>→</span>
+                                        <span style={styles.newValue}>{formatDisplayValue(update.updates[key])}</span>
+                                        </li>
+                                    ))}
                                     </ul>
+
                                 )}
                             </div>
 

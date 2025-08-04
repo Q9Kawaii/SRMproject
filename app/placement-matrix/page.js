@@ -1,201 +1,287 @@
+// P_Matrix/app/page.js
+
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import FormatAForm from '../components/FormatAForm';
-import FormatBForm from '../components/FormatBForm';
-import TeacherVerificationTable from '../components/TeacherVerificationTable-2'; 
-import { auth, db } from '../../lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
-import ExportButtonFormA from '../components/ExportButtonFormA';
-import ExportButtonFormB from '../components/ExportButtonFormB';
+import FormatAForm from './components/FormatAForm';
+import FormatBForm from './components/FormatBForm';
+import TeacherVerificationTable from './components/TeacherVerificationTable'; 
+import Login from './components/Login';
+import { auth, db } from '../lib/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import ExportButtonFormA from './components/ExportButtonFormA';
+import ExportButtonFormB from './components/ExportButtonFormB';
+import ApprovedProofs from './components/ApprovedProofs';
+
 
 export default function HomePage() {
   const [selectedFormat, setSelectedFormat] = useState(null);
+  const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [prefilledRegNum, setPrefilledRegNum] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      try {
-        if (currentUser) {
-          const userDocRef = doc(db, "UsersLogin", currentUser.uid);
-          const userDocSnap = await getDoc(userDocRef);
+      setUser(currentUser);
+      if (currentUser) {
+        console.log("Logged in user:", currentUser);
+        console.log("User Display Name:", currentUser.displayName);
+        console.log("User Email:", currentUser.email);
 
-          if (userDocSnap.exists()) {
-            const userData = userDocSnap.data();
-            setUserRole(userData.role);
-            if (
-              userData.role === 'student' &&
-              currentUser.email?.endsWith('@srmist.edu.in')
-            ) {
-              const displayName = currentUser.displayName;
-              const regNumMatch = displayName
-                ? displayName.match(/\((RA\d{13})\)/)
-                : null;
-              if (regNumMatch && regNumMatch[1]) {
-                setPrefilledRegNum(regNumMatch[1].toUpperCase());
-              }
+        const userDocRef = doc(db, "UsersLogin", currentUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          setUserRole(userData.role);
+
+          if (userData.role === 'student' && currentUser.email.endsWith('@srmist.edu.in')) {
+            const displayName = currentUser.displayName;
+            let extractedReg = '';
+
+            
+            const regNumDisplayNameMatch = displayName ? displayName.match(/\((RA\d{13})\)/) : null;
+            
+            if (regNumDisplayNameMatch && regNumDisplayNameMatch[1]) {
+              extractedReg = regNumDisplayNameMatch[1].toUpperCase(); 
+              console.log(`Successfully Extracted Registration Number: ${extractedReg}`);
+            } else {
+              console.warn("Could not extract a valid RA-Registration Number from display name. Check if it's in the format 'NAME (RA followed by 13 digits)'. DisplayName:", displayName);
+            }
+
+            if (extractedReg) {
+              setPrefilledRegNum(extractedReg);
             }
           }
+        } else {
+          await setDoc(userDocRef, {
+            name: currentUser.displayName,
+            email: currentUser.email,
+            role: "student"
+          }, { merge: true });
+          setUserRole("student");
+          console.log("User added to UsersLogin collection with default 'student' role.");
         }
-      } catch (error) {
-        setError('Failed to load user data. Please refresh the page.');
-      } finally {
-        setLoading(false);
+      } else {
+        setUserRole(null);
+        setPrefilledRegNum('');
+        setSelectedFormat(null);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  const handleBackToDashboard = () => {
-    setIsSubmitting(true);
-    router.push('/');
-  };
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-  const handleFormatSelection = (format) => {
-    if (isSubmitting) return;
-    setSelectedFormat(format);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen bg-slate-50">
-        <div className="text-center bg-white p-8 rounded-xl shadow-lg">
-          <div className="w-10 h-10 border-4 border-slate-200 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-lg text-slate-600 font-medium">Loading Placement Matrix...</div>
-        </div>
-      </div>
-    );
+  if (!user) {
+    return <Login />;
   }
 
   return (
-    <div className="max-w-3xl sm:max-w-4xl md:max-w-5xl mx-auto my-5 p-6 bg-white rounded-xl shadow-lg border border-slate-200 min-h-[75vh]">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8 pb-4 border-b-2 border-slate-100">
-        <button
-          onClick={handleBackToDashboard}
-          disabled={isSubmitting}
-          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:bg-slate-50 transition-colors disabled:opacity-60"
-        >
-          <span>←</span>
-          Back
-        </button>
-        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-2 select-none">
-          <span className="text-lg md:text-2xl">📊</span>
-          Placement Matrix
-        </h1>
-        <button
-          onClick={handleRefresh}
-          className="flex items-center gap-2 px-4 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-600 font-medium hover:bg-slate-50 transition-colors"
-        >
-          <span>🔄</span>
-          Refresh
-        </button>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h1 style={styles.heading}>Placement Matrix</h1>
+        <button onClick={handleLogout} style={styles.logoutButton}>Logout</button>
       </div>
 
-      {/* Error */}
-      {error && (
-        <div className="flex items-center gap-2 bg-red-100 border border-red-300 rounded-lg p-4 mb-6">
-          <span>⚠️</span>
-          <span className="text-red-700 font-medium">{error}</span>
-        </div>
-      )}
-
-      {/* Teacher View */}
       {userRole === 'teacher' ? (
         <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg md:text-xl font-bold text-slate-700">Verification Panel</h2>
-            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs md:text-sm font-medium">Teacher</span>
-          </div>
-          <div className="bg-blue-50 p-4 rounded-lg mb-6 border-l-4 border-blue-400 flex items-start gap-2 text-sm">
-            <span className="text-lg">💡</span>
-            <span className="text-slate-600">
-              Review and verify student placement form submissions below.
-            </span>
-          </div>
           <TeacherVerificationTable />
-          <div className="mt-8 p-6 bg-slate-50 rounded-lg border border-slate-200 shadow">
-            <h3 className="text-base font-bold text-slate-700 mb-1 text-center flex items-center justify-center gap-2">
-              <span>📥</span> Export Options
-            </h3>
-            <div className="flex gap-4 justify-center mt-3 flex-wrap">
-              <ExportButtonFormA />
-              <ExportButtonFormB />
-            </div>
-          </div>
+          <ApprovedProofs />
         </>
+        
       ) : (
-        /* Student View */
         <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg md:text-xl font-bold text-slate-700">Your Placement Forms</h2>
-            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs md:text-sm font-medium">Student</span>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg mb-6 border-l-4 border-green-400 flex items-start gap-2 text-sm">
-            <span className="text-lg">📝</span>
-            <span className="text-slate-600">
-              Choose a format below to fill out your placement information.<br className="hidden sm:block" />
-              All fields are required for complete submission.
-            </span>
-          </div>
-
-          {/* Format Selection Buttons */}
-          <div className="flex justify-center mb-6 gap-4 flex-wrap">
+          <div style={styles.buttonContainer}>
             <button
-              onClick={() => handleFormatSelection('A')}
-              disabled={isSubmitting}
-              className={`
-                flex flex-col items-center min-w-[140px] md:min-w-[180px] px-5 py-3 rounded-lg border-2 transition-all font-semibold text-blue-700
-                ${selectedFormat === 'A'
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg -translate-y-1'
-                  : 'bg-blue-50 border-blue-400 hover:bg-blue-100'}
-                ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-              `}
+              onClick={() => setSelectedFormat('A')}
+              style={{ ...styles.button, ...(selectedFormat === 'A' && styles.activeButton) }}
             >
               Format A
-              <div className={`mt-1 text-xs ${selectedFormat === 'A' ? 'text-white' : 'text-blue-700/80'}`}>
-                Academic & Technical Focus
-              </div>
             </button>
             <button
-              onClick={() => handleFormatSelection('B')}
-              disabled={isSubmitting}
-              className={`
-                flex flex-col items-center min-w-[140px] md:min-w-[180px] px-5 py-3 rounded-lg border-2 transition-all font-semibold text-blue-700
-                ${selectedFormat === 'B'
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg -translate-y-1'
-                  : 'bg-blue-50 border-blue-400 hover:bg-blue-100'}
-                ${isSubmitting ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-              `}
+              onClick={() => setSelectedFormat('B')}
+              style={{ ...styles.button, ...(selectedFormat === 'B' && styles.activeButton) }}
             >
               Format B
-              <div className={`mt-1 text-xs ${selectedFormat === 'B' ? 'text-white' : 'text-blue-700/80'}`}>
-                Comprehensive Portfolio
-              </div>
             </button>
           </div>
 
-          {/* Selected Form */}
-          <div className={selectedFormat ? "mt-2 p-4 bg-slate-50 rounded-lg border border-slate-200" : ""}>
-            {selectedFormat === 'A' && (
-              <FormatAForm prefilledRegistrationNumber={prefilledRegNum} />
-            )}
-            {selectedFormat === 'B' && (
-              <FormatBForm prefilledRegistrationNumber={prefilledRegNum} />
-            )}
-          </div>
+          {selectedFormat === 'A' && <FormatAForm prefilledRegistrationNumber={prefilledRegNum} />}
+          {selectedFormat === 'B' && <FormatBForm prefilledRegistrationNumber={prefilledRegNum} />}
         </>
       )}
+
+      <ExportButtonFormA/>
+      <ExportButtonFormB/>
     </div>
   );
 }
+
+
+const styles = {
+  container: {
+    maxWidth: '900px',
+    margin: '40px auto',
+    padding: '25px',
+    border: '1px solid #e0e0e0',
+    borderRadius: '10px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+    backgroundColor: '#ffffff',
+    fontFamily: 'Arial, sans-serif',
+    lineHeight: '1.6',
+    color: '#333',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '35px',
+  },
+  heading: {
+    textAlign: 'center',
+    color: '#1a202c',
+    fontSize: '2.5em',
+    flexGrow: 1,
+  },
+  logoutButton: {
+    padding: '8px 15px',
+    fontSize: '1em',
+    borderRadius: '5px',
+    border: '1px solid #dc3545',
+    backgroundColor: '#dc3545',
+    color: 'white',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease',
+  },
+  subHeading: {
+    color: '#4a5568',
+    borderBottom: '1px solid #ebf4ff',
+    paddingBottom: '12px',
+    marginBottom: '25px',
+    fontSize: '1.8em',
+  },
+  buttonContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: '40px',
+    gap: '20px',
+  },
+  button: {
+    padding: '14px 30px',
+    fontSize: '18px',
+    borderRadius: '8px',
+    border: '2px solid #3b82f6',
+    backgroundColor: '#eff6ff',
+    color: '#1d4ed8',
+    cursor: 'pointer',
+    transition: 'background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease',
+    fontWeight: '600',
+  },
+  buttonHover: {
+    backgroundColor: '#2563eb',
+    color: '#ffffff',
+    borderColor: '#2563eb',
+  },
+  activeButton: {
+    backgroundColor: '#3b82f6',
+    color: '#ffffff',
+    borderColor: '#3b82f6',
+  },
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '30px',
+  },
+  inputGroup: {
+    border: '1px solid #cbd5e0',
+    borderRadius: '8px',
+    padding: '25px',
+    backgroundColor: '#f8fafc',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+  },
+  label: {
+    display: 'block',
+    marginBottom: '8px',
+    fontWeight: 'bold',
+    color: '#2d3748',
+    fontSize: '0.95em',
+  },
+  input: {
+    width: '100%',
+    padding: '12px',
+    marginTop: '6px',
+    marginBottom: '18px',
+    border: '1px solid #a0aec0',
+    borderRadius: '6px',
+    boxSizing: 'border-box',
+    fontSize: '1.05em',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  },
+  inputFocus: {
+    borderColor: '#3b82f6',
+    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.25)',
+    outline: 'none',
+  },
+  textarea: {
+    width: '100%',
+    padding: '12px',
+    marginTop: '6px',
+    marginBottom: '18px',
+    border: '1px solid #a0aec0',
+    borderRadius: '6px',
+    boxSizing: 'border-box',
+    fontSize: '1.05em',
+    resize: 'vertical',
+    minHeight: '60px',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  },
+  textareaFocus: {
+    borderColor: '#3b82f6',
+    boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.25)',
+    outline: 'none',
+  },
+  radioGroup: {
+    display: 'flex',
+    gap: '20px',
+    marginTop: '8px',
+    marginBottom: '18px',
+  },
+  submitButton: {
+    padding: '15px 35px',
+    fontSize: '20px',
+    borderRadius: '8px',
+    border: 'none',
+    backgroundColor: '#10b981',
+    color: 'white',
+    cursor: 'pointer',
+    marginTop: '30px',
+    alignSelf: 'center',
+    width: 'fit-content',
+    transition: 'background-color 0.3s ease, transform 0.2s ease',
+    fontWeight: '700',
+  },
+  submitButtonHover: {
+    backgroundColor: '#059669',
+    transform: 'translateY(-1px)',
+  },
+  comingSoon: {
+    textAlign: 'center',
+    padding: '60px',
+    border: '2px dashed #93c5fd',
+    borderRadius: '10px',
+    marginTop: '30px',
+    backgroundColor: '#e0f2fe',
+    color: '#1e40af',
+    fontSize: '1.2em',
+  }
+};
