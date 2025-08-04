@@ -1,12 +1,12 @@
+// pages/api/approve-pending-update/route.js
 import { NextResponse } from "next/server";
 import { approvePendingUpdate } from '@/app/components/achievementFns';
 
-
 export async function POST(req) {
   try {
-    
     console.log("[API] /api/approve-pending-update HIT");
-    const { regNo } = await req.json();
+    // Destructure remarks from the request body as well
+    const { regNo, remarks } = await req.json(); 
 
     if (!regNo) {
       return NextResponse.json({
@@ -15,7 +15,8 @@ export async function POST(req) {
       });
     }
 
-    const response = await approvePendingUpdate(regNo);
+    // Pass the remarks to the backend function
+    const response = await approvePendingUpdate(regNo, remarks); 
     return NextResponse.json(response);
   } catch (err) {
     console.error("API error in approve-pending-update:", err);

@@ -180,6 +180,7 @@
         const [searchResults, setSearchResults] = useState([]); // Stores fetched student data
         const [selectedCategory, setSelectedCategory] = useState(Object.keys(CATEGORIES_CONFIG)[0]); // Active category for approved view
         const [loading, setLoading] = useState(false);
+        const [remarkInput, setRemarkInput] = useState(''); // State for the remarks textbox
         const [error, setError] = useState(null);
         const [selectedStudentForPendingView, setSelectedStudentForPendingView] = useState(null); // Full student object for pending detail
 
@@ -381,17 +382,25 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                     }
                 } else if (displayMode === 'pending') {
     if (selectedSearchType === 'regNo' || selectedSearchType === 'section') {
-        if (!searchIdentifier) {
-            toast.error(`Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`);
+        const effectiveIdentifier =
+            selectedSearchType === "section" && secRole === "FA"
+                ? SectionofFA
+                : searchIdentifier;
+
+        if (!effectiveIdentifier) {
+            toast.error(
+              `Please enter a ${selectedSearchType === 'regNo' ? 'Registration Number' : 'Section'}.`
+            );
             setLoading(false);
             return;
         }
         url = '/api/get-pending-updates';
-        payload = { identifier: searchIdentifier, type: selectedSearchType };
+        payload = { identifier: effectiveIdentifier, type: selectedSearchType };
         const response = await apiCall(url, payload);
         if (response && response.data) {
-            // Only process if there are actual pending items
-            const studentsWithPending = Array.isArray(response.data) ? response.data : (response.data.pendingItems && response.data.pendingItems.length > 0 ? [response.data] : []);
+            const studentsWithPending = Array.isArray(response.data)
+                ? response.data
+                : (response.data.pendingItems && response.data.pendingItems.length > 0 ? [response.data] : []);
             tempResults = studentsWithPending.filter(s => s.pendingItems && s.pendingItems.length > 0);
         }
     } else if (selectedSearchType === 'batch') {
@@ -444,6 +453,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
             setDisplayMode(mode);
             setSelectedStudentForPendingView(null);
             setSearchResults([]); // Clear results immediately on mode change
+            setRemarkInput(''); // Clear remark input on mode change
             // We will now rely on the `handleSearch` or direct calls to `fetchData`
             // based on user interaction, rather than useEffect automatically re-fetching.
             // If you want it to fetch immediately on mode change AND if search criteria is already valid:
@@ -455,11 +465,13 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
         const handleStudentCardClick = useCallback((student) => {
             setSelectedStudentForPendingView(student);
             setDisplayMode('pending_detail');
+            setRemarkInput(''); // Clear remark input when selecting a new student
         }, []);
 
         const handleBackToPendingList = useCallback(() => {
             setSelectedStudentForPendingView(null);
             setDisplayMode('pending');
+            setRemarkInput(''); // Clear remark input when going back
             // Re-fetch pending list after going back
             fetchData();
         }, [fetchData]);
@@ -467,68 +479,30 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
         const handleApproveReject = useCallback(async (actionType) => {
             if (!selectedStudentForPendingView) return;
 
-            // Note: The payload for approve/reject typically needs to specify which
-            // pending item is being approved/rejected, not just the regNo.
-            // Your backend API might need adjustment here if it expects individual item IDs.
-            // For now, assuming it approves/rejects ALL pending items for the regNo.
-            console.log("[api] called")
+            // REMARK: Remarks are now optional, so no validation check here.
+            // We will still send the remarkInput, even if it's an empty string.
+
+            console.log(`[API] Attempting to ${actionType} pending update for regNo: ${selectedStudentForPendingView.regNo}`);
             const url = actionType === 'approve' ? '/api/approve-pending-update' : '/api/reject-pending-update';
-            const payload = { regNo: selectedStudentForPendingView.regNo };
-
-            // If you need to approve/reject specific pending items:
-            // const payload = {
-            //     regNo: selectedStudentForPendingView.regNo,
-            //     pendingItemId: selectedPendingItemId // You'd need to pass this from the UI
-            // };
-
+            const payload = {
+                regNo: selectedStudentForPendingView.regNo,
+                remarks: remarkInput // REMARK: Added remarks to the payload, it can be empty string
+            };
             const response = await apiCall(url, payload);
             if (response && response.success) {
                 toast.success(`Student's pending achievements ${actionType === 'approve' ? 'approved' : 'rejected'} successfully!`);
+                setRemarkInput(''); // Clear the textbox after successful action
                 handleBackToPendingList(); // This will re-fetch the list
             }
-        }, [selectedStudentForPendingView, apiCall, handleBackToPendingList]);
-
+        }, [selectedStudentForPendingView, remarkInput, apiCall, handleBackToPendingList]); // REMARK: Added remarkInput to dependencies
         const handleDownloadExcel = useCallback(() => {
             exportAchievementsToExcel(); // Call the internal function
         }, [exportAchievementsToExcel]); // Now depends on the internal function itself
-
-
-        // THE CRITICAL CHANGE: Remove fetchData from the dependency array
-        // fetchData is already a useCallback and only re-creates if its own dependencies change.
-        // Calling it within useEffect with fetchData as a dependency creates a loop.
-    //     useEffect(() => {
-    //     // This useEffect should only run once on component mount for initial setup,
-    //     // or when core search parameters change, *if* an automatic fetch is desired.
-    //     // For explicitly triggered searches (via button), the handleSearch and
-    //     // handleDisplayModeChange callbacks already call fetchData().
-
-    //     // If you want an *initial* fetch when the component loads
-    //     // and a valid search state already exists (e.g., default to batch or pre-filled regNo)
-    //     if (selectedSearchType === 'batch' || (selectedSearchType !== 'batch' && searchIdentifier)) {
-    //         // Only fetch if it's 'batch' or if a valid identifier is present for regNo/section
-    //         fetchData();
-    //     } else {
-    //         setSearchResults([]); // Clear results if initial criteria are invalid
-    //     }
-    // }, [selectedSearchType, searchIdentifier, displayMode, fetchData]);
 
         // This useEffect is fine, it just clears error messages when searchIdentifier or displayMode changes
         useEffect(() => {
             setError(null);
         }, [searchIdentifier, displayMode]);
-
-//         useEffect(() => {
-//   if (
-//     selectedSearchType &&
-//     (selectedSearchType === 'batch' || searchIdentifier.trim() !== '')
-//   ) {
-//     const delayDebounce = setTimeout(() => {
-//       fetchData();
-//     }, 500); // wait 500ms after user stops typing
-
-//     return () => clearTimeout(delayDebounce); // cancel if user keeps typing
-//   }
-// }, [searchIdentifier, selectedSearchType, displayMode, fetchData]);
 
         return (
             <div className="min-h-screen p-6 bg-gray-50 font-sans antialiased">
@@ -715,7 +689,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                             </motion.div>
 
                             {/* Download Excel Button */}
-                            {(selectedSearchType === 'batch' || selectedSearchType === 'section' || searchIdentifier) && searchResults.length > 0 && (
+                            {(selectedSearchType === 'batch' || searchIdentifier) && searchResults.length > 0 && (
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleDownloadExcel}
@@ -843,24 +817,48 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                                     );
                                                 })}
                                             </div>
-                                            <div className="flex justify-end gap-3 mt-4">
-                                                <motion.button
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => handleApproveReject('approve')} // Assuming single approval/rejection for all pending for now
-                                                    className="px-5 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center gap-2"
-                                                    disabled={loading}
-                                                >
-                                                    <Check className="h-5 w-5" /> Approve All Pending
-                                                </motion.button>
-                                                <motion.button
-                                                    whileTap={{ scale: 0.95 }}
-                                                    onClick={() => handleApproveReject('reject')} // Assuming single approval/rejection for all pending for now
-                                                    className="px-5 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center gap-2"
-                                                    disabled={loading}
-                                                >
-                                                    <X className="h-5 w-5" /> Reject All Pending
-                                                </motion.button>
-                                            </div>
+                                            
+                                            {/* Remarks Textarea and Action Buttons Section - Moved outside the map for clarity and single input */}
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ duration: 0.3, delay: selectedStudentForPendingView.pendingItems.length * 0.05 + 0.1 }}
+                                        className="bg-white p-6 rounded-lg shadow-md mt-6" // Added margin-top to separate from achievement cards
+                                    >
+                                        <label htmlFor="adminRemarks" className="block text-gray-700 text-lg font-semibold mb-2">
+                                            Admin Remarks (Optional)
+                                        </label>
+                                        <textarea
+                                            id="adminRemarks"
+                                            value={remarkInput}
+                                            onChange={(e) => setRemarkInput(e.target.value)}
+                                            placeholder="Enter remarks for approval or rejection (optional)..."
+                                            rows={4}
+                                            className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-gray-800"
+                                            // Removed 'required' attribute since remarks are optional
+                                        />
+                                        <p className="text-sm text-gray-500 mt-1">These remarks will be saved for the student's reference.</p>
+
+                                        {/* Approve/Reject Buttons */}
+                                        <div className="flex justify-end gap-4 mt-6">
+                                            <motion.button
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => handleApproveReject('approve')}
+                                                className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center gap-2 text-lg font-semibold"
+                                                disabled={loading} // Only disable if loading, not based on remark presence
+                                            >
+                                                <Check className="h-6 w-6" /> Approve All
+                                            </motion.button>
+                                            <motion.button
+                                                whileTap={{ scale: 0.95 }}
+                                                onClick={() => handleApproveReject('reject')}
+                                                className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300 flex items-center gap-2 text-lg font-semibold"
+                                                disabled={loading} // Only disable if loading, not based on remark presence
+                                            >
+                                                <X className="h-6 w-6" /> Reject All
+                                            </motion.button>
+                                        </div>
+                                    </motion.div>
                                         </motion.div>
                                     ))}
                                 </div>

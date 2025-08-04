@@ -1,6 +1,7 @@
 import React from "react";
 
-const HOD = [
+
+const Patrons = [
   {
     name: "Dr. Revathi Venkataraman",
     role: "Chairperson",
@@ -15,11 +16,12 @@ const HOD = [
   },
   {
     name: "Dr. Niranjana G",
-    role: "Head Of Department",
+    role: "Head Of The Department",
     image: "/team/DrNiranjanaG.png",
     links: { visit: "https://www.srmist.edu.in/faculty/dr-g-niranjana/" },
   },
 ];
+
 
 const advisors = [
   {
@@ -48,6 +50,7 @@ const advisors = [
   },
 ];
 
+
 const mentors = [
   {
     name: "Dr. Hariharan R",
@@ -74,6 +77,7 @@ const mentors = [
     links: { visit: "https://www.srmist.edu.in/faculty/ms-umamageswari-b/" },
   },
 ];
+
 
 const team = [
   {
@@ -123,12 +127,14 @@ const team = [
   },
 ];
 
+
 const Section = ({ title, members }) => {
-  const isFaculty = ["HOD", "Advisors", "Mentors"].includes(title);
+  const isFaculty = ["Patrons", "Advisors", "Mentors"].includes(title);
   const isAdvisors = title === "Advisors";
 
+
   return (
-    <d iv className="mb-24 px-4">
+    <div className="mb-24 px-4">
       {/* Enhanced Section Header */}
       <div className="text-center mb-16">
         <div className="relative inline-block">
@@ -139,14 +145,15 @@ const Section = ({ title, members }) => {
           <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-12 h-0.5 bg-blue-300 rounded-full"></div>
         </div>
         <p className="text-gray-600 mt-6 text-lg font-light">
-          {title === "HOD" && "Leadership & Administrative Excellence"}
+          {title === "Patrons" && "Leadership & Administrative Excellence"}
           {title === "Advisors" && "Academic Guidance & Strategic Direction"}
           {title === "Mentors" && "Research Support & Faculty Mentorship"}
           {title === "Team" && "Innovation & Technical Development"}
         </p>
       </div>
 
-      <div className={`grid grid-cols-1 sm:grid-cols-2 ${isAdvisors ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-10`}>
+      {/* MODIFIED: Changed from grid to flex layout for single row */}
+      <div className="flex flex-row flex-nowrap justify-center gap-10 overflow-x-auto">
         {members.map((member, index) => {
           const cardContent = (
             <div className={`flex flex-col items-center text-center h-full ${isAdvisors ? "p-6" : "p-8"}`}>
@@ -252,7 +259,7 @@ const Section = ({ title, members }) => {
               href={member.links.visit}
               target="_blank"
               rel="noopener noreferrer"
-              className="group relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-blue-100/50 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700 transform hover:scale-105"
+              className="group relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-blue-100/50 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700 transform hover:scale-105 flex-shrink-0"
             >
               {/* Enhanced Top Border */}
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#0c4da2] via-[#1e5bb8] to-[#3a5b72] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
@@ -270,7 +277,7 @@ const Section = ({ title, members }) => {
           ) : (
             <div
               key={index}
-              className="group relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-blue-100/50 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700 transform hover:scale-105"
+              className="group relative bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl border border-blue-100/50 overflow-hidden hover:shadow-3xl hover:-translate-y-3 transition-all duration-700 transform hover:scale-105 flex-shrink-0"
             >
               {/* Enhanced Top Border */}
               <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#0c4da2] via-[#1e5bb8] to-[#3a5b72] transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500"></div>
@@ -288,9 +295,10 @@ const Section = ({ title, members }) => {
           );
         })}
       </div>
-    </d>
+    </div>
   );
 };
+
 
 export default function AboutUs() {
   return (
@@ -303,7 +311,7 @@ export default function AboutUs() {
       </div>
       
       <div className="relative z-10">
-        <Section title="HOD" members={HOD} />
+        <Section title="Patrons" members={Patrons} />
         <Section title="Advisors" members={advisors} />
         <Section title="Mentors" members={mentors} />
         <Section title="Team" members={team} />

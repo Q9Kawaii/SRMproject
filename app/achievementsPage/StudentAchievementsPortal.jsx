@@ -320,7 +320,7 @@ const StudentAchievementsPortal = ({ studentRegNo }) => {
   //... useState declarations ...
   const [studentInfo, setStudentInfo] = useState(null);
   const [achievements, setAchievements] = useState({});
-  const [pendingAchievements, setPendingAchievements] = useState(null);
+  const [pendingAchievements, setPendingAchievements] = useState({ pendingItems: [], remarks: [] });
   const [activeCategory, setActiveCategory] = useState(null);
   const [editingAchievementId, setEditingAchievementId] = useState(null);  // NEW STATE: To store the ID of the achievement being edited (null for new submission)
   const [formData, setFormData] = useState({});
@@ -459,25 +459,26 @@ const StudentAchievementsPortal = ({ studentRegNo }) => {
     });
       const result = await response.json();
       if (response.ok && result.success) {
-      // Backend returns { success: true, message: ..., data: { name, regNo, section, achievements: {...} } }
-      // We need to set the 'pendingAchievements' state to the 'achievements' property within 'data'
-      setPendingAchievements(result.data.pendingItems || []); // <--- CHANGED TO ARRAY
+      // Correctly capture both pendingItems and remarks from the backend response
+      setPendingAchievements({
+        pendingItems: result.data.pendingItems || [],
+        remarks: result.data.remarks || []
+      });
     } else {
-    // Only log if it's a true error, not just 'no pending updates'
-    if (result.message !== "No pending update found") {
+      if (result.message !== "No pending update found") {
         console.error('Error fetching pending achievements:', result.message);
         showToast(`Failed to load pending achievements: ${result.message}`, 'error');
-    } else {
+      } else {
         console.log('No pending achievements found for student (expected).');
+      }
+      setPendingAchievements({ pendingItems: [], remarks: [] }); // Ensure default empty object on error or no data
     }
-    setPendingAchievements([]); // <--- CHANGED TO EMPTY ARRAY
+  } catch (error) {
+    console.error('Network error fetching pending achievements:', error);
+    showToast('Network error fetching pending achievements. Please check your connection.', 'error');
+    setPendingAchievements({ pendingItems: [], remarks: [] }); // Ensure default empty object on network error
   }
-    } catch (error) {
-      console.error('Network error fetching pending achievements:', error);
-      showToast('Network error fetching pending achievements. Please check your connection.', 'error');
-      setPendingAchievements([]); // Ensure it's an empty object on error
-    }
-  }, [studentRegNo, showToast]);
+}, [studentRegNo, showToast]);
 
 // And ensure your useEffect calls them distinctly:
 useEffect(() => {
@@ -650,6 +651,37 @@ const handleSubmit = useCallback(async (category) => {
     }
 }, [formData, studentRegNo, showToast, CATEGORIES_CONFIG, fetchStudentPendingAchievements]); // Removed activeCategory from dependencies, as it's not directly used in the effect body
 
+
+// Function to handle dismissing all remarks
+const handleDismissRemarks = useCallback(async () => {
+    if (!studentRegNo) return; // Ensure we have a student ID
+
+    setLoading(true); // Show loading state
+    setToast(null);    // Clear any existing toast
+
+    try {
+        const response = await fetch('/api/dismiss-remark', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ regNo: studentRegNo }), // Send the student's registration number
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            showToast("All remarks dismissed!", "success"); // Success message
+            fetchStudentPendingAchievements(); // Refresh data to show remarks are gone
+        } else {
+            showToast(`Failed to dismiss remarks: ${result.message}`, "error"); // Error message
+        }
+    } catch (error) {
+        console.error("Dismiss remarks error:", error);
+        showToast("Network error dismissing remarks. Please try again.", "error"); // Network error
+    } finally {
+        setLoading(false); // End loading state
+    }
+}, [studentRegNo, showToast, fetchStudentPendingAchievements]); // Dependencies for useCallback
+
 //* 5. useEffect (depends on fetch functions)
 
   // Load data on mount
@@ -665,7 +697,7 @@ const handleSubmit = useCallback(async (category) => {
       // You might want to clear states or show a message if regNo becomes invalid
       setStudentInfo(null);
       setAchievements({});
-      setPendingAchievements(null);
+      setPendingAchievements({ pendingItems: [], remarks: [] });
     }
   }, [studentRegNo, fetchStudentInfo, fetchAchievements, fetchStudentPendingAchievements]);
 
@@ -697,8 +729,69 @@ const handleSubmit = useCallback(async (category) => {
     </div>
   ), [studentInfo]);
 
+
+// Sub-component: Remarks Display Card (NEW COMPONENT)
+const RemarksCard = ({ remarks, onDismissRemarks, isLoading }) => {
+    const [isRemarksExpanded, setIsRemarksExpanded] = useState(true); // Start expanded by default for visibility
+
+    // Only render the card if there are actual remarks to show
+    if (!remarks || remarks.length === 0) {
+        return null; // Don't render if no remarks
+    }
+
+    return (
+        <div className="bg-white/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 mb-8 border border-white/30 animate-fade-in">
+            <button
+                onClick={() => setIsRemarksExpanded(!isRemarksExpanded)}
+                className="w-full flex items-center justify-between text-left text-2xl font-bold text-gray-900 mb-4 focus:outline-none hover:bg-white/20 p-4 rounded-2xl transition-all duration-300"
+            >
+                <div className="flex items-center">
+                    {/* Using FileText icon for remarks, you can change it if you prefer MessageSquare or other */}
+                    <FileText className="h-7 w-7 text-red-500 mr-3" />
+                    Faculty Remarks
+                    <span className="ml-3 bg-red-100/70 backdrop-blur-sm text-red-800 px-3 py-1 rounded-full text-base font-semibold shadow-md">
+                        {remarks.length} {remarks.length === 1 ? 'remark' : 'remarks'}
+                    </span>
+                </div>
+                {isRemarksExpanded ? (
+                    <ChevronUp className="h-6 w-6 text-gray-600 transition-transform duration-300 transform rotate-180" />
+                ) : (
+                    <ChevronDown className="h-6 w-6 text-gray-600 transition-transform duration-300" />
+                )}
+            </button>
+
+            {/* Content area that expands/collapses */}
+            <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                isRemarksExpanded ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+                <p className="text-gray-600 mb-6">
+                    Here are the remarks from the faculty regarding your pending achievements.
+                </p>
+                <div className="space-y-4 max-h-[40vh] overflow-y-auto custom-scrollbar">
+                    {remarks.map((remark, index) => (
+                        <div key={index} className="bg-red-50/70 backdrop-blur-sm border border-red-200/50 rounded-2xl p-4 shadow-lg flex items-start">
+                            {/* Star icon for individual remarks */}
+                            <Star className="h-5 w-5 text-red-600 flex-shrink-0 mr-3 mt-1" />
+                            <p className="text-gray-800 flex-grow">{remark}</p>
+                        </div>
+                    ))}
+                </div>
+                <div className="mt-6 text-right">
+                    <button
+                        onClick={onDismissRemarks}
+                        disabled={isLoading} // Disable button while dismissing
+                        className="px-6 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
+                    >
+                        {isLoading ? 'Dismissing...' : 'Dismiss All Remarks'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // Sub-component: Pending Achievements Card
-const PendingAchievementsCard = () => {
+const PendingAchievementsCard = ({ pendingAchievements }) => {
   const [isPendingExpanded, setIsPendingExpanded] = useState(false);
 
   if (!pendingAchievements || pendingAchievements.length === 0) { // Check length for array
@@ -943,12 +1036,22 @@ const AchievementsDisplaySection = ({ onEdit, onDelete }) => { // Accept new pro
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {BasicInfoHeader}
 
-        <PendingAchievementsCard />
+        {/* NEW: Remarks Card - Rendered above Pending Submissions */}
+      <RemarksCard
+        remarks={pendingAchievements?.remarks} // Pass the remarks array from the state
+        onDismissRemarks={handleDismissRemarks} // Pass the dismiss function
+        isLoading={loading} // Pass loading state to disable the dismiss button
+      />
 
-        <AchievementsDisplaySection
-          onEdit={handleEditApprovedAchievement}
-          onDelete={handleDeleteApprovedAchievement}
-        />
+      {/* Existing: Pending Achievements Card - Now accepts a prop */}
+      <PendingAchievementsCard
+        pendingAchievements={pendingAchievements?.pendingItems} // Pass only the pendingItems array
+      />
+
+      <AchievementsDisplaySection
+        onEdit={handleEditApprovedAchievement}
+        onDelete={handleDeleteApprovedAchievement}
+      />
 
         <div id="forms-section" className="scroll-mt-8">
           <div className="bg-white/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 mb-8 border border-white/30 animate-fade-in">
@@ -987,3 +1090,4 @@ const AchievementsDisplaySection = ({ onEdit, onDelete }) => { // Accept new pro
 };
 
 export default StudentAchievementsPortal;
+

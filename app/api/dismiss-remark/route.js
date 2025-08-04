@@ -1,10 +1,10 @@
-// pages/api/reject-pending-update/route.js
+// pages/api/dismiss-remark/route.js
 import { NextResponse } from "next/server";
-import { rejectPendingUpdate } from '@/app/components/achievementFns';
+import { dismissRemark } from '@/app/components/achievementFns';
 
 export async function POST(req) {
   try {
-    const { regNo, remarks } = await req.json();
+    const { regNo } = await req.json();
 
     if (!regNo) {
       return NextResponse.json({
@@ -13,11 +13,10 @@ export async function POST(req) {
       });
     }
 
-    // Call the updated backend function with both regNo and remarks
-    const response = await rejectPendingUpdate(regNo, remarks);
+    const response = await dismissRemark(regNo);
     return NextResponse.json(response);
   } catch (err) {
-    console.error("API error in reject-pending-update:", err);
+    console.error("API error in dismiss-remark:", err);
     return NextResponse.json({
       success: false,
       message: "Server error"

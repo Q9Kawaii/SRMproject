@@ -63,6 +63,35 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
 
         totalPoints: '',
     });
+    // New state for proof links
+        const [proofLinks, setProofLinks] = useState({
+            tenthtwelfthpercent: [''],
+            github: [''],
+            codingplatform: [''],
+            certifications: [''],
+            internships: [''],
+            projectsdone: [''],
+            fsd: [''],
+            inhouse: [''],
+            membership: [''],
+            hackathons: [''],
+            twelfthB: [''],
+            tenthB: [''],
+            IITNIT: [''],
+            Fortune500: [''],
+            SmallComp: [''],
+            Lessthan3: [''],
+            paidIntern: [''],
+            cisco: [''],
+            nptel: [''],
+            coursera: [''],
+            prgcert: [''],
+            udemy: [''],
+            IITNITproj: [''],
+            GovtProj: [''],
+            Mobileapp: [''],
+            MiniProj: [''],
+        });
 
     useEffect(() => {
         if (prefilledRegistrationNumber && formDataB.registrationNumber === '') {
@@ -142,6 +171,21 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         }));
     };
 
+    // New handlers for proof links
+    const handleProofLinkChange = (section, index, value) => {
+        setProofLinks(prevLinks => {
+            const newLinks = [...prevLinks[section]];
+            newLinks[index] = value;
+            return { ...prevLinks, [section]: newLinks };
+        });
+    };
+    const addProofLink = (section) => {
+        setProofLinks(prevLinks => ({
+            ...prevLinks,
+            [section]: [...prevLinks[section], '']
+        }));
+    };
+
     const handleEdit = (e) => {
         e.preventDefault();
         if (!hasPendingChanges) {
@@ -154,8 +198,18 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
     const handleCancelEdit = () => {
         setIsEditing(false);
         setFormDataB(initialFormData);
-    };
-
+        // Reset proof links to initial state
+        setProofLinks(initialFormData.proofLinks || {
+            personalAndContact: [''],
+            academicDetails: [''],
+            collegeAcademics: [''],
+            technicalSkills: [''],
+            internships: [''],
+            codingAndHackathons: [''],
+            achievements: [''],
+            careerAndPlacement: [''],
+    });
+    }
     const handleSubmitB = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -186,10 +240,21 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         const original = {};
         let hasChanges = false;
 
-        for (const key in formatBDataToSave) {
-            if (formatBDataToSave.hasOwnProperty(key) && formatBDataToSave[key] !== initialFormData[key]) {
-                updates[key] = formatBDataToSave[key];
-                original[key] = initialFormData[key] || ''; 
+        // Combine formDataA and proofLinks for comparison
+        const currentData = { ...formDataB, proofLinks: proofLinks };
+        const initialCombinedData = { ...initialFormData, proofLinks: initialFormData.proofLinks || {} };
+
+        for (const key in currentData) {
+            // Special handling for proofLinks, which is an object
+            if (key === 'proofLinks') {
+                if (JSON.stringify(currentData.proofLinks) !== JSON.stringify(initialCombinedData.proofLinks)) {
+                    updates.proofLinks = currentData.proofLinks;
+                    original.proofLinks = initialCombinedData.proofLinks;
+                    hasChanges = true;
+                }
+            } else if (key !== 'timestamp' && currentData[key] !== initialCombinedData[key]) {
+                updates[key] = currentData[key];
+                original[key] = initialCombinedData[key] || ''; 
                 hasChanges = true;
             }
         }
@@ -304,10 +369,39 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. 12th % :
                     <input type="number" name="twelfthPercentagePoints" value={formDataB.twelfthPercentagePoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for 12th Marks:</h4>
+                {proofLinks.twelfthB.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('twelfthB', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
                 <label style={styles.label}>
                     {inputCounter++}. 10th % :
                     <input type="number" name="tenthPercentagePoints" value={formDataB.tenthPercentagePoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for 10th Marks:</h4>
+                {proofLinks.tenthB.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('tenthB', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                
             </div>
 
             <div style={styles.inputGroup}>
@@ -336,6 +430,25 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. No of Collaborations:
                     <input type="number" name="collaborationsPoints" value={formDataB.collaborationsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Github Profile:</h4>
+                {proofLinks.github.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('github', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('github')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
             </div>
 
             <div style={styles.inputGroup}>
@@ -349,6 +462,25 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. No of Medium and Difficult Questions Solved :
                     <input type="number" name="codingPracticeQuestionsPoints" value={formDataB.codingPracticeQuestionsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+            {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Coding Platforms:</h4>
+                {proofLinks.codingplatform.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('codingplatform', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('codingplatform')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
             </div>
 
             <div style={styles.inputGroup}>
@@ -357,22 +489,136 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. IIT, NIT, SRM Internship Cycle:
                     <input type="number" name="internshipIITNITSRMPoints" value={formDataB.internshipIITNITSRMPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for IIT, NIT, SRM Internships:</h4>
+                {proofLinks.IITNIT.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('IITNIT', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('IITNIT')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Fortune 500 Companies:
                     <input type="number" name="internshipFortune500Points" value={formDataB.internshipFortune500Points} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Fortune 500 Companies:</h4>
+                {proofLinks.Fortune500.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('Fortune500', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('Fortune500')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Small Companies:
                     <input type="number" name="internshipSmallCompaniesPoints" value={formDataB.internshipSmallCompaniesPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Small Companies:</h4>
+                {proofLinks.SmallComp.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('SmallComp', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('SmallComp')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Less than 3 Months:
                     <input type="number" name="internshipLessThan3MonthsPoints" value={formDataB.internshipLessThan3MonthsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Less Than 3 Months:</h4>
+                {proofLinks.Lessthan3.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('Lessthan3', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('Lessthan3')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Paid Intern:
                     <input type="number" name="internshipPaidPoints" value={formDataB.internshipPaidPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Paid Internships:</h4>
+                {proofLinks.paidIntern.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('paidIntern', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('paidIntern')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
+            {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Github Profile:</h4>
+                {proofLinks.internships.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('internships', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('internships')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
             </div>
 
             <div style={styles.inputGroup}>
@@ -381,22 +627,118 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. CISCO, CCNA, CCNP, MCNA, MCNP, Matlab, Redhat, IBM :
                     <input type="number" name="certificationCiscoPoints" value={formDataB.certificationCiscoPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Cisco, Ccna etc:</h4>
+                {proofLinks.cisco.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('cisco', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('cisco')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. NPTEL:
                     <input type="number" name="certificationNPTELPoints" value={formDataB.certificationNPTELPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for NPTEL:</h4>
+                {proofLinks.nptel.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('nptel', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('nptel')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Coursera:
                     <input type="number" name="certificationCourseraPoints" value={formDataB.certificationCourseraPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Coursera:</h4>
+                {proofLinks.coursera.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('coursera', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('coursera')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Programming Cert:
                     <input type="number" name="certificationPgmmgCertPoints" value={formDataB.certificationPgmmgCertPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Programming Certification:</h4>
+                {proofLinks.prgcert.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('prgcert', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('prgcert')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Udemy / Elab:
                     <input type="number" name="certificationUdemyElabPoints" value={formDataB.certificationUdemyElabPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Udemy/ELAB:</h4>
+                {proofLinks.udemy.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('udemy', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('udemy')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
+                
             </div>
 
             <div style={styles.inputGroup}>
@@ -405,18 +747,95 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. IIT, NIT, DRDO Projects:
                     <input type="number" name="projectsIITDRDOPoints" value={formDataB.projectsIITDRDOPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for IIT, NIT, DRDO:</h4>
+                {proofLinks.IITNITproj.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('IITNITproj', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('IITNITproj')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Govt Projects:
                     <input type="number" name="projectsGovtPoints" value={formDataB.projectsGovtPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Government Projects:</h4>
+                {proofLinks.GovtProj.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('GovtProj', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('GovtProj')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Mobile & Web App Projects :
                     <input type="number" name="projectsMobileWebAppPoints" value={formDataB.projectsMobileWebAppPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Mobile Apps:</h4>
+                {proofLinks.Mobileapp.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('Mobileapp', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('MobileApp')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
                 <label style={styles.label}>
                     {inputCounter++}. Mini Project :
                     <input type="number" name="projectsMiniProjectPoints" value={formDataB.projectsMiniProjectPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Mini Projects:</h4>
+                {proofLinks.MiniProj.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('MiniProj', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('MiniProj')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
+                
             </div>
 
             <div style={styles.inputGroup}>
@@ -425,6 +844,25 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. FSD Project :
                     <input type="number" name="fsdProjectPoints" value={formDataB.fsdProjectPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Full Stack Development:</h4>
+                {proofLinks.fsd.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('fsd', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('fsd')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
             </div>
 
             <div style={styles.inputGroup}>
@@ -445,6 +883,25 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. Participated :
                     <input type="number" name="codingCompetitionParticipatedPoints" value={formDataB.codingCompetitionParticipatedPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Hackathons:</h4>
+                {proofLinks.hackathons.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('hackathons', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('hackathons')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
             </div>
 
             <div style={styles.inputGroup}>
@@ -453,6 +910,25 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. Inhouse Projects:
                     <input type="number" name="inhouseEachProjectPoints" value={formDataB.inhouseEachProjectPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                     </label>
+                    {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Inhouse Projects:</h4>
+                {proofLinks.inhouse.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('inhouse', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('inhouse')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
             </div>
 
             <div style={styles.inputGroup}>
@@ -461,6 +937,26 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     {inputCounter++}. Professional Bodies Membership:
                     <input type="number" name="professionalBodiesMembershipPoints" value={formDataB.professionalBodiesMembershipPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
                 </label>
+                {/* Proof links for Academic Details */}
+                <h4 style={styles.proofTitle}>Proof Links for Membership:</h4>
+                {proofLinks.membership.map((link, index) => (
+                    <div key={index} style={styles.proofInputWrapper}>
+                        <input
+                            type="text"
+                            value={link}
+                            onChange={(e) => handleProofLinkChange('membership', index, e.target.value)}
+                            placeholder="Enter proof URL"
+                            style={styles.input}
+                            disabled={!isEditing || hasPendingChanges}
+                        />
+                    </div>
+                ))}
+                {isEditing && !hasPendingChanges && (
+                    <button type="button" onClick={() => addProofLink('membership')} style={styles.addButton}>
+                        + Add another proof link
+                    </button>
+                )}
+                
             </div>
 
             <div style={styles.inputGroup}>
@@ -563,6 +1059,12 @@ const styles = {
         backgroundColor: '#fdfdfd',
         boxShadow: '0 2px 15px rgba(0,0,0,0.05)',
     },
+    buttonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px', // Space between buttons
+        marginTop: '20px',
+    },
     subHeading: {
         textAlign: 'center',
         color: '#1a202c',
@@ -584,6 +1086,11 @@ const styles = {
         paddingBottom: '10px',
         marginBottom: '20px',
         fontSize: '1.4em',
+    },
+    proofTitle: {
+        marginTop: '20px',
+        color: '#4a5568',
+        fontSize: '1.1em',
     },
     minorGroupTitle: {
         color: '#5a677a',
@@ -607,6 +1114,20 @@ const styles = {
         boxSizing: 'border-box',
         fontSize: '1em',
         transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+    },
+    proofInputWrapper: {
+        marginBottom: '10px',
+    },
+    addButton: {
+        marginTop: '10px',
+        padding: '8px 15px',
+        fontSize: '1em',
+        borderRadius: '5px',
+        border: '1px solid #3b82f6',
+        backgroundColor: '#f0f8ff',
+        color: '#3b82f6',
+        cursor: 'pointer',
+        transition: 'background-color 0.2s ease',
     },
     lockedInput: {
         backgroundColor: '#e9ecef',

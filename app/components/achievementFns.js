@@ -1,4 +1,4 @@
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, deleteDoc, arrayUnion, arrayRemove, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase"; // Your initialized firebase client
 
 //! Fetch basic student info
@@ -62,12 +62,7 @@ export async function getStudentAchievements(regNo) {
     return { success: false, message: "Error fetching data", data: {} };
   }
 }
-
 //! Submit new or edit pending achievements
-
-// Now, 'updates' will be a single achievement object, including its unique ID
-// Example 'updates': { id: 'uuid123', category: 'Participations', 'Event Name': 'Hackathon', ... }
-
 export async function submitPendingAchievement(regNo, category, achievementData) {
   try {
     const pendingRef = doc(db, "pendingAchievements", regNo);
@@ -77,34 +72,32 @@ export async function submitPendingAchievement(regNo, category, achievementData)
     if (pendingSnap.exists()) {
       pendingItems = pendingSnap.data().pendingItems || [];
     }
-
+    
     // Check if an item with the same ID already exists in pendingItems for the same category
     const existingIndex = pendingItems.findIndex(
       item => item.id === achievementData.id && item.category === category
     );
 
+    const { id, ...cleanData } = achievementData;
+    const newOrUpdatedPendingItem = {
+      id,
+      category,
+      data: cleanData,
+      submissionDate: new Date().toISOString()
+    };
+
     if (existingIndex !== -1) {
-      // If it's an update to an existing pending item (e.g., student edited it again before approval)
-      const { id, ...cleanData } = achievementData;
-pendingItems.push({
-  id,
-  category,
-  data: cleanData,
-  submissionDate: new Date().toISOString()
-});
+      // If it's an update, REPLACE the existing item at its index
+      pendingItems[existingIndex] = newOrUpdatedPendingItem;
     } else {
-      // It's a brand new pending item (either new submission or edit of an approved one)
-      const { id, ...cleanData } = achievementData;
-pendingItems.push({
-  id,
-  category,
-  data: cleanData,
-  submissionDate: new Date().toISOString()
-});
+      // It's a brand new pending item, add it to the array
+      pendingItems.push(newOrUpdatedPendingItem);
     }
 
     await setDoc(pendingRef, {
-      pendingItems: pendingItems // Store as an array
+      pendingItems: pendingItems, // Store as an array
+      // Initialize remarks array if the document is new, otherwise keep existing
+      remarks: pendingSnap.exists() ? pendingSnap.data().remarks || [] : [] 
     }, { merge: true }); // Use merge:true to not overwrite other fields if any
 
     return { success: true, message: "Pending achievement saved." };
@@ -113,7 +106,6 @@ pendingItems.push({
     return { success: false, message: "Error saving data." };
   }
 }
-
 
 //! Fetch achievements by student regNo or full section
 
@@ -178,79 +170,6 @@ export async function getUserOrSectionAchievements(identifier, type) {
   }
 }
 
-// //! Fetch pending updates either for a student or for a section
-
-// // Now fetches 'pendingItems' array instead of 'achievements' object
-// export async function getPendingUpdates(identifier, type) {
-//   try {
-//     const pendingRef = collection(db, "pendingAchievements");
-
-//     if (type === "regNo") {
-//       const docRef = doc(pendingRef, identifier);
-//       const snap = await getDoc(docRef);
-
-//       if (!snap.exists()) {
-//         return { success: false, message: "No pending update found", data: [] }; // Return empty array for no pending
-//       }
-
-//       const basicInfo = await getBasicStudentInfo(identifier);
-
-//       return {
-//         success: true,
-//         message: "Pending update found",
-//         data: {
-//           ...basicInfo.data,
-//           pendingItems: snap.data().pendingItems || [] // Get the array
-//         }
-//       };
-//     }
-
-//     if (type === "section") {
-//       const querySnap = await getDocs(pendingRef);
-
-//       const pendingList = [];
-
-//       for (const docSnap of querySnap.docs) {
-//         const regNo = docSnap.id;
-//         const basicInfo = await getBasicStudentInfo(regNo);
-
-//         if (
-//           basicInfo.success &&
-//           basicInfo.data.section === identifier
-//         ) {
-//           const studentPendingItems = docSnap.data().pendingItems || [];
-//           if (studentPendingItems.length > 0) { // Only add if there are actual pending items
-//             pendingList.push({
-//               ...basicInfo.data,
-//               pendingItems: studentPendingItems
-//             });
-//           }
-//         }
-//       }
-
-//       return {
-//         success: true,
-//         message: "Pending updates for section fetched",
-//         data: pendingList
-//       };
-//     }
-
-//     return { success: false, message: "Invalid query type", data: {} };
-
-//   } catch (err) {
-//     console.error("Error fetching pending updates:", err);
-//     return { success: false, message: "Error fetching data", data: {} };
-//   }
-// }
-
-// achievementFns.js
-
-// Make sure you have the necessary imports at the top of your file:
-// import { db } from './firebaseConfig'; // Or wherever your Firestore instance is
-// import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
-// import { getBasicStudentInfo } from './achievementFns'; // Or the correct path to getBasicStudentInfo if it's in another file
-
-//! Fetch pending updates either for a student or for a section
 //! Fetch pending updates either for a student or for a section
 export async function getPendingUpdates(identifier, type) {
   try {
@@ -269,7 +188,8 @@ export async function getPendingUpdates(identifier, type) {
           // Remove the message property entirely
           data: {
             ...studentData,
-            pendingItems: []
+            pendingItems: [],
+            remarks: [] // Add this line
           }
         };
       }
@@ -282,7 +202,8 @@ export async function getPendingUpdates(identifier, type) {
         message: "Pending update found",
         data: {
           ...basicInfo.data,
-          pendingItems: snap.data().pendingItems || []
+          pendingItems: snap.data().pendingItems || [],
+          remarks: snap.data().remarks || [] // Add this line
         }
       };
     }
@@ -301,9 +222,11 @@ export async function getPendingUpdates(identifier, type) {
         ) {
           const studentPendingItems = docSnap.data().pendingItems || [];
           if (studentPendingItems.length > 0) {
+            const studentRemarks = docSnap.data().remarks || []; // Add this line before push
             pendingList.push({
               ...basicInfo.data,
-              pendingItems: studentPendingItems
+              pendingItems: studentPendingItems,
+              remarks: studentRemarks // Add this line
             });
           }
         }
@@ -320,126 +243,169 @@ export async function getPendingUpdates(identifier, type) {
 
   } catch (err) {
     console.error("Error fetching pending updates:", err);
-    return { success: false, message: "Error fetching data", data: { pendingItems: [] } };
+    return { success: false, message: "Error fetching data", data: { pendingItems: [], remarks: [] } };
   }
 }
-
-
-//! Approve and apply pending update to main User doc
-
-// Iterates through pendingItems and applies each individually
-export async function approvePendingUpdate(regNo) {
+//! Approve and apply ALL pending updates to main User doc
+// MODIFIED: This function now approves all pending items and clears the pendingItems array.
+// It also accepts an optional 'remarks' field to add a message during approval.
+export async function approvePendingUpdate(regNo, remarks = '') { // Added optional remarks parameter
   try {
-    console.log(`[approvePendingUpdate] Called with regNo:`, regNo);
-
     const pendingRef = doc(db, "pendingAchievements", regNo);
-    const pendingSnap = await getDoc(pendingRef);
-
-    if (!pendingSnap.exists()) {
-      console.log(`[approvePendingUpdate] No pendingAchievements doc found for ${regNo}`);
-      return { success: true, message: "No pending update to approve. Already done." };
-    }
-
-    const pendingItems = pendingSnap.data().pendingItems || [];
-    console.log(`[approvePendingUpdate] Fetched pendingItems (${pendingItems.length}):`, pendingItems);
-
-    if (pendingItems.length === 0) {
-      console.log(`[approvePendingUpdate] Pending items array EMPTY for ${regNo}, deleting doc.`);
-      await deleteDoc(pendingRef); // Clean up if somehow empty array
-      return { success: true, message: "No pending items to approve." };
-    }
-
     const userRef = doc(db, "User", regNo);
-    let userSnap = await getDoc(userRef);
 
-    // User creation if not exists
-    if (!userSnap.exists()) {
-      console.log(`[approvePendingUpdate] No User doc for ${regNo}. Will create basic document.`);
-      const basicInfo = await getBasicStudentInfo(regNo); // This should always exist!
-      await setDoc(userRef, {
-        regNo: regNo,
-        name: basicInfo?.data?.name || 'Unknown Student',
-        section: basicInfo?.data?.section || 'Unknown Section',
-        achievements: {}
+    await runTransaction(db, async (transaction) => {
+
+      const pendingSnap = await transaction.get(pendingRef);
+
+      if (!pendingSnap.exists()) {
+        throw new Error("No pending update found to approve.");
+      }
+
+      const pendingData = pendingSnap.data();
+      const pendingItems = pendingData.pendingItems || [];
+      const currentRemarks = pendingData.remarks || []; // Get existing remarks
+
+      if (pendingItems.length === 0) {
+        // If pendingItems is already empty, just return or update remarks if provided
+        if (remarks.trim() !== '') {
+            const updatedRemarksArray = [...currentRemarks, remarks];
+            transaction.update(pendingRef, { remarks: updatedRemarksArray });
+            return;
+        }
+        return;
+      }
+
+      let userSnap = await transaction.get(userRef);
+      if (!userSnap.exists()) {
+        const basicInfo = await getBasicStudentInfo(regNo);
+        transaction.set(userRef, {
+          regNo: regNo,
+          name: basicInfo?.data?.name || 'Unknown Student',
+          section: basicInfo?.data?.section || 'Unknown Section',
+          achievements: {}
+        });
+        userSnap = await transaction.get(userRef);
+      }
+
+      const userData = userSnap.data();
+      const currentAchievements = userData.achievements || {};
+      const updatedAchievements = { ...currentAchievements };
+
+      for (const pendingItem of pendingItems) {
+        const { id, category, data } = pendingItem;
+
+        if (!updatedAchievements[category]) {
+          updatedAchievements[category] = [];
+        } else if (!Array.isArray(updatedAchievements[category])) {
+          console.warn(`Category '${category}' was not an array! Fixing.`);
+          updatedAchievements[category] = [updatedAchievements[category]];
+        }
+
+        const existingIndex = updatedAchievements[category].findIndex((ach) => ach.id === id);
+        if (existingIndex !== -1) {
+          updatedAchievements[category][existingIndex] = { ...data, id };
+        } else {
+          updatedAchievements[category].push({ ...data, id });
+        }
+      }
+
+      transaction.update(userRef, { achievements: updatedAchievements });
+
+      // After successful approval, clear pendingItems and add the new remark if provided
+      const finalRemarks = remarks.trim() !== '' ? [...currentRemarks, remarks] : currentRemarks;
+      
+      // If there are no pendingItems and no remarks, we can consider deleting the document
+      // However, per our existing logic, we only clear pendingItems here, and remarks
+      // are handled by dismissRemark. So we just update.
+      transaction.update(pendingRef, {
+        pendingItems: [],
+        remarks: finalRemarks // Update remarks here
       });
-      const newUserSnap = await getDoc(userRef);
-      userSnap = newUserSnap;
-      console.log(`[approvePendingUpdate] Created new User doc for ${regNo}.`);
-    }
-
-    const userData = userSnap.data();
-    const currentAchievements = userData.achievements || {};
-    const updatedAchievements = { ...currentAchievements };
-
-    // Step through all pendingItems
-    for (const pendingItem of pendingItems) {
-      const { id, category, data } = pendingItem;
-
-      if (!id || !category || !data) {
-        console.warn(`[approvePendingUpdate] ⛔ Skipping malformed pending item for ${regNo}:`, pendingItem);
-        continue;
-      }
-
-      // Ensure the category array exists and warn if not
-      if (!updatedAchievements[category]) {
-        updatedAchievements[category] = [];
-        console.log(`[approvePendingUpdate] Created new category array: '${category}'`);
-      } else if (!Array.isArray(updatedAchievements[category])) {
-        console.warn(`[approvePendingUpdate] Category '${category}' for ${regNo} was not an array! Fixing.`);
-        updatedAchievements[category] = [updatedAchievements[category]];
-      }
-
-      // Check if achievement with same id exists (edit)
-      const existingAchievementIndex = updatedAchievements[category].findIndex(
-        (ach) => ach.id === id
-      );
-
-      if (existingAchievementIndex !== -1) {
-        console.log(`[approvePendingUpdate] ↻ Editing existing achievement in category '${category}' at index ${existingAchievementIndex}:`, updatedAchievements[category][existingAchievementIndex]);
-        updatedAchievements[category][existingAchievementIndex] = { ...data, id };
-      } else {
-        console.log(`[approvePendingUpdate] ➕ Adding new achievement to category '${category}':`, { ...data, id });
-        updatedAchievements[category].push({ ...data, id });
-      }
-    }
-
-    // Write merged achievements
-    console.log(`[approvePendingUpdate] Writing merged achievements for ${regNo}:`, updatedAchievements);
-
-    await updateDoc(userRef, {
-      achievements: updatedAchievements,
     });
-
-    // Delete pending document
-    await deleteDoc(pendingRef);
-    console.log(`[approvePendingUpdate] Deleted pendingAchievements doc for ${regNo}`);
 
     return { success: true, message: "All pending updates approved and applied." };
   } catch (err) {
     console.error("[approvePendingUpdate] ❌ Error:", err);
-    return { success: false, message: "Failed to approve update" };
+    return { success: false, message: `Failed to approve update: ${err.message}` };
   }
 }
 
-
-
-//! Reject pending update: simply deletes the student's entry in pendingAchievements
-export async function rejectPendingUpdate(regNo) {
+//! Reject ALL pending updates
+// This function will remove all pendingItems and add the new remark to the remarks array.
+export async function rejectPendingUpdate(regNo, remarks) {
   try {
     const pendingRef = doc(db, "pendingAchievements", regNo);
-    const snap = await getDoc(pendingRef);
 
-    if (!snap.exists()) {
-      return { success: false, message: "No pending update found to reject." };
-    }
+    await runTransaction(db, async (transaction) => {
 
-    await deleteDoc(pendingRef);
-    return { success: true, message: "Pending update rejected and removed." };
+      const pendingSnap = await transaction.get(pendingRef);
+
+      if (!pendingSnap.exists()) {
+        // If no pending document exists, we can't reject anything.
+        return;
+      }
+
+      // Check if remarks were provided.
+      if (!remarks || remarks.trim() === '') {
+        // If no remarks are provided, simply delete the document as requested.
+        transaction.delete(pendingRef);
+        return;
+      }
+      
+      const pendingData = pendingSnap.data();
+      const remarksArray = pendingData.remarks || [];
+
+      // Add the new remark string to the existing or new remarks array
+      const updatedRemarksArray = [...remarksArray, remarks];
+      
+      // Clear the pendingItems array and update the remarks array
+      transaction.update(pendingRef, {
+        pendingItems: [],
+        remarks: updatedRemarksArray,
+      });
+    });
+
+    return { success: true, message: "All pending updates rejected and remarked." };
   } catch (err) {
     console.error("Error rejecting pending update:", err);
-    return { success: false, message: "Failed to reject pending update." };
+    return { success: false, message: `Failed to reject pending update: ${err.message}` };
   }
 }
+
+//! New: Dismiss all remarks
+// This function will clear the entire remarks array.
+// If the pendingItems array is also empty, it will delete the entire document.
+export async function dismissRemark(regNo) {
+  try {
+    const pendingRef = doc(db, "pendingAchievements", regNo);
+
+    await runTransaction(db, async (transaction) => {
+      const pendingSnap = await transaction.get(pendingRef);
+      if (!pendingSnap.exists()) {
+        throw new Error("No pending document found to dismiss remarks.");
+      }
+
+      const pendingData = pendingSnap.data();
+      const pendingItems = pendingData.pendingItems || [];
+
+      // If pendingItems is empty, and we are about to clear the remarks,
+      // we can delete the whole document.
+      if (pendingItems.length === 0) {
+        transaction.delete(pendingRef);
+      } else {
+        // Otherwise, just clear the remarks array and keep the pendingItems.
+        transaction.update(pendingRef, { remarks: [] });
+      }
+    });
+
+    return { success: true, message: "Remarks dismissed successfully." };
+  } catch (err) {
+    console.error("Error dismissing remark:", err);
+    return { success: false, message: `Failed to dismiss remarks: ${err.message}` };
+  }
+}
+
 
 //! New: Delete an approved achievement directly from the User collection
 export async function deleteApprovedAchievement(regNo, category, achievementId) {

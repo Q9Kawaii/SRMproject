@@ -451,7 +451,7 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
                 ))}
 
                 {/* Enhanced Achievements Section */}
-                {isEditing && (
+                {/* {isEditing && (
                   <div className="md:col-span-2 mt-8">
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 backdrop-blur-sm rounded-2xl p-6 border-2 border-blue-200">
                       <div className="flex items-center gap-3 mb-6">
@@ -522,7 +522,7 @@ export default function StudentsDashBoard({ regNo: propRegNo, section: propSecti
                       </button>
                     </div>
                   </div>
-                )}
+                )} */}
 
                 
 

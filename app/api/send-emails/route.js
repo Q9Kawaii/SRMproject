@@ -5,6 +5,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 console.log("Resend API Key:", process.env.RESEND_API_KEY);
 
+
 export async function POST(request) {
   try {
     const { studentIds, type, imageMap } = await request.json();
@@ -31,6 +32,7 @@ export async function POST(request) {
 
         const studentSnap = await adminDb.collection("User").doc(id).get();
 
+
         if (!studentSnap.exists) {
           console.warn(`[SKIP] Student not found for ID: ${id}`);
           results.push({ id, status: "failed", reason: "Student not found" });
@@ -38,7 +40,7 @@ export async function POST(request) {
         }
 
         const student = studentSnap.data();
-        const requiredFields = ["name", "email", "parentEmail", "faEmail", "regNo", "section"];
+        const requiredFields = ["name", "email", "parentEmail", "regNo", "section"];
         if (type === "attendance") requiredFields.push("attendance");
         if (type === "marks") requiredFields.push("marks");
 
@@ -81,30 +83,37 @@ export async function POST(request) {
         const htmlList = subjectEntries.map((item) => `<li>${item}</li>`).join("");
 
         let attachments = [];
-        const regNoKey = (student.regNo ?? "").trim().toLowerCase();
-        console.log("ATTACHMENT CHECK", { regNo: student.regNo, regNoKey, found: !!imageMap[regNoKey] });
-        if (regNoKey && imageMap?.[regNoKey]) {
-          try {
-            const imageUrl = imageMap[regNoKey];
-            const imageBuffer = await fetch(imageUrl).then((res) => res.arrayBuffer());
-            console.log("🧪 Image buffer byteLength:", imageBuffer.byteLength);
-            console.log("[ATTACHMENT DEBUG]", { regNoKey, imageUrl });
-            const base64 = Buffer.from(imageBuffer).toString("base64");
-            if (!imageBuffer || imageBuffer.byteLength === 0) {
-              console.warn("⚠️ Empty image buffer for", imageUrl);
-              throw new Error("Empty image buffer");
-            }
+const regNoKey = (student.regNo ?? "").trim().toLowerCase();
+console.log("ATTACHMENT CHECK", { regNo: student.regNo, regNoKey, found: !!imageMap[regNoKey] });
+if (regNoKey && imageMap?.[regNoKey]) {
+  try {
+    const imageUrl = imageMap[regNoKey];
+    const imageBuffer = await fetch(imageUrl).then((res) => res.arrayBuffer());
+    console.log("🧪 Image buffer byteLength:", imageBuffer.byteLength);
+    console.log("[ATTACHMENT DEBUG]", { regNoKey, imageUrl });
+const base64 = Buffer.from(imageBuffer).toString("base64");
+if (!imageBuffer || imageBuffer.byteLength === 0) {
+  console.warn("⚠️ Empty image buffer for", imageUrl);
+  throw new Error("Empty image buffer");
+}
 
-            attachments.push({
-              filename: `${student.regNo}.jpg`,
-              content: base64,
-              type: "image/jpeg",
-              disposition: "attachment",
-            });
-          } catch (err) {
-            console.warn(`[ATTACHMENT FAIL] Couldn't fetch/convert image for ${student.regNo}:`, err.message);
-          }
-        }
+
+    if (!imageBuffer || imageBuffer.byteLength === 0) {
+  console.warn("⚠️ Empty image buffer for", imageUrl);
+}
+
+    attachments.push({
+      filename: `${student.regNo}.jpg`,
+      content: base64,
+      type: "image/jpeg",
+      disposition: "attachment",
+    });
+  } catch (err) {
+    console.warn(`[ATTACHMENT FAIL] Couldn't fetch/convert image for ${student.regNo}:`, err.message);
+  }
+}
+
+
 
         const studentEmail = {
           from: "School Alerts <noreply@yashdingar.xyz>",
@@ -151,81 +160,31 @@ export async function POST(request) {
           attachments,
         };
 
-        const faEmail = {
-          from: "School Alerts <noreply@yashdingar.xyz>",
-          to: student.faEmail,
-          subject: `${subjectLine} - ${student.name} (${student.regNo})`,
-          html: `
-            <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
-              <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 8px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                <h2 style="color: ${subjectColor};">${subjectLine} - Academic Alert</h2>
-                <p>Dear Faculty Advisor,</p>
-                <p>
-                  This is to inform you about your advisee, <strong>${student.name}</strong> 
-                  (Reg No: <strong>${student.regNo}</strong>, Section: <strong>${student.section}</strong>):
-                </p>
-                <ul style="padding-left: 20px; color: ${subjectColor};">${htmlList}</ul>
-                <p>Please consider providing academic guidance and support to the student.</p>
-                <p style="margin-top: 30px;">Best regards,<br/><strong>Academic Monitoring Team</strong></p>
-              </div>
-            </div>
-          `,
-          attachments,
-        };
+        const studentRes = await resend.emails.send(studentEmail);
+        const parentRes = await resend.emails.send(parentEmail);
 
-        // Send all three emails in parallel with fail-safe
-        console.log(`[SENDING] Sending emails for ${student.name} to:`, {
-          student: student.email,
-          parent: student.parentEmail,
-          fa: student.faEmail
-        });
-
-        const studentResult = await resend.emails.send(studentEmail);
-        await new Promise((r) => setTimeout(r, 600));
-
-        const parentResult = await resend.emails.send(parentEmail);
-        await new Promise((r) => setTimeout(r, 600));
-
-        const faResult = await resend.emails.send(faEmail);
+        console.log(`[EMAIL] Student Email (${student.email}):`, studentRes);
+        console.log(`[EMAIL] Parent Email (${student.parentEmail}):`, parentRes);
+        console.log("ATTACHMENTS SENT:", attachments.map(a => a.filename));
 
 
-        await new Promise((r) => setTimeout(r, 600));
-        
-        const studentSent = studentResult.status === "fulfilled" && studentResult.value?.data?.id && !studentResult.value?.error;
-        const parentSent = parentResult.status === "fulfilled" && parentResult.value?.data?.id && !parentResult.value?.error;
-        const faSent = faResult.status === "fulfilled" && faResult.value?.data?.id && !faResult.value?.error;
-
-
-        console.log(`[EMAIL RESULTS] ${student.name}:`);
-        console.log(`  Student Email (${student.email}):`, studentSent ? "SUCCESS" : "FAILED", studentResult);
-        console.log(`  Parent Email (${student.parentEmail}):`, parentSent ? "SUCCESS" : "FAILED", parentResult);
-        console.log(`  FA Email (${student.faEmail}):`, faSent ? "SUCCESS" : "FAILED", faResult);
-        console.log("  ATTACHMENTS SENT:", attachments.map((a) => a.filename));
-
-        const failedEmails = [];
-        if (!studentSent) failedEmails.push("student");
-        if (!parentSent) failedEmails.push("parent");
-        if (!faSent) failedEmails.push("fa");
-
-        if (failedEmails.length > 0) {
-          console.warn(`[PARTIAL FAIL] ${student.name} - Failed emails:`, failedEmails);
+        if (!studentRes?.id || !parentRes?.id) {
+          console.warn(`[SEND FAIL] ${student.name}`, {
+            studentId: studentRes?.id,
+            parentId: parentRes?.id,
+          });
           results.push({
             id,
-            status: "partial",
-            reason: `Failed to send to: ${failedEmails.join(", ")}`,
-            details: { studentSent, parentSent, faSent }
+            status: "failed",
+            reason: `Send failed. studentId: ${!!studentRes?.id}, parentId: ${!!parentRes?.id}`,
           });
-        } else {
-          console.log(`[SUCCESS] All emails sent for ${student.name}`);
-          results.push({
-            id,
-            status: "success",
-            details: { studentSent: true, parentSent: true, faSent: true }
-          });
+          continue;
         }
 
+        results.push({ id, status: "success" });
+
       } catch (error) {
-        console.error(`[ERROR] Sending emails for student ID ${id}:`, error);
+        console.error(`[ERROR] Sending email for student ID ${id}:`, error);
         results.push({ id, status: "failed", reason: error.message });
       }
     }
