@@ -64,7 +64,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         totalPoints: '',
     });
     // New state for proof links
-        const [proofLinks, setProofLinks] = useState({
+        const [proofLinksB, setproofLinksB] = useState({
             tenthtwelfthpercent: [''],
             github: [''],
             codingplatform: [''],
@@ -173,14 +173,14 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
 
     // New handlers for proof links
     const handleProofLinkChange = (section, index, value) => {
-        setProofLinks(prevLinks => {
+        setproofLinksB(prevLinks => {
             const newLinks = [...prevLinks[section]];
             newLinks[index] = value;
             return { ...prevLinks, [section]: newLinks };
         });
     };
     const addProofLink = (section) => {
-        setProofLinks(prevLinks => ({
+        setproofLinksB(prevLinks => ({
             ...prevLinks,
             [section]: [...prevLinks[section], '']
         }));
@@ -199,7 +199,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         setIsEditing(false);
         setFormDataB(initialFormData);
         // Reset proof links to initial state
-        setProofLinks(initialFormData.proofLinks || {
+        setproofLinksB(initialFormData.proofLinksB || {
             personalAndContact: [''],
             academicDetails: [''],
             collegeAcademics: [''],
@@ -240,16 +240,16 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         const original = {};
         let hasChanges = false;
 
-        // Combine formDataA and proofLinks for comparison
-        const currentData = { ...formDataB, proofLinks: proofLinks };
-        const initialCombinedData = { ...initialFormData, proofLinks: initialFormData.proofLinks || {} };
+        // Combine formDataA and proofLinksB for comparison
+        const currentData = { ...formDataB, proofLinksB: proofLinksB };
+        const initialCombinedData = { ...initialFormData, proofLinksB: initialFormData.proofLinksB || {} };
 
         for (const key in currentData) {
-            // Special handling for proofLinks, which is an object
-            if (key === 'proofLinks') {
-                if (JSON.stringify(currentData.proofLinks) !== JSON.stringify(initialCombinedData.proofLinks)) {
-                    updates.proofLinks = currentData.proofLinks;
-                    original.proofLinks = initialCombinedData.proofLinks;
+            // Special handling for proofLinksB, which is an object
+            if (key === 'proofLinksB') {
+                if (JSON.stringify(currentData.proofLinksB) !== JSON.stringify(initialCombinedData.proofLinksB)) {
+                    updates.proofLinksB = currentData.proofLinksB;
+                    original.proofLinksB = initialCombinedData.proofLinksB;
                     hasChanges = true;
                 }
             } else if (key !== 'timestamp' && currentData[key] !== initialCombinedData[key]) {
@@ -371,7 +371,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for 12th Marks:</h4>
-                {proofLinks.twelfthB.map((link, index) => (
+                {proofLinksB.twelfthB.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -389,7 +389,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for 10th Marks:</h4>
-                {proofLinks.tenthB.map((link, index) => (
+                {proofLinksB.tenthB.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -432,7 +432,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Github Profile:</h4>
-                {proofLinks.github.map((link, index) => (
+                {proofLinksB.github.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -464,7 +464,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
             {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Coding Platforms:</h4>
-                {proofLinks.codingplatform.map((link, index) => (
+                {proofLinksB.codingplatform.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -491,7 +491,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for IIT, NIT, SRM Internships:</h4>
-                {proofLinks.IITNIT.map((link, index) => (
+                {proofLinksB.IITNIT.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -514,7 +514,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Fortune 500 Companies:</h4>
-                {proofLinks.Fortune500.map((link, index) => (
+                {proofLinksB.Fortune500.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -537,7 +537,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Small Companies:</h4>
-                {proofLinks.SmallComp.map((link, index) => (
+                {proofLinksB.SmallComp.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -560,7 +560,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Less Than 3 Months:</h4>
-                {proofLinks.Lessthan3.map((link, index) => (
+                {proofLinksB.Lessthan3.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -583,7 +583,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Paid Internships:</h4>
-                {proofLinks.paidIntern.map((link, index) => (
+                {proofLinksB.paidIntern.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -602,7 +602,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 )}
             {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Github Profile:</h4>
-                {proofLinks.internships.map((link, index) => (
+                {proofLinksB.internships.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -629,7 +629,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Cisco, Ccna etc:</h4>
-                {proofLinks.cisco.map((link, index) => (
+                {proofLinksB.cisco.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -652,7 +652,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for NPTEL:</h4>
-                {proofLinks.nptel.map((link, index) => (
+                {proofLinksB.nptel.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -675,7 +675,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Coursera:</h4>
-                {proofLinks.coursera.map((link, index) => (
+                {proofLinksB.coursera.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -698,7 +698,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Programming Certification:</h4>
-                {proofLinks.prgcert.map((link, index) => (
+                {proofLinksB.prgcert.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -721,7 +721,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Udemy/ELAB:</h4>
-                {proofLinks.udemy.map((link, index) => (
+                {proofLinksB.udemy.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -749,7 +749,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for IIT, NIT, DRDO:</h4>
-                {proofLinks.IITNITproj.map((link, index) => (
+                {proofLinksB.IITNITproj.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -772,7 +772,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Government Projects:</h4>
-                {proofLinks.GovtProj.map((link, index) => (
+                {proofLinksB.GovtProj.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -795,7 +795,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Mobile Apps:</h4>
-                {proofLinks.Mobileapp.map((link, index) => (
+                {proofLinksB.Mobileapp.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -818,7 +818,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Mini Projects:</h4>
-                {proofLinks.MiniProj.map((link, index) => (
+                {proofLinksB.MiniProj.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -846,7 +846,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Full Stack Development:</h4>
-                {proofLinks.fsd.map((link, index) => (
+                {proofLinksB.fsd.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -885,7 +885,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Hackathons:</h4>
-                {proofLinks.hackathons.map((link, index) => (
+                {proofLinksB.hackathons.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -912,7 +912,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     </label>
                     {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Inhouse Projects:</h4>
-                {proofLinks.inhouse.map((link, index) => (
+                {proofLinksB.inhouse.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
@@ -939,7 +939,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
                 {/* Proof links for Academic Details */}
                 <h4 style={styles.proofTitle}>Proof Links for Membership:</h4>
-                {proofLinks.membership.map((link, index) => (
+                {proofLinksB.membership.map((link, index) => (
                     <div key={index} style={styles.proofInputWrapper}>
                         <input
                             type="text"
