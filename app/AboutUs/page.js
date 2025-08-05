@@ -16,7 +16,7 @@ const Patrons = [
   },
   {
     name: "Dr. Niranjana G",
-    role: "Head Of The Department",
+    role: "Head of the Department",
     image: "/team/DrNiranjanaG.png",
     links: { visit: "https://www.srmist.edu.in/faculty/dr-g-niranjana/" },
   },
