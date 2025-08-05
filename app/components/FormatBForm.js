@@ -109,24 +109,30 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                     const docSnap = await getDoc(docRef);
 
                     if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        const cleanedData = { ...data };
-                        delete cleanedData.timestamp;
+    const data = docSnap.data();
+    const cleanedData = { ...data };
+    delete cleanedData.timestamp;
 
-                        
-                        const formBKeys = Object.keys(formDataB); 
-                        const filteredData = {};
-                        for (const key of formBKeys) {
-                            if (cleanedData.hasOwnProperty(key)) {
-                                filteredData[key] = cleanedData[key];
-                            }
-                        }
+    const formBKeys = Object.keys(formDataB); 
+    const filteredData = {};
+    for (const key of formBKeys) {
+        if (cleanedData.hasOwnProperty(key)) {
+            filteredData[key] = cleanedData[key];
+        }
+    }
 
-                        setFormDataB(filteredData);
-                        setInitialFormData(filteredData); 
-                        setIsEditing(false);
-                        console.log("Existing Format B data loaded:", filteredData);
-                    } else {
+    setFormDataB(filteredData);
+    setInitialFormData(filteredData);
+
+    // ✅ Load proof links if they exist
+    if (data.proofLinksB) {
+        setproofLinksB(data.proofLinksB);
+    }
+
+    setIsEditing(false);
+    console.log("Existing Format B data loaded:", filteredData);
+}
+ else {
                         console.log("No existing Format B data found for this registration number. Allowing initial submission.");
                         setIsEditing(true);
                         setFormDataB(prevData => ({
