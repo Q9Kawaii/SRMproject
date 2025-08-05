@@ -294,7 +294,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                                 ))
                         ) : (
                             <div style={styles.noLinksMessage}>
-                                📝 No proof links added yet. Click "Edit Data" to add links.
+                                📝 No proof links added yet. Click Edit Data to add links.
                             </div>
                         )}
                     </div>
