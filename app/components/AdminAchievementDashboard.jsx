@@ -718,11 +718,29 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                                             className="bg-gray-100 p-4 rounded-md shadow-sm"
                                                         >
                                                             <h4 className="font-semibold text-gray-800 mb-2">{CATEGORIES_CONFIG[selectedCategory]?.fields.find(f => f.name === 'Event Name' || f.name === 'Course Name' || f.name === 'Sports Name' || f.name === 'Name of the Membership Body' || f.name === 'Type of Scholarship / Freeship (Merit/Defense)' || f.name === 'Internship Company/University Name' || f.name === 'Paper/Patent Title' || f.name === 'Outreach Title')?.name || 'Achievement'}</h4>
-                                                            {CATEGORIES_CONFIG[selectedCategory]?.fields.filter(f => !['Reg Number', 'Student Name', 'Section', 'id'].includes(f.name)).map(field => (
-                                                                <p key={field.name} className="text-sm text-gray-600">
-                                                                    <span className="font-medium">{field.name}:</span> {field.type === 'date' ? formatDateToDDMMYYYY(achievement[field.name]) : achievement[field.name]}
-                                                                </p>
-                                                            ))}
+                                                            {CATEGORIES_CONFIG[selectedCategory]?.fields.filter(f => !['Reg Number', 'Student Name', 'Section', 'id'].includes(f.name)).map(field => {
+  const value = achievement[field.name];
+  return (
+    <p key={field.name} className="text-sm text-gray-600">
+      <span className="font-medium">{field.name}:</span>{' '}
+      {field.type === 'url' && value
+        ? (
+            <a
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline break-all"
+            >
+              {value}
+            </a>
+          )
+        : field.type === 'date'
+          ? formatDateToDDMMYYYY(value)
+          : value}
+    </p>
+  );
+})}
+
                                                         </motion.div>
                                                     ))
                                                 ) : (
@@ -808,14 +826,28 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                             <p className="text-lg font-semibold mb-2">Category: {item.category}</p>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                                                 {Object.entries(item.data).map(([key, value]) => {
-                                                    const fieldConfig = CATEGORIES_CONFIG[item.category]?.fields.find(f => f.name === key);
-                                                    return (
-                                                        <p key={key} className="text-gray-700">
-                                                            <span className="font-medium">{key}:</span>{' '}
-                                                            {fieldConfig?.type === 'date' ? formatDateToDDMMYYYY(value) : value}
-                                                        </p>
-                                                    );
-                                                })}
+  const fieldConfig = CATEGORIES_CONFIG[item.category]?.fields.find(f => f.name === key);
+  return (
+    <p key={key} className="text-gray-700">
+      <span className="font-medium">{key}:</span>{' '}
+      {fieldConfig?.type === 'url' && value
+        ? (
+            <a
+              href={value}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline break-all"
+            >
+              {value}
+            </a>
+          )
+        : fieldConfig?.type === 'date'
+          ? formatDateToDDMMYYYY(value)
+          : value}
+    </p>
+  );
+})}
+
                                             </div>
                                             
                                             {/* Remarks Textarea and Action Buttons Section - Moved outside the map for clarity and single input */}
