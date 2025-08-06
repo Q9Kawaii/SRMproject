@@ -6,7 +6,7 @@ import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import AdminDashBoardd from "./components/Admin-DashBoard";
 import StudentsDashBoard from "./components/Students-DashBoard";
 import { app } from "../lib/firebase";
-import HamsterLoader from "./components/HamsterLoader";
+import HamsterLoader from "./components/DashboardComponents/HamsterLoader";
 import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
 
 const auth = getAuth(app);

@@ -1,6 +1,6 @@
 'use client';
 
-import * as allExports from "../utils/exportExcelFormA";
+import * as allExports from "./exportExcelFormA";
 
 export default function ExportButtonFormA() {
     const handleClick = async () => {

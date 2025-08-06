@@ -1,6 +1,6 @@
 // app/api/get-all-students-achievements/route.js
 import { NextResponse } from "next/server";
-import { getAllStudentsAchievements } from '@/app/components/achievementFns'; // Adjust path if necessary
+import { getAllStudentsAchievements } from '@/app/components/Achievements/achievementFns'; // Adjust path if necessary
 
 export async function POST(req) { // Using POST for consistency with other APIs
     try {

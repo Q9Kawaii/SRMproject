@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getStudentAchievements } from '@/app/components/achievementFns';
+import { getStudentAchievements } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(request) {
   try {

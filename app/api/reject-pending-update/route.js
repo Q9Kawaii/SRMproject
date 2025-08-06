@@ -1,6 +1,6 @@
 // pages/api/reject-pending-update/route.js
 import { NextResponse } from "next/server";
-import { rejectPendingUpdate } from '@/app/components/achievementFns';
+import { rejectPendingUpdate } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(req) {
   try {

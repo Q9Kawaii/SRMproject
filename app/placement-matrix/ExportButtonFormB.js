@@ -1,6 +1,6 @@
 "use client";
 
-import { exportFormBtoExcel } from "../utils/exportExcelFormB";
+import { exportFormBtoExcel } from "./exportExcelFormB";
 
 export default function ExportButtonFormB() {
   return (

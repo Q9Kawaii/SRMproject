@@ -4,7 +4,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "firebase/firestore";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
-import StudentAttendancePage from "./StudentAttendancePage";
+import StudentAttendancePage from "./Upload-Attendance/StudentAttendancePage";
 import { useRouter } from "next/navigation";
 import StudentAchievementsPortal from "../achievementsPage/page";
 

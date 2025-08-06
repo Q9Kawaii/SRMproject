@@ -1,5 +1,5 @@
 // app/api/get-basic-student-info/route.js or route.ts
-import { getBasicStudentInfo } from "../../components/achievementFns";
+import { getBasicStudentInfo } from "../../components/Achievements/achievementFns";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {

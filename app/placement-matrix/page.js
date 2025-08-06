@@ -7,12 +7,12 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
 /* ----------  Dynamically loaded browser-only components  ---------- */
-const FormatAForm            = dynamic(() => import("../components/FormatAForm"),            { ssr: false });
-const FormatBForm            = dynamic(() => import("../components/FormatBForm"),            { ssr: false });
-const TeacherVerificationTable = dynamic(() => import("../components/TeacherVerificationTable"), { ssr: false });
-const ApprovedProofs         = dynamic(() => import("../components/ApprovedProofs"),         { ssr: false });
-const ExportButtonFormA      = dynamic(() => import("../components/ExportButtonFormA"),      { ssr: false });
-const ExportButtonFormB      = dynamic(() => import("../components/ExportButtonFormB"),      { ssr: false });
+const FormatAForm            = dynamic(() => import("./FormatAForm"),            { ssr: false });
+const FormatBForm            = dynamic(() => import("./FormatBForm"),            { ssr: false });
+const TeacherVerificationTable = dynamic(() => import("./TeacherVerificationTable"), { ssr: false });
+const ApprovedProofs         = dynamic(() => import("./ApprovedProofs"),         { ssr: false });
+const ExportButtonFormA      = dynamic(() => import("./ExportButtonFormA"),      { ssr: false });
+const ExportButtonFormB      = dynamic(() => import("./ExportButtonFormB"),      { ssr: false });
 /* ------------------------------------------------------------------ */
 
 export default function PlacementMatrixPage() {

@@ -1,6 +1,6 @@
 // pages/api/approve-pending-update/route.js
 import { NextResponse } from "next/server";
-import { approvePendingUpdate } from '@/app/components/achievementFns';
+import { approvePendingUpdate } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(req) {
   try {

@@ -4,17 +4,16 @@ import { getFirestore, doc, getDoc } from "firebase/firestore";
 import SearchBar from "./DashboardComponents/SearchBar";
 import AnimatedBlob from "./DashboardComponents/AnimatedBlob";
 import DashCards from "./DashboardComponents/DashCards";
-import UploadSystem from "./UploadSystem";
-import EmailSystem from "./EmailSystem";
-import SearchComponent from "./SearchComponent";
-import HamsterLoader from "./HamsterLoader"; // ✅ Import hamster loader
-import AchievementsTable from "./AchievementsTable";
-import TeacherVerificationTable from "./TeacherVerificationTable";
+import UploadSystem from "./Upload-Attendance/UploadSystem";
+import EmailSystem from "./Email-System/EmailSystem";
+import HamsterLoader from "./DashboardComponents/HamsterLoader"; // ✅ Import hamster loader
+import AchievementsTable from "./Achievements/AchievementsTable";
+import TeacherVerificationTable from "../placement-matrix/TeacherVerificationTable";
 
 import { useRouter } from 'next/navigation';
 
 import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
-import AdminAchievementDashboard from "./AdminAchievementDashboard";
+import AdminAchievementDashboard from "./Achievements/AdminAchievementDashboard";
 
 
 export default function AdminDashBoard({ secRole, SectionofFA, nameOfFA }) {

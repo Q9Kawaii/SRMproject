@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPendingUpdates } from '@/app/components/achievementFns';
+import { getPendingUpdates } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(req) {
   try {

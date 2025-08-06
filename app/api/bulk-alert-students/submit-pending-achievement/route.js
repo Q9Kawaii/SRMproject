@@ -1,6 +1,6 @@
 // pages/api/submit-pending-achievement/route.js
 import { NextResponse } from 'next/server';
-import { submitPendingAchievement } from '@/app/components/achievementFns';
+import { submitPendingAchievement } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(request) {
   try {

@@ -4,7 +4,7 @@ import { db } from "@/lib/firebase";
 import { collection, getDocs, deleteDoc, doc, updateDoc, setDoc } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import HamsterLoader from "./HamsterLoader";
+import HamsterLoader from "../DashboardComponents/HamsterLoader";
 
 export default function StudentsTable({SectionofFA, nameOfFA}) {
   const [students, setStudents] = useState([]);

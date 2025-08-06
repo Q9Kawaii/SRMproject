@@ -1,6 +1,6 @@
 // pages/api/dismiss-remark/route.js
 import { NextResponse } from "next/server";
-import { dismissRemark } from '@/app/components/achievementFns';
+import { dismissRemark } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(req) {
   try {

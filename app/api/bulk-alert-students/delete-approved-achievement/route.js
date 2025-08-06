@@ -1,6 +1,6 @@
 // pages/api/delete-approved-achievement/route.js
 import { NextResponse } from 'next/server';
-import { deleteApprovedAchievement } from '@/app/components/achievementFns';
+import { deleteApprovedAchievement } from '@/app/components/Achievements/achievementFns';
 
 export async function POST(request) {
   try {

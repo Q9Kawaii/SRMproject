@@ -1,6 +1,6 @@
 "use client"
-import Footer from "./components/Footer";
-import NavBar from "./components/NavBar";
+import Footer from "./components/DashboardComponents/Footer";
+import NavBar from "./components/DashboardComponents/NavBar";
 import "./globals.css";
 import AuthReset from './components/AuthReset';
 import React, { useState } from "react";
