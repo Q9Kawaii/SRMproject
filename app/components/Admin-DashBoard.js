@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
-import SearchBar from "./DashboardComponents/SearchBar";
 import AnimatedBlob from "./DashboardComponents/AnimatedBlob";
 import DashCards from "./DashboardComponents/DashCards";
 import UploadSystem from "./Upload-Attendance/UploadSystem";
@@ -18,7 +17,6 @@ import AdminAchievementDashboard from "./Achievements/AdminAchievementDashboard"
 
 export default function AdminDashBoard({ secRole, SectionofFA, nameOfFA }) {
   const [selectedComponent, setSelectedComponent] = useState(null);
-  const [searchResult, setSearchResult] = useState(null);
   const [searchError, setSearchError] = useState("");
   const [loading, setLoading] = useState(false);
   const db = getFirestore();
@@ -26,27 +24,6 @@ export default function AdminDashBoard({ secRole, SectionofFA, nameOfFA }) {
 
   const handlePlacementMatrixRedirect = () => {
     router.push('/placement-matrix');
-  };
-
-  const handleSearch = async (regNo) => {
-    try {
-      setLoading(true);
-      setSearchError("");
-      setSearchResult(null);
-
-      const studentRef = doc(db, "User", regNo);
-      const studentSnap = await getDoc(studentRef);
-
-      if (studentSnap.exists()) {
-        setSearchResult({ ...studentSnap.data(), regNo });
-      } else {
-        setSearchError("No student found with this registration number");
-      }
-    } catch (err) {
-      setSearchError("Error searching student: " + err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleCardClick = (type) => {
@@ -57,12 +34,10 @@ export default function AdminDashBoard({ secRole, SectionofFA, nameOfFA }) {
   }
   
   setSelectedComponent(type);
-  setSearchResult(null);
 };
 
 
   const renderComponent = () => {
-  if (searchResult) return <SearchComponent studentData={searchResult} />;
 
   switch (selectedComponent) {
     case "uploadAttendance":
