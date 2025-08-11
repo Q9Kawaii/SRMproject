@@ -45,7 +45,7 @@ export default function NavBar({ onHamClick, onLogout }) {
             
             {/* Brand Text */}
             <div className="hidden md:block">
-              <h1 className="text-lg font-bold text-[#0c4da2]">SRM Samadhan</h1>
+              <h1 className="text-lg font-bold text-[#0c4da2]">SRM Shine</h1>
               <p className="text-xs text-gray-600">Student Management Portal</p>
             </div>
           </div>
