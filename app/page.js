@@ -284,43 +284,65 @@ export default function Home() {
 
   // Section/dept prompt for new SRM students or incomplete student info
   if (sectionPrompt) {
-    return (
-      <form
-        onSubmit={handleSectionSubmit}
-        className="section-form flex flex-col items-center justify-center gap-4 p-10 bg-white rounded shadow max-w-md mx-auto mt-10"
-      >
-        <h3 className="text-xl font-semibold">Enter Your Section, Registration Number & Department</h3>
-        <input
-          className="bg-neutral-200 p-2 rounded w-full"
-          type="text"
-          value={section}
-          onChange={(e) => setSection(e.target.value)}
-          placeholder="Section (e.g., CSE-A)"
-          required
-        />
-        <input
-          className="bg-neutral-200 p-2 rounded w-full"
-          type="text"
-          value={regNo}
-          onChange={(e) => setRegNo(e.target.value)}
-          placeholder="Registration Number"
-          required
-        />
-        <input
-          className="bg-neutral-200 p-2 rounded w-full"
-          type="text"
-          value={department}
-          onChange={(e) => setDepartment(e.target.value)}
-          placeholder="Department (e.g., CSE)"
-          required
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Submit
-        </button>
-        {error && <p className="text-red-500">{error}</p>}
-      </form>
-    );
-  }
+  return (
+    <form
+      onSubmit={handleSectionSubmit}
+      className="section-form flex flex-col items-center justify-center gap-4 p-10 bg-white rounded shadow max-w-md mx-auto mt-10"
+    >
+      {isNewUser && newUserUID && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+          <p className="text-sm font-semibold text-[#0c4da2] mb-3 text-center">Your UID is:</p>
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="bg-white rounded-lg px-3 py-2 border border-blue-200 shadow-sm">
+              <span className="font-mono text-[#0c4da2] font-bold text-sm">
+                {newUserUID}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => copyToClipboard(newUserUID)}
+              className="p-2 bg-[#0c4da2] text-white rounded-lg hover:bg-[#3a5b72] transition-colors duration-200 shadow-md hover:shadow-lg"
+            >
+              <Copy className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="text-xs text-gray-600 text-center">Share this UID with admin if required.</div>
+        </div>
+      )}
+
+      <h3 className="text-xl font-semibold">Enter Your Section, Registration Number & Department</h3>
+      <input
+        className="bg-neutral-200 p-2 rounded w-full"
+        type="text"
+        value={section}
+        onChange={(e) => setSection(e.target.value)}
+        placeholder="Section (e.g., CSE-A)"
+        required
+      />
+      <input
+        className="bg-neutral-200 p-2 rounded w-full"
+        type="text"
+        value={regNo}
+        onChange={(e) => setRegNo(e.target.value)}
+        placeholder="Registration Number"
+        required
+      />
+      <input
+        className="bg-neutral-200 p-2 rounded w-full"
+        type="text"
+        value={department}
+        onChange={(e) => setDepartment(e.target.value)}
+        placeholder="Department (e.g., CSE)"
+        required
+      />
+      <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
+        Submit
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
+    </form>
+  );
+}
+
   console.log(`${nameOfFA} from page.js`);
 
   // Dashboard redirection
@@ -330,6 +352,7 @@ export default function Home() {
       {userRole === "teacher" && <AdminDashBoardd secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA}/>}
       {userRole === "student" && <StudentsDashBoard regNo={regNo} section={section} />}
       {!userRole && <div className="error">No role assigned</div>}
+      
     </div>
   );
 }
