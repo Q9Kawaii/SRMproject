@@ -180,7 +180,7 @@ export default function Home() {
             <div className="text-center mb-12">
               <div className="inline-block p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg mb-6">
                 <h1 className="text-4xl sm:text-5xl font-bold text-[#0c4da2] mb-2 lg:text-8xl">
-                  SRM <span className="text-[#3a5b72] relative">
+                  <span className="text-[#3a5b72] relative">
                     SHINE
                     <div className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-full"></div>
                   </span>
