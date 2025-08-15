@@ -1,7 +1,10 @@
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { User, Award, Plus, ChevronDown, ChevronUp, Calendar, MapPin, Building, ExternalLink, Upload, Check, X, BookOpen, Trophy, Users, Briefcase, Star, Shield, DollarSign, FileText, Heart, Clock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { v4 as uuidv4 } from 'uuid';
+
+
 
 //Global Date Conversion Functions : 
 const convertToInputDate = (dateString) => {
@@ -12,6 +15,8 @@ const convertToInputDate = (dateString) => {
     }
     return dateString;
 };
+
+
 
 const convertToBackendDate = (dateString) => {
     if (!dateString) return '';
@@ -241,6 +246,8 @@ const InputField = ({ fieldConfig, value, onChange, studentInfo }) => {
   );
 };
 
+
+
 // Form Card Component - Optimized with useCallback for internal handlers
 const FormCard = ({ category, config, isOpen, onToggle, formData, onInputChange, onSubmit, onCancel, loading, studentInfo }) => {
   const IconComponent = config.icon;
@@ -254,6 +261,10 @@ const FormCard = ({ category, config, isOpen, onToggle, formData, onInputChange,
   const handleSubmit = useCallback(() => {
     onSubmit(category);
   }, [category, onSubmit]);
+
+  const router = useRouter();
+  
+
   
   return (
     <div className="bg-white/60 backdrop-blur-md rounded-3xl shadow-xl border border-white/30 overflow-hidden hover:shadow-2xl hover:bg-white/70 transition-all duration-500">
@@ -326,6 +337,7 @@ const StudentAchievementsPortal = ({ studentRegNo }) => {
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState(null);
+
 
   //* 1. Utility functions / simple callbacks :
 
@@ -651,6 +663,25 @@ const handleSubmit = useCallback(async (category) => {
     }
 }, [formData, studentRegNo, showToast, CATEGORIES_CONFIG, fetchStudentPendingAchievements]); // Removed activeCategory from dependencies, as it's not directly used in the effect body
 
+
+const router = useRouter();
+
+// Simple "Go Back" button (no save):
+const handleGoBack = useCallback(() => {
+  router.back();
+}, [router]);
+
+// OR — if you want it to save active form first:
+const handleSaveAndGoBack = useCallback(async () => {
+  if (!activeCategory) {
+    router.back();
+    return;
+  }
+  await handleSubmit(activeCategory);
+  setTimeout(() => {
+    router.back();
+  }, 500);
+}, [activeCategory, handleSubmit, router]);
 
 // Function to handle dismissing all remarks
 const handleDismissRemarks = useCallback(async () => {
@@ -1034,6 +1065,10 @@ const AchievementsDisplaySection = ({ onEdit, onDelete }) => { // Accept new pro
         `}
       </style>
       <div className="container mx-auto px-4 py-8 max-w-6xl">
+
+       
+
+        
         {BasicInfoHeader}
 
         {/* NEW: Remarks Card - Rendered above Pending Submissions */}
@@ -1082,9 +1117,19 @@ const AchievementsDisplaySection = ({ onEdit, onDelete }) => { // Accept new pro
             </div>
           </div>
         </div>
+         {/* Go Back Button (outside everything) */}
+      <div className="mb-6">
+        <button
+          onClick={handleGoBack} // or handleSaveAndGoBack
+          className="px-6 py-3 bg-gradient-to-r from-gray-500 to-gray-700 text-white rounded-xl hover:from-gray-600 hover:to-gray-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+        >
+          ← Save and Go Back
+        </button>
+      </div>
       </div>
 
       <Toast />
+      
     </div>
   );
 };

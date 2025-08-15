@@ -81,7 +81,13 @@ const AdminAttendancePage = () => {
             const absentRes = await fetch(`/api/get-absent-records?regNo=${encodeURIComponent(student.regNo)}`);
             const absentRecordsRaw = await absentRes.json();
             
+            // --- ADDED/CORRECTED CONSOLE.LOG HERE ---
+            console.log(`Absent records for ${student.name} (${student.regNo}):`, absentRecordsRaw);
+            // --- END ADDITION/CORRECTION ---
+
+            console.log("Checking attendance for:", student.name, student.attendance);
             const lowAttendanceSubjects = getLowAttendanceSubjects(student.attendance || {});
+            console.log("Low attendance for", student.name, "=>", lowAttendanceSubjects);
 
             return {
               ...student,
