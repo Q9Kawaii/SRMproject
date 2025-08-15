@@ -141,6 +141,19 @@ export default function Home() {
     } catch (err) {
       setError("Failed to save section, registration number, or department");
     }
+    await setDoc(
+  doc(db, "User", regNo),   // Or use user.uid if preferred
+  {
+    regNo,
+    name: user.displayName,
+    email: user.email,
+    section,
+    department,
+    role: "student",
+    createdAt: new Date().toISOString(),
+  },
+  { merge: true }
+);
   };
 
   if (loading) return <HamsterLoader />;

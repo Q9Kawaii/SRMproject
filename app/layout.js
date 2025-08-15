@@ -14,14 +14,17 @@ export default function RootLayout({ children }) {
   const router = useRouter();
 
   const handleLogout = async () => {
-    try {
-      const auth = getAuth();
-      await signOut(auth);
-      router.push('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
+  try {
+    setMenuOpen(false); // close side menu instantly
+    const auth = getAuth();
+    await signOut(auth);
+    router.replace('/'); // replace prevents back button returning
+  } catch (error) {
+    console.error('Error signing out:', error);
+  }
+};
+
+
 
   return (
     <html lang="en">

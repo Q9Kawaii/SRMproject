@@ -97,38 +97,43 @@
      }, []);
 
      const handleApprove = async (pendingUpdateId, regNo, formType, updates, original) => {
-         setLoading(true);
-         const batch = writeBatch(db);
+    setLoading(true);
+    const batch = writeBatch(db);
 
-         try {
-             // 1. Update the form under /User/{regNo}/{formType}/{regNo}
-             const formDocRef = doc(db, "User", regNo, formType, regNo);
-             batch.set(formDocRef, { ...updates, timestamp: serverTimestamp() }, { merge: true });
+    try {
+        // Filter out undefined values to prevent Firestore errors
+        const filteredUpdates = Object.fromEntries(
+            Object.entries(updates).filter(([key, value]) => value !== undefined)
+        );
 
-             // 2. Update the main /User/{regNo} doc
-             const studentDocRef = doc(db, "User", regNo);
-             batch.set(studentDocRef, { ...updates, lastApprovedSubmission: serverTimestamp() }, { merge: true });
+        // 1. Update form doc
+        const formDocRef = doc(db, "User", regNo, formType, regNo);
+        batch.set(formDocRef, { ...filteredUpdates, timestamp: serverTimestamp() }, { merge: true });
 
-             // 3. Update PendingUpdates:
-             const pendingUpdateRef = doc(db, "PendingUpdates", pendingUpdateId);
+        // 2. Update main user doc
+        const studentDocRef = doc(db, "User", regNo);
+        batch.set(studentDocRef, { ...filteredUpdates, lastApprovedSubmission: serverTimestamp() }, { merge: true });
 
-             batch.update(pendingUpdateRef, {
-                 status: "approved",
-                 approvedAt: serverTimestamp(),
-                 original: { ...original, ...updates }, 
-                 updates: deleteField(), 
-             });
+        // 3. Update PendingUpdates status
+        const pendingUpdateRef = doc(db, "PendingUpdates", pendingUpdateId);
+        batch.update(pendingUpdateRef, {
+            status: "approved",
+            approvedAt: serverTimestamp(),
+            original: { ...original, ...filteredUpdates },
+            updates: deleteField(),
+        });
 
-             await batch.commit();
-             alert(`Approved ${formType} update for ${regNo}.`);
-             fetchPendingUpdates();
-         } catch (error) {
-             console.error("Error approving update:", error);
-             alert("Failed to approve update. Please check console.");
-         } finally {
-             setLoading(false);
-         }
-     };
+        await batch.commit();
+        alert(`Approved ${formType} update for ${regNo}.`);
+        fetchPendingUpdates();
+    } catch (error) {
+        console.error("Error approving update:", error);
+        alert("Failed to approve update. Please check console.");
+    } finally {
+        setLoading(false);
+    }
+};
+
 
 
 
