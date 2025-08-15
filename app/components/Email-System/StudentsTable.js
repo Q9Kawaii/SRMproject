@@ -430,10 +430,8 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Select</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Name</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Reg. No</th>
-                      <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Section</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Student Email</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Parent Email</th>
-                      <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">FA Email</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">All Subjects Attendance</th>
                     </tr>
                   </thead>
@@ -451,10 +449,8 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
                         </td>
                         <td className="px-4 py-4 text-center font-medium text-gray-900">{s.name}</td>
                         <td className="px-4 py-4 text-center text-gray-600">{s.regNo || "—"}</td>
-                        <td className="px-4 py-4 text-center text-gray-600">{s.section || "—"}</td>
                         <td className="px-4 py-4 text-center text-sm text-gray-600">{s.email}</td>
                         <td className="px-4 py-4 text-center text-sm text-gray-600">{s.parentEmail}</td>
-                        <td className="px-4 py-4 text-center text-sm text-gray-600">{s.faEmail}</td>
                         <td className="px-4 py-4 text-center">
                           <div className="flex flex-wrap gap-1 justify-center">
                             {s.attendance

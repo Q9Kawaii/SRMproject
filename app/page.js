@@ -356,7 +356,6 @@ export default function Home() {
   );
 }
 
-  console.log(`${nameOfFA} from page.js`);
 
   // Dashboard redirection
   return (

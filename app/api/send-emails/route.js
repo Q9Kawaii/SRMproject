@@ -2,12 +2,22 @@ console.log("[API] /api/send-emails hit");
 import { adminDb } from "@/lib/firebase-admin";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Debug environment setup
 console.log("Resend API Key:", process.env.RESEND_API_KEY);
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 export async function POST(request) {
+  console.log("[API] POST request received at /api/send-emails");
+
   try {
-    const { studentIds, type, imageMap } = await request.json();
+    const body = await request.json();
+    console.log("[API] Request body parsed:", JSON.stringify(body, null, 2));
+
+    const { studentIds, type, imageMap } = body;
+    console.log("studentIds:", studentIds);
+    console.log("type:", type);
+    console.log("imageMap keys:", imageMap ? Object.keys(imageMap) : "no imageMap");
 
     if (!Array.isArray(studentIds) || studentIds.length === 0) {
       console.warn("[API] No students selected");
@@ -22,6 +32,9 @@ export async function POST(request) {
     const results = [];
 
     for (const id of studentIds) {
+      console.log("\n-------------------------------");
+      console.log(`[API] Processing student ID: ${id}`);
+
       try {
         if (!id) {
           console.warn("[SKIP] Missing student ID");
@@ -30,6 +43,7 @@ export async function POST(request) {
         }
 
         const studentSnap = await adminDb.collection("User").doc(id).get();
+        console.log(`[API] Firestore get doc for ID ${id} result: exists=${studentSnap.exists}`);
 
         if (!studentSnap.exists) {
           console.warn(`[SKIP] Student not found for ID: ${id}`);
@@ -38,6 +52,8 @@ export async function POST(request) {
         }
 
         const student = studentSnap.data();
+        console.log(`[API] Student data:`, JSON.stringify(student, null, 2));
+
         const requiredFields = ["name", "email", "parentEmail", "faEmail", "regNo", "section"];
         if (type === "attendance") requiredFields.push("attendance");
         if (type === "marks") requiredFields.push("marks");
@@ -53,7 +69,7 @@ export async function POST(request) {
         const subjectEntries = [];
 
         if (subjectData && typeof subjectData === "object") {
-          for (const [subject, value] of Object.entries(subjectData)) {
+          Object.entries(subjectData).forEach(([subject, value]) => {
             const parsed = typeof value === "string" ? parseFloat(value) : value;
             if (type === "attendance" && !isNaN(parsed) && parsed < 75) {
               subjectEntries.push(`${subject}: ${parsed}%`);
@@ -61,8 +77,9 @@ export async function POST(request) {
             if (type === "marks") {
               subjectEntries.push(`${subject}: ${parsed}`);
             }
-          }
+          });
         }
+        console.log(`[API] Subject Entries:`, subjectEntries);
 
         if (type === "attendance" && subjectEntries.length === 0) {
           console.log(`[SKIP] ${student.name} has no low attendance.`);
@@ -72,28 +89,32 @@ export async function POST(request) {
 
         const subjectLine = type === "attendance" ? "Attendance Alert" : "Marks Report";
         const subjectColor = type === "attendance" ? "#d93025" : "#1a73e8";
-
-        const messageBody =
-          type === "attendance"
-            ? `your attendance is currently below <strong>75%</strong> in the following subject(s):`
-            : `your marks for recent assessments are as follows:`;
-
+        const messageBody = type === "attendance"
+          ? `your attendance is currently below <strong>75%</strong> in the following subject(s):`
+          : `your marks for recent assessments are as follows:`;
         const htmlList = subjectEntries.map((item) => `<li>${item}</li>`).join("");
 
+        // Attachment handling
         let attachments = [];
         const regNoKey = (student.regNo ?? "").trim().toLowerCase();
-        console.log("ATTACHMENT CHECK", { regNo: student.regNo, regNoKey, found: !!imageMap[regNoKey] });
+        console.log("[ATTACHMENT CHECK]", { regNo: student.regNo, regNoKey, found: !!imageMap?.[regNoKey] });
+
         if (regNoKey && imageMap?.[regNoKey]) {
           try {
             const imageUrl = imageMap[regNoKey];
-            const imageBuffer = await fetch(imageUrl).then((res) => res.arrayBuffer());
-            console.log("🧪 Image buffer byteLength:", imageBuffer.byteLength);
-            console.log("[ATTACHMENT DEBUG]", { regNoKey, imageUrl });
-            const base64 = Buffer.from(imageBuffer).toString("base64");
-            if (!imageBuffer || imageBuffer.byteLength === 0) {
-              console.warn("⚠️ Empty image buffer for", imageUrl);
-              throw new Error("Empty image buffer");
+            console.log(`[ATTACHMENT] Fetching image from: ${imageUrl}`);
+            const imageResponse = await fetch(imageUrl);
+
+            if (!imageResponse.ok) {
+              throw new Error(`Image fetch failed: ${imageResponse.status} ${imageResponse.statusText}`);
             }
+
+            const imageBuffer = await imageResponse.arrayBuffer();
+            console.log("[ATTACHMENT] Image buffer byteLength:", imageBuffer.byteLength);
+
+            if (!imageBuffer || imageBuffer.byteLength === 0) throw new Error("Empty image buffer");
+
+            const base64 = Buffer.from(imageBuffer).toString("base64");
 
             attachments.push({
               filename: `${student.regNo}.jpg`,
@@ -101,11 +122,13 @@ export async function POST(request) {
               type: "image/jpeg",
               disposition: "attachment",
             });
+            console.log(`[ATTACHMENT] Prepared for ${student.regNo}`);
           } catch (err) {
             console.warn(`[ATTACHMENT FAIL] Couldn't fetch/convert image for ${student.regNo}:`, err.message);
           }
         }
 
+        // Prepare emails
         const studentEmail = {
           from: "School Alerts <noreply@yashdingar.xyz>",
           to: student.email,
@@ -173,34 +196,44 @@ export async function POST(request) {
           attachments,
         };
 
-        // Send all three emails in parallel with fail-safe
-        console.log(`[SENDING] Sending emails for ${student.name} to:`, {
-          student: student.email,
-          parent: student.parentEmail,
-          fa: student.faEmail
-        });
-
-        const studentResult = await resend.emails.send(studentEmail);
-        await new Promise((r) => setTimeout(r, 600));
-
-        const parentResult = await resend.emails.send(parentEmail);
-        await new Promise((r) => setTimeout(r, 600));
-
-        const faResult = await resend.emails.send(faEmail);
-
-
-        await new Promise((r) => setTimeout(r, 600));
+        // Send all three emails in sequence and log everything
+        console.log(`[SENDING] Trying to deliver emails for ${student.name}`);
+        console.log("Student Email Params:", JSON.stringify(studentEmail, null, 2));
+        let studentResult, parentResult, faResult;
         
-        const studentSent = studentResult.status === "fulfilled" && studentResult.value?.data?.id && !studentResult.value?.error;
-        const parentSent = parentResult.status === "fulfilled" && parentResult.value?.data?.id && !parentResult.value?.error;
-        const faSent = faResult.status === "fulfilled" && faResult.value?.data?.id && !faResult.value?.error;
+        try {
+          studentResult = await resend.emails.send(studentEmail);
+          console.log("Student Email Result:", JSON.stringify(studentResult, null, 2));
+        } catch (e) {
+          studentResult = { error: e.message };
+          console.error("[SEND FAIL] Student email:", e);
+        }
+        await new Promise((r) => setTimeout(r, 600));
 
+        try {
+          parentResult = await resend.emails.send(parentEmail);
+          console.log("Parent Email Result:", JSON.stringify(parentResult, null, 2));
+        } catch (e) {
+          parentResult = { error: e.message };
+          console.error("[SEND FAIL] Parent email:", e);
+        }
+        await new Promise((r) => setTimeout(r, 600));
 
-        console.log(`[EMAIL RESULTS] ${student.name}:`);
-        console.log(`  Student Email (${student.email}):`, studentSent ? "SUCCESS" : "FAILED", studentResult);
-        console.log(`  Parent Email (${student.parentEmail}):`, parentSent ? "SUCCESS" : "FAILED", parentResult);
-        console.log(`  FA Email (${student.faEmail}):`, faSent ? "SUCCESS" : "FAILED", faResult);
-        console.log("  ATTACHMENTS SENT:", attachments.map((a) => a.filename));
+        try {
+          faResult = await resend.emails.send(faEmail);
+          console.log("FA Email Result:", JSON.stringify(faResult, null, 2));
+        } catch (e) {
+          faResult = { error: e.message };
+          console.error("[SEND FAIL] Faculty Advisor email:", e);
+        }
+
+        // Analyze send results
+        const studentSent = !!(studentResult?.id);
+        const parentSent = !!(parentResult?.id);
+        const faSent = !!(faResult?.id);
+
+        console.log(`[RESULT] Student Sent: ${studentSent}, Parent Sent: ${parentSent}, FA Sent: ${faSent}`);
+        console.log("[ATTACHMENTS SENT]:", attachments.map((a) => a.filename));
 
         const failedEmails = [];
         if (!studentSent) failedEmails.push("student");
@@ -213,14 +246,14 @@ export async function POST(request) {
             id,
             status: "partial",
             reason: `Failed to send to: ${failedEmails.join(", ")}`,
-            details: { studentSent, parentSent, faSent }
+            details: { studentResult, parentResult, faResult }
           });
         } else {
           console.log(`[SUCCESS] All emails sent for ${student.name}`);
           results.push({
             id,
             status: "success",
-            details: { studentSent: true, parentSent: true, faSent: true }
+            details: { studentResult, parentResult, faResult }
           });
         }
 
@@ -228,9 +261,13 @@ export async function POST(request) {
         console.error(`[ERROR] Sending emails for student ID ${id}:`, error);
         results.push({ id, status: "failed", reason: error.message });
       }
+
+      console.log("---------------------------------------");
     }
 
+    console.log("[API] All processing done. Results:", JSON.stringify(results, null, 2));
     return Response.json({ results });
+
   } catch (err) {
     console.error("[API] Fatal error:", err);
     return Response.json(
