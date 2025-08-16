@@ -18,11 +18,11 @@ const parseDisplayName = (displayName) => {
   if (!displayName) return { name: "", regNo: "" };
   const match = displayName.match(/^(.*?)\s*\((.*?)\)$/);
   if (match) {
-    return { name: match[1].trim(), regNo: match.trim() };
+    return { name: match[1].trim(), regNo: match[2].trim() };
   }
-  // fallback (no brackets found)
   return { name: displayName.trim(), regNo: "" };
 };
+
 
 export default function Home() {
   const [userRole, setUserRole] = useState(null);
