@@ -1,25 +1,23 @@
-import { NextResponse } from "next/server";
-import { approvePendingUpdate } from '@/app/components/Achievements/achievementFns';
+import { NextResponse } from 'next/server';
+import { bulkAlertStudents } from '../../../attendanceLogic'; // Corrected path
 
-
-export async function POST(req) {
+export async function POST(request) {
   try {
-    const { regNo } = await req.json();
+    const { regNos, dateStr } = await request.json(); // Access body
 
-    if (!regNo) {
-      return NextResponse.json({
-        success: false,
-        message: "Missing regNo"
-      });
+    if (!Array.isArray(regNos) || !dateStr) {
+      return NextResponse.json({ error: 'regNos (array) and dateStr are required' }, { status: 400 });
     }
 
-    const response = await approvePendingUpdate(regNo);
-    return NextResponse.json(response);
-  } catch (err) {
-    console.error("API error in approve-pending-update:", err);
-    return NextResponse.json({
-      success: false,
-      message: "Server error"
-    });
+    const result = await bulkAlertStudents(regNos, dateStr);
+    return NextResponse.json({ success: true, result }, { status: 200 });
+  } catch (error) {
+    console.error('[bulk-alert-students]', error);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
+}
+
+// Optional: Add other HTTP methods if needed
+export async function GET(request) {
+  return NextResponse.json({ error: 'GET method not allowed for this API.' }, { status: 405 });
 }
