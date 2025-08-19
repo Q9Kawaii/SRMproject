@@ -1,7 +1,11 @@
 import Image from 'next/image';
-import { LogOut } from 'lucide-react';
+import { LogOut, ArrowLeft } from 'lucide-react';
 
 export default function NavBar({ onHamClick, onLogout }) {
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
   return (
     <div className="w-full relative overflow-hidden">
       {/* Animated Background Elements */}
@@ -50,8 +54,18 @@ export default function NavBar({ onHamClick, onLogout }) {
             </div>
           </div>
           
-          {/* Right side with logout button and hamburger menu */}
-          <div className="flex items-center gap-4">
+          {/* Right side with back button, logout button and hamburger menu */}
+          <div className="flex items-center gap-3">
+            
+            {/* Back Button */}
+            <button
+              onClick={handleGoBack}
+              className="group flex items-center gap-2 px-4 py-3 bg-white/80 backdrop-blur-sm text-[#0c4da2] hover:bg-gradient-to-r hover:from-[#0c4da2] hover:to-[#3a5b72] hover:text-white rounded-xl transition-all duration-300 font-medium text-sm shadow-lg border border-blue-100 hover:shadow-xl transform hover:-translate-y-0.5"
+              title="Go Back"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform duration-300" />
+              <span className="hidden sm:inline">Back</span>
+            </button>
             
             {/* Logout Button */}
             <button

@@ -21,6 +21,11 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
   const [pdfProcessingStatus, setPdfProcessingStatus] = useState("");
   const [sendingAALog, setSendingAALog] = useState(false);
   const [aaLogSent, setAALogSent] = useState(false);
+  
+  // New states for email editing
+  const [editingEmailId, setEditingEmailId] = useState(null);
+  const [editedEmail, setEditedEmail] = useState("");
+  const [savingEmail, setSavingEmail] = useState(false);
 
   const deleteStudent = async (id) => {
     try {
@@ -30,6 +35,62 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
       console.error("Failed to delete student:", error);
       alert("Error deleting student.");
     }
+  };
+
+  // New function to update parent email
+  const updateParentEmail = async (studentId, newEmail) => {
+    if (!newEmail.trim()) {
+      alert("Please enter a valid email address.");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      alert("Please enter a valid email format.");
+      return;
+    }
+
+    try {
+      setSavingEmail(true);
+      
+      // Update in Firebase
+      await updateDoc(doc(db, "User", studentId), {
+        parentEmail: newEmail.trim()
+      });
+
+      // Update local state
+      setStudents((prev) => 
+        prev.map(student => 
+          student.id === studentId 
+            ? { ...student, parentEmail: newEmail.trim() }
+            : student
+        )
+      );
+
+      // Reset editing state
+      setEditingEmailId(null);
+      setEditedEmail("");
+      
+      alert("Parent email updated successfully!");
+    } catch (error) {
+      console.error("Error updating parent email:", error);
+      alert("Failed to update email. Please try again.");
+    } finally {
+      setSavingEmail(false);
+    }
+  };
+
+  // Function to start editing
+  const startEditing = (studentId, currentEmail) => {
+    setEditingEmailId(studentId);
+    setEditedEmail(currentEmail || "");
+  };
+
+  // Function to cancel editing
+  const cancelEditing = () => {
+    setEditingEmailId(null);
+    setEditedEmail("");
   };
 
   useEffect(() => {
@@ -430,7 +491,6 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Select</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Name</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Reg. No</th>
-                      <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Student Email</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">Parent Email</th>
                       <th className="px-4 py-4 text-center text-sm font-bold text-gray-700 border-b border-gray-200">All Subjects Attendance</th>
                     </tr>
@@ -449,8 +509,56 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
                         </td>
                         <td className="px-4 py-4 text-center font-medium text-gray-900">{s.name}</td>
                         <td className="px-4 py-4 text-center text-gray-600">{s.regNo || "—"}</td>
-                        <td className="px-4 py-4 text-center text-sm text-gray-600">{s.email}</td>
-                        <td className="px-4 py-4 text-center text-sm text-gray-600">{s.parentEmail}</td>
+                        
+                        {/* Updated Parent Email Column with Edit Functionality */}
+                        <td className="px-4 py-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {editingEmailId === s.id ? (
+                              // Edit Mode
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="email"
+                                  value={editedEmail}
+                                  onChange={(e) => setEditedEmail(e.target.value)}
+                                  className="px-2 py-1 border border-blue-300 rounded-lg text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200 min-w-[200px]"
+                                  placeholder="Enter parent email"
+                                  disabled={savingEmail}
+                                />
+                                <button
+                                  onClick={() => updateParentEmail(s.id, editedEmail)}
+                                  disabled={savingEmail}
+                                  className="px-3 py-1 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-all duration-200 disabled:bg-gray-400"
+                                >
+                                  {savingEmail ? "Saving..." : "Save"}
+                                </button>
+                                <button
+                                  onClick={cancelEditing}
+                                  disabled={savingEmail}
+                                  className="px-3 py-1 bg-gray-500 text-white rounded-lg text-xs font-semibold hover:bg-gray-600 transition-all duration-200"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              // Display Mode
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600 min-w-[150px]">
+                                  {s.parentEmail || "No email set"}
+                                </span>
+                                <button
+                                  onClick={() => startEditing(s.id, s.parentEmail)}
+                                  disabled={sendingEmails || editingEmailId !== null}
+                                  className="px-2 py-1 bg-blue-100 text-blue-600 rounded-lg text-xs font-semibold hover:bg-blue-200 transition-all duration-200 disabled:bg-gray-100 disabled:text-gray-400"
+                                >
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+
                         <td className="px-4 py-4 text-center">
                           <div className="flex flex-wrap gap-1 justify-center">
                             {s.attendance
@@ -500,7 +608,7 @@ export default function StudentsTable({SectionofFA, nameOfFA}) {
                     >
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
+                    </svg>
                       Download Email Log (PDF)
                     </button>
                   )}
