@@ -541,7 +541,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                     />
                                     <span className="text-gray-700">Section</span>
                                 </label>
-                                <label className="flex items-center space-x-2 cursor-pointer">
+                                {/* <label className="flex items-center space-x-2 cursor-pointer">
                                     <input
                                         type="radio"
                                         name="searchType"
@@ -551,7 +551,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                         className="form-radio h-4 w-4 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="text-gray-700">Batch (All Students)</span>
-                                </label>
+                                </label> */}
                             </div>
                         </div>
 
