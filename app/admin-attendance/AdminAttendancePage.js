@@ -30,8 +30,22 @@ const AdminAttendancePage = () => {
   const [selectedMonth, setSelectedMonth] = useState('');
   const [processingActions, setProcessingActions] = useState(new Set()); // For granular button loading states
   const [message, setMessage] = useState({ type: '', text: '' }); // For user feedback messages
+  const [remarksMap, setRemarksMap] = useState({});
+  const getRemarkKey = (regNo, dateStr) => `${regNo}_${dateStr}`;
   const [showConfirmBulkAlert, setShowConfirmBulkAlert] = useState(false); // For custom bulk alert confirmation modal
   
+
+  // Get remark text for a specific alert
+  const getRemark = (regNo, dateStr) => {
+    const key = getRemarkKey(regNo, dateStr);
+    return remarksMap[key] || "";
+  };
+
+  // Set remark text for a specific alert
+  const setRemark = (regNo, dateStr, text) => {
+    const key = getRemarkKey(regNo, dateStr);
+    setRemarksMap(prev => ({ ...prev, [key]: text }));
+  };
 
   // Clears messages after a delay
   useEffect(() => {
@@ -78,7 +92,8 @@ const AdminAttendancePage = () => {
       const enrichedStudents = await Promise.all(
         studentsData.map(async (student) => {
           try {
-            const absentRes = await fetch(`/api/get-absent-records?regNo=${encodeURIComponent(student.regNo)}`);
+            // const absentRes = await fetch(`/api/get-absent-records?regNo=${encodeURIComponent(student.regNo)}`);
+            const absentRes = await fetch(`/api/get-absent-records?regNo=${encodeURIComponent(student.regNo)}&role=${encodeURIComponent(secRole)}`);
             const absentRecordsRaw = await absentRes.json();
             
             // --- ADDED/CORRECTED CONSOLE.LOG HERE ---
@@ -236,27 +251,33 @@ const confirmBulkAlert = async () => {
   }
 };
 
-
-  // Handle FA approval
-  const handleFAApproval = async (regNo, dateStr) => {
-    const actionKey = `fa-${regNo}-${dateStr}`;
+  // Handle FA verify (status = 1)
+  const handleFAVerify = async (regNo, dateStr) => {
+    const actionKey = `fa-verify-${regNo}-${dateStr}`;
     if (processingActions.has(actionKey)) return;
 
     setProcessingActions(prev => new Set([...prev, actionKey]));
     setMessage({ type: '', text: '' });
 
     try {
-      await fetch('/api/approve-fa', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ regNo, dateStr }),
-    });
+      const remarks = getRemark(regNo, dateStr) || "NA";
 
-      setMessage({ type: 'success', text: `FA approval for ${regNo} on ${dateStr} successful.` });
-      await handleSectionSearch(); // Refresh data
+      const res = await fetch('/api/approve-fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regNo, dateStr, remarks }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'FA verify failed');
+      }
+
+      setMessage({ type: 'success', text: `FA verified for ${regNo} on ${dateStr}.` });
+      await handleSectionSearch(); // Refresh data after change
     } catch (error) {
-      console.error('Error in FA approval:', error);
-      setMessage({ type: 'error', text: `Failed to approve FA for ${regNo} on ${dateStr}: ${error.message}.` });
+      console.error('Error in FA verify:', error);
+      setMessage({ type: 'error', text: `Failed to verify FA for ${regNo} on ${dateStr}: ${error.message}` });
     } finally {
       setProcessingActions(prev => {
         const newSet = new Set(prev);
@@ -266,20 +287,63 @@ const confirmBulkAlert = async () => {
     }
   };
 
-  // Handle AA approval
-  const handleAAApproval = async (regNo, dateStr) => {
-    const actionKey = `aa-${regNo}-${dateStr}`;
+  // Handle FA verify & forward (status = 2)
+  const handleFAForward = async (regNo, dateStr) => {
+    const actionKey = `fa-forward-${regNo}-${dateStr}`;
     if (processingActions.has(actionKey)) return;
 
     setProcessingActions(prev => new Set([...prev, actionKey]));
     setMessage({ type: '', text: '' });
 
     try {
-      await fetch('/api/approve-aa', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ regNo, dateStr }),
-    });
+      const remarks = getRemark(regNo, dateStr) || "NA";
+
+      const res = await fetch('/api/forward-fa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regNo, dateStr, remarks }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'FA forward failed');
+      }
+
+      setMessage({ type: 'success', text: `FA forwarded for ${regNo} on ${dateStr}.` });
+      await handleSectionSearch(); // Refresh data
+    } catch (error) {
+      console.error('Error in FA forward:', error);
+      setMessage({ type: 'error', text: `Failed to forward FA for ${regNo} on ${dateStr}: ${error.message}` });
+    } finally {
+      setProcessingActions(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(actionKey);
+        return newSet;
+      });
+    }
+  };
+
+    // Handle AA approval
+  const handleAAApproval = async (regNo, dateStr) => {
+    const actionKey = `aa-verify-${regNo}-${dateStr}`;
+    if (processingActions.has(actionKey)) return;
+
+    setProcessingActions(prev => new Set([...prev, actionKey]));
+    setMessage({ type: '', text: '' });
+
+    try {
+      const remarks = getRemark(regNo, dateStr) || "NA";
+
+      const res = await fetch('/api/approve-aa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ regNo, dateStr, remarks }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || 'AA approval failed');
+      }
 
       setMessage({ type: 'success', text: `AA approval for ${regNo} on ${dateStr} successful.` });
       await handleSectionSearch(); // Refresh data
@@ -356,14 +420,20 @@ const confirmBulkAlert = async () => {
 
   // Helper to get status badge for an individual absent record
   const getRecordStatusBadge = (record) => {
-    // This assumes the record object has boolean properties for faApproved, aaApproved, and resolved
-    // as parsed by the getAbsentRecords function in attendanceLogic.js
-    if (record.resolved) {
+    // Support both old boolean fields and new faStatus string
+    const faStatusRaw = (record.faStatus !== undefined && record.faStatus !== null) ? String(record.faStatus) : (record.faApproved ? '1' : '0');
+    const faApproved = record.faApproved === true || faStatusRaw === '1' || faStatusRaw === '2';
+    const faForwarded = record.faForwarded === true || faStatusRaw === '2';
+    const aaApproved = record.aaApproved === true || String(record.aaApproved) === '1';
+    const resolved = record.resolved === true || (faForwarded && aaApproved);
+
+    if (resolved) {
       return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs flex items-center gap-1"><Check size={12} />Resolved</span>;
-    } else if (record.faApproved) {
-      return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs flex items-center gap-1">FA Approved</span>;
-    } else if (record.aaApproved) {
-      // This state implies AA approved without FA, which might be a business rule violation depending on flow
+    } else if (faForwarded) {
+      return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs flex items-center gap-1">FA Forwarded</span>;
+    } else if (faApproved) {
+      return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs flex items-center gap-1">FA Verified</span>;
+    } else if (aaApproved) {
       return <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs flex items-center gap-1">AA Approved (FA Pending)</span>;
     } else {
       return <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs flex items-center gap-1"><AlertTriangle size={12} />Pending</span>;
@@ -608,6 +678,9 @@ const confirmBulkAlert = async () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reg. No</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Low Att. Subjects</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">All Subjects Att.</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Absent Details & Controls</th>
                     </tr>
@@ -624,7 +697,25 @@ const confirmBulkAlert = async () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{student.name}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.regNo}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.section}</td>
-
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline cursor-pointer">
+                          <a href={`mailto:${student.email}`}>{student.email}</a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline cursor-pointer">
+                          <a href={`mailto:${student.parentEmail}`}>{student.parentEmail}</a>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-wrap gap-1">
+                            {student.lowAttendanceSubjects.length > 0 ? (
+                              student.lowAttendanceSubjects.map((subject) => (
+                                <span key={subject} className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
+                                  {subject}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">None</span>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-wrap gap-1">
                             {Object.entries(student.attendance || {}).map(([subject, percentage]) => (
@@ -652,39 +743,87 @@ const confirmBulkAlert = async () => {
                                     <p className="flex items-center gap-1"><Clock size={12} /> Alerted: {record.alertTimestamp || '—'}</p>
                                     <p className="flex items-center gap-1"><Clock size={12} /> FA Time: {record.faTimestamp || '—'}</p>
                                     <p className="flex items-center gap-1"><Clock size={12} /> AA Time: {record.aaTimestamp || '—'}</p>
+
+                                    {/* Show stored remarks (if any) */}
+                                    <p className="flex items-center gap-1 text-sm text-gray-600"><strong>FA Remarks:</strong> {record.faRemarks && record.faRemarks !== 'NA' ? record.faRemarks : '—'}</p>
+                                    <p className="flex items-center gap-1 text-sm text-gray-600"><strong>AA Remarks:</strong> {record.aaRemarks && record.aaRemarks !== 'NA' ? record.aaRemarks : '—'}</p>
                                   </div>
-                                  <div className="mt-2 flex gap-2">
-                                    <motion.button
-                                      whileHover={{ scale: secRole === 'FA' && !record.faApproved ? 1.05 : 1 }}
-                                      whileTap={{ scale: secRole === 'FA' && !record.faApproved ? 0.95 : 1 }}
-                                      onClick={() => handleFAApproval(student.regNo, record.date)}
-                                      // Disable if already approved by FA, or if current role is not FA
-                                      // or if this specific action is being processed
-                                      disabled={record.faApproved || secRole !== 'FA' || processingActions.has(`fa-${student.regNo}-${record.date}`)}
-                                      className={`px-3 py-1 text-xs font-medium rounded-md transition-all duration-200 shadow-sm
-                                        ${record.faApproved || secRole !== 'FA'
-                                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                          : 'bg-blue-500 text-white hover:bg-blue-600 transform hover:scale-105'
-                                        }`}
-                                    >
-                                      {processingActions.has(`fa-${student.regNo}-${record.date}`) ? 'Approving...' : (record.faApproved ? 'FA Approved' : 'FA Approve')}
-                                    </motion.button>
-                                    <motion.button
-                                      whileHover={{ scale: secRole === 'AA' && !record.aaApproved ? 1.05 : 1 }}
-                                      whileTap={{ scale: secRole === 'AA' && !record.aaApproved ? 0.95 : 1 }}
-                                      onClick={() => handleAAApproval(student.regNo, record.date)}
-                                      // Disable if already approved by AA, or if current role is not AA
-                                      // or if this specific action is being processed
-                                      disabled={record.aaApproved || secRole !== 'AA' || processingActions.has(`aa-${student.regNo}-${record.date}`)}
-                                      className={`px-3 py-1 text-xs font-medium rounded-md transition-all duration-200 shadow-sm
-                                        ${record.aaApproved || secRole !== 'AA'
-                                          ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                                          : 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105'
-                                        }`}
-                                    >
-                                      {processingActions.has(`aa-${student.regNo}-${record.date}`) ? 'Approving...' : (record.aaApproved ? 'AA Approved' : 'AA Approve')}
-                                    </motion.button>
+
+                                                                    {/* Remarks input + action buttons */}
+                                  <div className="mt-2 space-y-2">
+                                    {/* Remarks input for this alert */}
+                                    <input
+                                      type="text"
+                                      value={getRemark(student.regNo, record.date)}
+                                      onChange={(e) => setRemark(student.regNo, record.date, e.target.value)}
+                                      placeholder="Add remarks (optional)"
+                                      className="w-full p-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    />
+
+                                    <div className="flex gap-2">
+                                      {/* FA controls (visible only for FA role) */}
+                                      {secRole === 'FA' && (
+                                        <>
+                                          {(() => {
+                                            // Compute flags (supports old/new backend shapes)
+                                            const faStatusRaw = record.faStatus ?? (record.faApproved ? '1' : '0');
+                                            const isFaVerified = record.faApproved === true || faStatusRaw === '1' || faStatusRaw === '2';
+                                            const isFaForwarded = record.faForwarded === true || faStatusRaw === '2';
+
+                                            return (
+                                              <>
+                                                <motion.button
+                                                  whileHover={{ scale: !isFaVerified ? 1.05 : 1 }}
+                                                  whileTap={{ scale: !isFaVerified ? 0.95 : 1 }}
+                                                  onClick={() => handleFAVerify(student.regNo, record.date)}
+                                                  disabled={isFaVerified || processingActions.has(`fa-verify-${student.regNo}-${record.date}`)}
+                                                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all duration-200 shadow-sm
+                                                    ${isFaVerified
+                                                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                                      : 'bg-blue-500 text-white hover:bg-blue-600 transform hover:scale-105'
+                                                    }`}
+                                                >
+                                                  {processingActions.has(`fa-verify-${student.regNo}-${record.date}`) ? 'Verifying...' : (isFaVerified ? 'Verified' : 'Verify')}
+                                                </motion.button>
+
+                                                <motion.button
+                                                  whileHover={{ scale: !isFaForwarded ? 1.05 : 1 }}
+                                                  whileTap={{ scale: !isFaForwarded ? 0.95 : 1 }}
+                                                  onClick={() => handleFAForward(student.regNo, record.date)}
+                                                  disabled={isFaForwarded || processingActions.has(`fa-forward-${student.regNo}-${record.date}`)}
+                                                  className={`px-3 py-1 text-xs font-medium rounded-md transition-all duration-200 shadow-sm
+                                                    ${isFaForwarded
+                                                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                                      : 'bg-indigo-600 text-white hover:bg-indigo-700 transform hover:scale-105'
+                                                    }`}
+                                                >
+                                                  {processingActions.has(`fa-forward-${student.regNo}-${record.date}`) ? 'Forwarding...' : (isFaForwarded ? 'Forwarded' : 'Verify & Forward')}
+                                                </motion.button>
+                                              </>
+                                            );
+                                          })()}
+                                        </>
+                                      )}
+
+                                      {/* AA control (visible only to AA) */}
+                                      {secRole === 'AA' && (
+                                        <motion.button
+                                          whileHover={{ scale: !record.aaApproved ? 1.05 : 1 }}
+                                          whileTap={{ scale: !record.aaApproved ? 0.95 : 1 }}
+                                          onClick={() => handleAAApproval(student.regNo, record.date)}
+                                          disabled={record.aaApproved || processingActions.has(`aa-verify-${student.regNo}-${record.date}`)}
+                                          className={`px-3 py-1 text-xs font-medium rounded-md transition-all duration-200 shadow-sm
+                                            ${record.aaApproved
+                                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                              : 'bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105'
+                                            }`}
+                                        >
+                                          {processingActions.has(`aa-verify-${student.regNo}-${record.date}`) ? 'Verifying...' : (record.aaApproved ? 'Verified' : 'Verify')}
+                                        </motion.button>
+                                      )}
+                                    </div>
                                   </div>
+
                                 </div>
                               ))
                             ) : (

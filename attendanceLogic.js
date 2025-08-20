@@ -24,6 +24,13 @@
 
   // ========== Core Functions ==========
 
+  function sanitizeInput(input) {
+  if (!input || typeof input !== "string") return "NA";
+  return input.replace(/~/g, "-").trim(); // replace ~ with hyphen
+}
+
+
+
   // Fetch students by section
   export async function fetchStudentsBySection(section) {
     try {
@@ -45,7 +52,8 @@
       const doc = await ref.get();
       if (!doc.exists) throw new Error("Student not found");
 
-      const newAlert = `0~0~~NA~NA~${getTimestamp()}`;
+      // const newAlert = `0~0~~NA~NA~${getTimestamp()}`;
+      const newAlert = `0~0~~NA~NA~${getTimestamp()}~NA~NA`;
       await ref.set(
         {
           absentRecords: {
@@ -93,7 +101,8 @@
       if (!record) throw new Error("Alert not raised for this date"); // More specific error message
 
       const parts = record.split("~");
-      parts[2] = reason; // Replace reason
+      while (parts.length < 8) parts.push("NA"); // pad old 6-part rows safely  //! hope this dosent break shit
+      parts[2] = sanitizeInput(reason);  // Replace reason
       const updated = parts.join("~");
 
       await ref.update({
@@ -105,128 +114,271 @@
     }
   }
 
-  // Approve by FA
-  export async function approveFA(regNo, dateStr) {
-    try {
-      const ref = studentsCollection.doc(regNo);
-      const doc = await ref.get();
-      if (!doc.exists) throw new Error("Student not found");
+  // // Approve by FA
+  // export async function approveFA(regNo, dateStr) {
+  //   try {
+  //     const ref = studentsCollection.doc(regNo);
+  //     const doc = await ref.get();
+  //     if (!doc.exists) throw new Error("Student not found");
 
-      const record = doc.data().absentRecords?.[dateStr];
-      if (!record) throw new Error("Alert not found for this date to approve FA"); // More specific error message
+  //     const record = doc.data().absentRecords?.[dateStr];
+  //     if (!record) throw new Error("Alert not found for this date to approve FA"); // More specific error message
 
-      const parts = record.split("~");
-      parts[0] = "1";
-      parts[3] = getTimestamp(); // FA timestamp
-      const updated = parts.join("~");
+  //     const parts = record.split("~");
+  //     parts[0] = "1";
+  //     parts[3] = getTimestamp(); // FA timestamp
+  //     const updated = parts.join("~");
 
-      await ref.update({
-        [`absentRecords.${dateStr}`]: updated,
-      });
-    } catch (error) {
-      console.error(`Error approving FA for ${regNo} on ${dateStr}:`, error);
-      throw new Error(`Failed to approve FA: ${error.message}`);
-    }
+  //     await ref.update({
+  //       [`absentRecords.${dateStr}`]: updated,
+  //     });
+  //   } catch (error) {
+  //     console.error(`Error approving FA for ${regNo} on ${dateStr}:`, error);
+  //     throw new Error(`Failed to approve FA: ${error.message}`);
+  //   }
+  // }
+
+  // NEW FUNCTION 1: For the "Verify" button
+export async function approveFA(regNo, dateStr, remarks) {
+  try {
+    const ref = studentsCollection.doc(regNo);
+    const doc = await ref.get();
+    if (!doc.exists) throw new Error("Student not found");
+
+    const record = doc.data().absentRecords?.[dateStr];
+    if (!record) throw new Error("Alert not found for this date");
+
+    const parts = record.split("~");
+    parts[0] = "1"; // Set FA status to 1 (Verified)
+    remarks = sanitizeInput(remarks);
+    parts[3] = getTimestamp(); // Set FA timestamp
+    parts[6] = remarks || "NA"; // Set FA remarks
+    const updated = parts.join("~");
+
+    await ref.update({
+      [`absentRecords.${dateStr}`]: updated,
+    });
+  } catch (error) {
+    console.error(`Error verifying FA for ${regNo} on ${dateStr}:`, error);
+    throw new Error(`Failed to verify FA: ${error.message}`);
   }
+}
 
-  // Approve by AA
-  export async function approveAA(regNo, dateStr) {
-    try {
-      const ref = studentsCollection.doc(regNo);
-      const doc = await ref.get();
-      if (!doc.exists) throw new Error("Student not found");
+// NEW FUNCTION 2: For the "Verify & Forward" button
+export async function forwardFA(regNo, dateStr, remarks) {
+  try {
+    const ref = studentsCollection.doc(regNo);
+    const doc = await ref.get();
+    if (!doc.exists) throw new Error("Student not found");
 
-      const record = doc.data().absentRecords?.[dateStr];
-      if (!record) throw new Error("Alert not found for this date to approve AA"); // More specific error message
+    const record = doc.data().absentRecords?.[dateStr];
+    if (!record) throw new Error("Alert not found for this date");
 
-      const parts = record.split("~");
-      parts[1] = "1";
-      parts[4] = getTimestamp(); // AA timestamp
-      const updated = parts.join("~");
+    const parts = record.split("~");
+    parts[0] = "2"; // Set FA status to 2 (Verified & Forwarded)
+    parts[3] = getTimestamp(); // Set FA timestamp
+    remarks = sanitizeInput(remarks);
+    parts[6] = remarks || "NA"; // Set FA remarks
+    const updated = parts.join("~");
 
-      await ref.update({
-        [`absentRecords.${dateStr}`]: updated,
-      });
-    } catch (error) {
-      console.error(`Error approving AA for ${regNo} on ${dateStr}:`, error);
-      throw new Error(`Failed to approve AA: ${error.message}`);
-    }
+    await ref.update({
+      [`absentRecords.${dateStr}`]: updated,
+    });
+  } catch (error) {
+    console.error(`Error forwarding FA for ${regNo} on ${dateStr}:`, error);
+    throw new Error(`Failed to forward FA: ${error.message}`);
   }
+}
+
+  // // Approve by AA
+  // export async function approveAA(regNo, dateStr) {
+  //   try {
+  //     const ref = studentsCollection.doc(regNo);
+  //     const doc = await ref.get();
+  //     if (!doc.exists) throw new Error("Student not found");
+
+  //     const record = doc.data().absentRecords?.[dateStr];
+  //     if (!record) throw new Error("Alert not found for this date to approve AA"); // More specific error message
+
+  //     const parts = record.split("~");
+  //     parts[1] = "1";
+  //     parts[4] = getTimestamp(); // AA timestamp
+  //     const updated = parts.join("~");
+
+  //     await ref.update({
+  //       [`absentRecords.${dateStr}`]: updated,
+  //     });
+  //   } catch (error) {
+  //     console.error(`Error approving AA for ${regNo} on ${dateStr}:`, error);
+  //     throw new Error(`Failed to approve AA: ${error.message}`);
+  //   }
+  // }
 
   // Fetch and parse all absent records for a student
 
-  export async function getAbsentRecords(regNo) {
-    try {
-      const studentRef = db.collection('User').doc(regNo);
-      const doc = await studentRef.get();
+  export async function approveAA(regNo, dateStr, remarks) {
+  try {
+    const ref = studentsCollection.doc(regNo);
+    const doc = await ref.get();
+    if (!doc.exists) throw new Error("Student not found");
 
-      if (!doc.exists) {
-        console.log(`No student found with regNo: ${regNo}`);
-        return [];
-      }
+    const record = doc.data().absentRecords?.[dateStr];
+    if (!record) throw new Error("Alert not found for this date");
 
-      const data = doc.data();
-      const rawAbsentRecordsMap = data.absentRecords || {}; // This is the map from Firestore
-
-      const parsedRecords = [];
-
-      // Iterate over the entries in the map: [date, delimited_string]
-      for (const [dateKey, delimitedString] of Object.entries(rawAbsentRecordsMap)) {
-        if (typeof delimitedString === 'string' && delimitedString.includes('~')) {
-          const parts = delimitedString.split('~');
-
-          // Expecting 6 parts based on the confirmed structure
-          if (parts.length >= 6) {
-            const faApprovedRaw = parts[0]; // '0' or '1'
-            const aaApprovedRaw = parts[1]; // '0' or '1'
-
-            const faApproved = faApprovedRaw === '1';
-            const aaApproved = aaApprovedRaw === '1';
-
-            // Derived 'resolved' status: true if both FA and AA are approved
-            const resolved = faApproved && aaApproved;
-
-            const reason = parts[2].trim() !== 'NA' ? parts[2].trim() : '';
-            const faTimestamp = parts[3].trim() !== 'NA' ? parts[3].trim() : '';
-            const aaTimestamp = parts[4].trim() !== 'NA' ? parts[4].trim() : '';
-            const alertTimestamp = parts[5].trim() !== 'NA' ? parts[5].trim() : '';
-
-            // Using the raw dateKey as it is DDMMYYYY
-            const formattedDate = dateKey;
-
-            parsedRecords.push({
-              date: formattedDate,
-              resolved: resolved, // Derived property
-              faApproved: faApproved,
-              aaApproved: aaApproved,
-              reason: reason,
-              faTimestamp: faTimestamp,
-              aaTimestamp: aaTimestamp,
-              alertTimestamp: alertTimestamp,
-            });
-          } else {
-            console.warn(`Absent record for ${dateKey} has too few parts (${parts.length}). Expected 6: ${delimitedString}`);
-          }
-        } else {
-          console.warn(`Absent record for ${dateKey} is not a valid delimited string: ${delimitedString}`);
-        }
-      }
-
-      // Optional: Sort records by date (newest first, for example)
-      parsedRecords.sort((a, b) => {
-        // Assuming date is DDMMYYYY
-        const dateA = new Date(a.date.substring(4,8), a.date.substring(2,4) - 1, a.date.substring(0,2));
-        const dateB = new Date(b.date.substring(4,8), b.date.substring(2,4) - 1, b.date.substring(0,2));
-        return dateB.getTime() - dateA.getTime();
-      });
-
-
-      return parsedRecords; // This array will be sent as JSON to the frontend
-    } catch (error) {
-      console.error(`Error fetching or parsing absent records for ${regNo}:`, error);
-      return []; // Return empty array on error
+    const parts = record.split("~");
+    if (parts[0] !== '2') {
+        throw new Error("Cannot verify by AA as the alert has not been forwarded by FA.");
     }
+    parts[1] = "1"; // Set AA status to 1 (Verified)
+    parts[4] = getTimestamp(); // Set AA timestamp
+    remarks = sanitizeInput(remarks);
+    parts[7] = remarks || "NA"; // Set AA remarks
+    const updated = parts.join("~");
+
+    await ref.update({
+      [`absentRecords.${dateStr}`]: updated,
+    });
+  } catch (error) {
+    console.error(`Error verifying AA for ${regNo} on ${dateStr}:`, error);
+    throw new Error(`Failed to verify AA: ${error.message}`);
   }
+}
+
+
+/**
+ * CHANGED: Fetches and parses all absent records, now handles the 8-part structure and filters for AA role.
+ * @param {string} regNo - The student's registration number.
+ * @param {string} role - The role of the user ('FA' or 'AA'), used for filtering.
+ */
+export async function getAbsentRecords(regNo, role) {
+  try {
+    const studentRef = db.collection('User').doc(regNo);
+    const doc = await studentRef.get();
+    if (!doc.exists) return [];
+
+    const rawAbsentRecordsMap = doc.data().absentRecords || {};
+    const parsedRecords = [];
+
+    for (const [dateKey, delimitedString] of Object.entries(rawAbsentRecordsMap)) {
+      if (typeof delimitedString === 'string' && delimitedString.includes('~')) {
+        const parts = delimitedString.split('~');
+
+        // Pad old records to always have 8 parts
+        while (parts.length < 8) parts.push("NA");
+
+        const faStatusRaw = parts[0]; // '0', '1', or '2'
+
+        // Business logic to filter alerts for AA.
+        if (role === 'AA' && faStatusRaw !== '2') {
+          continue; // Skip record if user is AA and alert is not forwarded.
+        }
+
+        const aaApprovedRaw = parts[1]; // '0' or '1'
+        const resolved = aaApprovedRaw === '1'; // An alert is resolved once the AA approves it.
+
+        parsedRecords.push({
+          date: dateKey,
+          faStatus: faStatusRaw, // Send raw status to frontend
+          aaApproved: aaApprovedRaw === '1',
+          resolved: resolved,
+          reason: parts[2].trim() !== 'NA' ? parts[2].trim() : '',
+          faTimestamp: parts[3].trim() !== 'NA' ? parts[3].trim() : '',
+          aaTimestamp: parts[4].trim() !== 'NA' ? parts[4].trim() : '',
+          alertTimestamp: parts[5].trim() !== 'NA' ? parts[5].trim() : '',
+          faRemarks: parts[6].trim() !== 'NA' ? parts[6].trim() : '',
+          aaRemarks: parts[7].trim() !== 'NA' ? parts[7].trim() : '',
+        });
+      }
+    }
+
+    // Sort records by date (newest first)
+    parsedRecords.sort((a, b) => {
+      const dateA = new Date(a.date.substring(4, 8), a.date.substring(2, 4) - 1, a.date.substring(0, 2));
+      const dateB = new Date(b.date.substring(4, 8), b.date.substring(2, 4) - 1, b.date.substring(0, 2));
+      return dateB.getTime() - dateA.getTime();
+    });
+
+    return parsedRecords;
+  } catch (error) {
+    console.error(`Error fetching absent records for ${regNo}:`, error);
+    return [];
+  }
+}
+
+
+
+  // export async function getAbsentRecords(regNo) {
+  //   try {
+  //     const studentRef = db.collection('User').doc(regNo);
+  //     const doc = await studentRef.get();
+
+  //     if (!doc.exists) {
+  //       console.log(`No student found with regNo: ${regNo}`);
+  //       return [];
+  //     }
+
+  //     const data = doc.data();
+  //     const rawAbsentRecordsMap = data.absentRecords || {}; // This is the map from Firestore
+
+  //     const parsedRecords = [];
+
+  //     // Iterate over the entries in the map: [date, delimited_string]
+  //     for (const [dateKey, delimitedString] of Object.entries(rawAbsentRecordsMap)) {
+  //       if (typeof delimitedString === 'string' && delimitedString.includes('~')) {
+  //         const parts = delimitedString.split('~');
+
+  //         // Expecting 6 parts based on the confirmed structure
+  //         if (parts.length >= 6) {
+  //           const faApprovedRaw = parts[0]; // '0' or '1'
+  //           const aaApprovedRaw = parts[1]; // '0' or '1'
+
+  //           const faApproved = faApprovedRaw === '1';
+  //           const aaApproved = aaApprovedRaw === '1';
+
+  //           // Derived 'resolved' status: true if both FA and AA are approved
+  //           const resolved = faApproved && aaApproved;
+
+  //           const reason = parts[2].trim() !== 'NA' ? parts[2].trim() : '';
+  //           const faTimestamp = parts[3].trim() !== 'NA' ? parts[3].trim() : '';
+  //           const aaTimestamp = parts[4].trim() !== 'NA' ? parts[4].trim() : '';
+  //           const alertTimestamp = parts[5].trim() !== 'NA' ? parts[5].trim() : '';
+
+  //           // Using the raw dateKey as it is DDMMYYYY
+  //           const formattedDate = dateKey;
+
+  //           parsedRecords.push({
+  //             date: formattedDate,
+  //             resolved: resolved, // Derived property
+  //             faApproved: faApproved,
+  //             aaApproved: aaApproved,
+  //             reason: reason,
+  //             faTimestamp: faTimestamp,
+  //             aaTimestamp: aaTimestamp,
+  //             alertTimestamp: alertTimestamp,
+  //           });
+  //         } else {
+  //           console.warn(`Absent record for ${dateKey} has too few parts (${parts.length}). Expected 6: ${delimitedString}`);
+  //         }
+  //       } else {
+  //         console.warn(`Absent record for ${dateKey} is not a valid delimited string: ${delimitedString}`);
+  //       }
+  //     }
+
+  //     // Optional: Sort records by date (newest first, for example)
+  //     parsedRecords.sort((a, b) => {
+  //       // Assuming date is DDMMYYYY
+  //       const dateA = new Date(a.date.substring(4,8), a.date.substring(2,4) - 1, a.date.substring(0,2));
+  //       const dateB = new Date(b.date.substring(4,8), b.date.substring(2,4) - 1, b.date.substring(0,2));
+  //       return dateB.getTime() - dateA.getTime();
+  //     });
+
+
+  //     return parsedRecords; // This array will be sent as JSON to the frontend
+  //   } catch (error) {
+  //     console.error(`Error fetching or parsing absent records for ${regNo}:`, error);
+  //     return []; // Return empty array on error
+  //   }
+  // }
 
   // For client-side PDF export: return data grouped by section
   // This function remains to prepare data for generatePdfReport on the server
@@ -236,43 +388,123 @@
 
   // For server-side PDF export: return data grouped by section
   // This function prepares data for generatePdfReport on the server
-  export async function downloadSectionReport(section, month) {
-    try {
-      const students = await fetchStudentsBySection(section); // This fetches raw student data
-      const report = [];
 
-      for (const student of students) {
-        const regNo = student.regNo;
-        const name = student.name;
 
-        // --- CRITICAL CHANGE HERE ---
-        // Fetch and parse absent records for this specific student using getAbsentRecords
-        const parsedAbsentRecords = await getAbsentRecords(regNo);
-        // --- END CRITICAL CHANGE ---
+//   // ========== DOWNLOAD SECTION REPORT ==========
+// export async function downloadSectionReport(section, month) {
+//   try {
+//     const students = await fetchStudentsBySection(section);
+//     const report = [];
 
-        for (const record of parsedAbsentRecords) { // Now 'parsedAbsentRecords' is an array and iterable
-          // Check if the record's date matches the selected month (MMYYYY)
-          if (record.date && record.date.substring(2, 8) === month) { // Example: "01072025" -> "072025" for month "072025"
-            report.push({
-              regNo,
-              name,
-              date: record.date,
-              reason: record.reason,
-              faApproved: record.faApproved ? "Yes" : "No", // Convert boolean to "Yes"/"No" for report
-              aaApproved: record.aaApproved ? "Yes" : "No", // Convert boolean to "Yes"/"No" for report
-              faTime: record.faTimestamp,
-              aaTime: record.aaTimestamp,
-              alertTime: record.alertTimestamp,
-            });
-          }
+//     for (const student of students) {
+//       const regNo = student.regNo;
+//       const name = student.name;
+//       const parsedAbsentRecords = await getAbsentRecords(regNo);
+
+//       for (const record of parsedAbsentRecords) {
+//         if (record.date && record.date.substring(2, 8) === month) {
+//           report.push({
+//             regNo,
+//             name,
+//             date: record.date,
+//             reason: record.reason,
+//             faStatus: record.faForwarded ? "Verified & Forwarded" : record.faApproved ? "Verified" : "Pending",
+//             aaStatus: record.aaApproved ? "Verified" : "Pending",
+//             faTime: record.faTimestamp,
+//             aaTime: record.aaTimestamp,
+//             alertTime: record.alertTimestamp,
+//             faRemarks: record.faRemarks,
+//             aaRemarks: record.aaRemarks,
+//           });
+//         }
+//       }
+//     }
+//     return report;
+//   } catch (error) {
+//     console.error(`Error preparing section report for ${section} in ${month}:`, error);
+//     throw new Error(`Failed to prepare section report: ${error.message}`);
+//   }
+// }
+
+export async function downloadSectionReport(section, month) {
+  try {
+    const students = await fetchStudentsBySection(section);
+    const report = [];
+
+    for (const student of students) {
+      // CORRECT: Calls getAbsentRecords with a role to fetch all data
+      const parsedAbsentRecords = await getAbsentRecords(student.regNo, 'FA'); 
+
+      for (const record of parsedAbsentRecords) {
+        if (record.date && record.date.substring(2, 8) === month) {
+          
+          // CORRECT: Creates descriptive text from the new 'faStatus' property
+          let faStatusText = "Pending";
+          if (record.faStatus === '1') faStatusText = "Verified";
+          else if (record.faStatus === '2') faStatusText = "Verified & Forwarded";
+
+          let aaStatusText = record.aaApproved ? "Verified" : "Pending";
+
+          report.push({
+            regNo: student.regNo,
+            name: student.name,
+            date: record.date,
+            reason: record.reason,
+            faStatus: faStatusText, // Uses the new text
+            aaStatus: aaStatusText, // Uses the new text
+            faTime: record.faTimestamp,
+            aaTime: record.aaTimestamp,
+            alertTime: record.alertTimestamp,
+            faRemarks: record.faRemarks,
+            aaRemarks: record.aaRemarks,
+          });
         }
       }
-      return report; // backend can convert to PDF using pdfkit
-    } catch (error) {
-      console.error(`Error preparing section report for ${section} in ${month}:`, error);
-      throw new Error(`Failed to prepare section report: ${error.message}`);
     }
-  }// attendanceLogic.js (replace your existing bulkAlertStudents function with this)
+    return report;
+  } catch (error) {
+    console.error(`Error preparing section report for ${section} in ${month}:`, error);
+    throw new Error(`Failed to prepare section report: ${error.message}`);
+  }
+}
+
+  // export async function downloadSectionReport(section, month) {
+  //   try {
+  //     const students = await fetchStudentsBySection(section); // This fetches raw student data
+  //     const report = [];
+
+  //     for (const student of students) {
+  //       const regNo = student.regNo;
+  //       const name = student.name;
+
+  //       // --- CRITICAL CHANGE HERE ---
+  //       // Fetch and parse absent records for this specific student using getAbsentRecords
+  //       const parsedAbsentRecords = await getAbsentRecords(regNo);
+  //       // --- END CRITICAL CHANGE ---
+
+  //       for (const record of parsedAbsentRecords) { // Now 'parsedAbsentRecords' is an array and iterable
+  //         // Check if the record's date matches the selected month (MMYYYY)
+  //         if (record.date && record.date.substring(2, 8) === month) { // Example: "01072025" -> "072025" for month "072025"
+  //           report.push({
+  //             regNo,
+  //             name,
+  //             date: record.date,
+  //             reason: record.reason,
+  //             faApproved: record.faApproved ? "Yes" : "No", // Convert boolean to "Yes"/"No" for report
+  //             aaApproved: record.aaApproved ? "Yes" : "No", // Convert boolean to "Yes"/"No" for report
+  //             faTime: record.faTimestamp,
+  //             aaTime: record.aaTimestamp,
+  //             alertTime: record.alertTimestamp,
+  //           });
+  //         }
+  //       }
+  //     }
+  //     return report; // backend can convert to PDF using pdfkit
+  //   } catch (error) {
+  //     console.error(`Error preparing section report for ${section} in ${month}:`, error);
+  //     throw new Error(`Failed to prepare section report: ${error.message}`);
+  //   }
+  // }// attendanceLogic.js (replace your existing bulkAlertStudents function with this)
 
   /**
    * Bulk alert multiple students for the same date, skipping those who already have an alert for that day.
@@ -416,48 +648,95 @@
     })}`;
 
     const columns = [
-      { header: 'Reg No', width: '80px', key: 'regNo', align: 'center' },
-      { header: 'Name', width: '100px', key: 'name', align: 'left' },
-      { header: 'Alert Time', width: '70px', key: 'alertTime', align: 'center' },
-      { header: 'Reason', width: '100px', key: 'reason', align: 'left' },
-      { header: 'FA Approval', width: '90px', key: 'faApproval', align: 'center' },
-      { header: 'AA Approval', width: '90px', key: 'aaApproval', align: 'center' }
-    ];
+  { header: 'Reg No', width: '70px', key: 'regNo', align: 'center' },
+  { header: 'Name', width: '90px', key: 'name', align: 'left' },
+  { header: 'Alert Time', width: '70px', key: 'alertTime', align: 'center' },
+  { header: 'Reason', width: '110px', key: 'reason', align: 'left' },
+  { header: 'FA Approval', width: '110px', key: 'faStatus', align: 'center' },
+  { header: 'AA Approval', width: '110px', key: 'aaStatus', align: 'center' }
+];
 
     // Generate table rows
+    // const tableRowsHtml = reportData.map((item, index) => {
+    //   const isEven = index % 2 === 0;
+    //   const bgColor = isEven ? colors.background : colors.cardBg;
+
+    //   const alertDateTime = formatDateTime(item.alertTime);
+    //   const faInfo = formatApprovalInfo(item.faApproved, item.faTime);
+    //   const aaInfo = formatApprovalInfo(item.aaApproved, item.aaTime);
+
+    //   const faStatusColor = faInfo.status === 'Approved' ? colors.success :
+    //     faInfo.status === 'Rejected' ? colors.error : colors.warning;
+    //   const aaStatusColor = aaInfo.status === 'Approved' ? colors.success :
+    //     aaInfo.status === 'Rejected' ? colors.error : colors.warning;
+
+    //   return `
+    //     <div class="table-row" style="background-color: ${bgColor};">
+    //       <div class="cell reg-no">${String(item.regNo || '—')}</div>
+    //       <div class="cell name">${String(item.name || '—')}</div>
+    //       <div class="cell alert-time">
+    //         ${alertDateTime.date !== '—' ? `<span>${alertDateTime.date}</span>` : '<span>—</span>'}
+    //         ${alertDateTime.time !== '—' && alertDateTime.time ? `<span style="font-size: 8px; color: ${colors.lightText};">${alertDateTime.time}</span>` : ''}
+    //       </div>
+    //       <div class="cell reason">${String(item.reason || '—')}</div>
+    //       <div class="cell approval fa-approval" style="color: ${faStatusColor};">
+    //         <span>${faInfo.status}</span>
+    //         ${faInfo.datetime !== '—' ? `<span style="font-size: 8px; color: ${colors.lightText};">${faInfo.datetime}</span>` : ''}
+    //       </div>
+    //       <div class="cell approval aa-approval" style="color: ${aaStatusColor};">
+    //         <span>${aaInfo.status}</span>
+    //         ${aaInfo.datetime !== '—' ? `<span style="font-size: 8px; color: ${colors.lightText};">${aaInfo.datetime}</span>` : ''}
+    //       </div>
+    //     </div>
+    //   `;
+    // }).join('');
+
     const tableRowsHtml = reportData.map((item, index) => {
-      const isEven = index % 2 === 0;
-      const bgColor = isEven ? colors.background : colors.cardBg;
+  const isEven = index % 2 === 0;
+  const bgColor = isEven ? colors.background : colors.cardBg;
 
-      const alertDateTime = formatDateTime(item.alertTime);
-      const faInfo = formatApprovalInfo(item.faApproved, item.faTime);
-      const aaInfo = formatApprovalInfo(item.aaApproved, item.aaTime);
+  // Helper to format timestamps
+  const formatTimestamp = (ts) => {
+      if (!ts || ts === 'NA') return '—';
+      const parts = ts.match(/(\d{1,2}:\d{2}[ap]m)(\d{2})(\d{2})(\d{4})/);
+      if (!parts) return ts;
+      return `${parts[2]}/${parts[3]} at ${parts[1]}`;
+  };
 
-      const faStatusColor = faInfo.status === 'Approved' ? colors.success :
-        faInfo.status === 'Rejected' ? colors.error : colors.warning;
-      const aaStatusColor = aaInfo.status === 'Approved' ? colors.success :
-        aaInfo.status === 'Rejected' ? colors.error : colors.warning;
+  // Determine status colors from the new text fields
+  const faStatusColor = item.faStatus.includes('Verified') ? colors.success : colors.warning;
+  const aaStatusColor = item.aaStatus.includes('Verified') ? colors.success : colors.warning;
+  
+  // Conditionally create HTML for remarks
+  const faRemarksHtml = (item.faRemarks && item.faRemarks !== 'NA') 
+      ? `<span class="remarks">“${item.faRemarks}”</span>` 
+      : '';
+  const aaRemarksHtml = (item.aaRemarks && item.aaRemarks !== 'NA') 
+      ? `<span class="remarks">“${item.aaRemarks}”</span>` 
+      : '';
 
-      return `
-        <div class="table-row" style="background-color: ${bgColor};">
-          <div class="cell reg-no">${String(item.regNo || '—')}</div>
-          <div class="cell name">${String(item.name || '—')}</div>
-          <div class="cell alert-time">
-            ${alertDateTime.date !== '—' ? `<span>${alertDateTime.date}</span>` : '<span>—</span>'}
-            ${alertDateTime.time !== '—' && alertDateTime.time ? `<span style="font-size: 8px; color: ${colors.lightText};">${alertDateTime.time}</span>` : ''}
-          </div>
-          <div class="cell reason">${String(item.reason || '—')}</div>
-          <div class="cell approval fa-approval" style="color: ${faStatusColor};">
-            <span>${faInfo.status}</span>
-            ${faInfo.datetime !== '—' ? `<span style="font-size: 8px; color: ${colors.lightText};">${faInfo.datetime}</span>` : ''}
-          </div>
-          <div class="cell approval aa-approval" style="color: ${aaStatusColor};">
-            <span>${aaInfo.status}</span>
-            ${aaInfo.datetime !== '—' ? `<span style="font-size: 8px; color: ${colors.lightText};">${aaInfo.datetime}</span>` : ''}
-          </div>
-        </div>
-      `;
-    }).join('');
+  return `
+    <div class="table-row" style="background-color: ${bgColor};">
+      <div class="cell reg-no">${String(item.regNo || '—')}</div>
+      <div class="cell name">${String(item.name || '—')}</div>
+      <div class="cell alert-time">
+        <span>${formatTimestamp(item.alertTime).split(' at ')[0] || '—'}</span>
+        <span style="font-size: 8px; color: ${colors.lightText};">${formatTimestamp(item.alertTime).split(' at ')[1] || ''}</span>
+      </div>
+      <div class="cell reason">${String(item.reason || '—')}</div>
+      <div class="cell approval fa-approval" style="color: ${faStatusColor};">
+        <span>${item.faStatus}</span>
+        <span style="font-size: 8px; color: ${colors.lightText};">${formatTimestamp(item.faTime)}</span>
+        ${faRemarksHtml}
+      </div>
+      <div class="cell approval aa-approval" style="color: ${aaStatusColor};">
+        <span>${item.aaStatus}</span>
+        <span style="font-size: 8px; color: ${colors.lightText};">${formatTimestamp(item.aaTime)}</span>
+        ${aaRemarksHtml}
+      </div>
+    </div>
+  `;
+}).join('');
 
 
     return `
@@ -496,7 +775,14 @@
                   --border-color: ${colors.border};
                   --shadow-color: ${colors.shadow};
               }
-
+              .remarks {
+                font-style: italic;
+                font-size: 9px !important;
+                color: ${colors.lightText} !important;
+                margin-top: 4px;
+                display: block;
+                word-wrap: break-word;
+            }
               .header-section {
                   position: relative;
                   height: 140px;
@@ -738,10 +1024,13 @@
 
       const htmlContent = generateReportHtml(reportData, section, month);
 
+    // TEMPORARY LINE FOR TESTING:
+    // return htmlContent; // This will skip Puppeteer and return the HTML string
+
     browser = await puppeteer.launch({
     args: chromium.args,
     defaultViewport: chromium.defaultViewport,
-    executablePath: await chromium.executablePath(), // ✅ FIXED
+    executablePath: await chromium.executablePath(), // FIXED
     headless: chromium.headless,
   });
 

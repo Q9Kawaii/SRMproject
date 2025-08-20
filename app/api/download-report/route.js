@@ -11,6 +11,42 @@ export async function GET(request) { // Changed to App Router GET handler
     return NextResponse.json({ error: 'Missing section or month parameter.' }, { status: 400 });
   }
 
+  //! Temp for API Testing as chrommium browser launch is not supported in postman or local launch
+//   try {
+//     const result = await generatePdfReport(section, month);
+
+//     if (!result) {
+//         return new Response(null, { status: 204 });
+//     }
+
+//     // NEW TEMPORARY LOGIC: Check if the result is a string (our HTML)
+//     if (typeof result === 'string') {
+//         // If it's a string, return it as plain HTML
+//         return new Response(result, {
+//             status: 200,
+//             headers: {
+//                 'Content-Type': 'text/html',
+//             },
+//         });
+//     }
+
+//     // This is the original code for handling the real PDF buffer
+//     return new Response(result, {
+//         status: 200,
+//         headers: {
+//             'Content-Type': 'application/pdf',
+//             'Content-Disposition': `attachment; filename="Attendance_Report_${section}_${month}.pdf"`,
+//             'Content-Length': result.length.toString(),
+//         },
+//     });
+
+// } catch (error) {
+//     console.error(`API Error generating report for section ${section}, month ${month}:`, error);
+//     return NextResponse.json(
+//         { error: `Failed to generate PDF report: ${error.message || 'Internal server error.'}` },
+//         { status: 500 }
+//     );
+// }
   try {
     const pdfBuffer = await generatePdfReport(section, month);
 

@@ -3,13 +3,13 @@ import { approveAA } from '../../../attendanceLogic'; // Corrected path to atten
 
 export async function POST(request) { // Changed to App Router POST handler
   try {
-    const { regNo, dateStr } = await request.json(); // Access body using await request.json()
+    const { regNo, dateStr, remarks } = await request.json(); // Access body using await request.json()
 
     if (!regNo || !dateStr) {
       return NextResponse.json({ error: 'regNo and dateStr are required' }, { status: 400 }); // Use NextResponse
     }
 
-    await approveAA(regNo, dateStr);
+    await approveAA(regNo, dateStr, remarks || "NA");
     return NextResponse.json({ success: true, message: 'AA approval successful' }, { status: 200 }); // Use NextResponse
   } catch (error) {
     console.error('[approve-aa]', error);

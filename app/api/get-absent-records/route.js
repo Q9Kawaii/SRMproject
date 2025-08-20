@@ -4,13 +4,16 @@ import { getAbsentRecords } from '../../../attendanceLogic'; // Corrected path
 export async function GET(request) { // Changed to App Router GET handler
   const { searchParams } = new URL(request.url); // Access query parameters
   const regNo = searchParams.get('regNo');
+  const role = searchParams.get('role');
+
 
   if (!regNo) {
     return NextResponse.json({ error: 'regNo is required' }, { status: 400 });
   }
 
   try {
-    const records = await getAbsentRecords(regNo);
+    // const records = await getAbsentRecords(regNo);
+    const records = await getAbsentRecords(regNo, role || "FA");
     return NextResponse.json({ success: true, records }, { status: 200 });
   } catch (error) {
     console.error('[get-absent-records]', error);
