@@ -26,7 +26,7 @@ const parseDisplayName = (displayName) => {
 
 export default function Home() {
   const [userRole, setUserRole] = useState(null);
-  const [sectionPrompt, setSectionPrompt] = useState(false);
+  // sectionPrompt and handleSectionSubmit are fully removed.
   const [section, setSection] = useState("");
   const [regNo, setRegNo] = useState("");
   const [department, setDepartment] = useState("");
@@ -43,75 +43,71 @@ export default function Home() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setLoading(true);
-      setError("");
       if (user) {
+        setError("");
         try {
-          const userRef = doc(db, "UsersLogin", user.uid);
-          const docSnap = await getDoc(userRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            const role = data.role;
-            if (role === "teacher") {
-              setUserRole("teacher");
-              setSecRole(data.SecRole);
-              setSectionofFA(data.section);
-              setnameOfFA(data.name);
-              setIsNewUser(false);
-              setSectionPrompt(false);
-            } else if (role === "student") {
-              if (!user.email.endsWith("@srmist.edu.in")) {
-                setError("Students must use @srmist.edu.in email.");
-                setUserRole(null);
-                setSectionPrompt(false);
-                setIsNewUser(false);
-              } else {
-                setUserRole("student");
-                if (!data.section || !data.regNo || !data.department) {
-                  setSectionPrompt(true);
-                } else {
-                  setSection(data.section);
-                  setRegNo(data.regNo);
-                  setDepartment(data.department);
-                  setSectionPrompt(false);
-                }
-                setIsNewUser(false);
-              }
-            } else {
-              setError("Unknown role. Contact admin.");
+          // --- Priority Check 1: Is the user a Teacher? ---
+          const teacherRef = doc(db, "UsersLogin", user.uid);
+          const teacherSnap = await getDoc(teacherRef);
+
+          if (teacherSnap.exists() && teacherSnap.data().role === 'teacher') {
+            const data = teacherSnap.data();
+            setUserRole("teacher");
+            setSecRole(data.SecRole);
+            setSectionofFA(data.section);
+            setnameOfFA(data.name);
+            setIsNewUser(false);
+          }
+          // --- Priority Check 2: If not a teacher, are they an authorized Student? ---
+          else if (user.email.endsWith("@srmist.edu.in")) {
+            const { regNo: parsedRegNo, name: parsedName } = parseDisplayName(user.displayName);
+
+            if (!parsedRegNo) {
+              setError("Registration number not found in your Google profile name.");
               await auth.signOut();
-              setUserRole(null);
-              setSectionPrompt(false);
+              return;
+            }
+
+            const studentRef = doc(db, "User", parsedRegNo);
+            const studentSnap = await getDoc(studentRef);
+
+            if (studentSnap.exists()) {
+              // Student is authorized. Update their details and log them in.
+              const studentData = studentSnap.data();
+              
+              // Update the User doc with the latest name and email from Google.
+              await setDoc(studentRef, {
+                name: parsedName,
+                email: user.email,
+              }, { merge: true });
+
+              setUserRole("student");
+              setRegNo(studentData.regNo || parsedRegNo);
+              setSection(studentData.section);
+              setDepartment(studentData.department);
               setIsNewUser(false);
-            }
-          } else {
-            // ✅ New user
-            if (user.email.endsWith("@srmist.edu.in")) {
-              const { regNo, name } = parseDisplayName(user.displayName);
-              setRegNo(regNo);
-              // Parsed name also available but we don’t need to set in state
-              setIsNewUser(true);
-              setNewUserUID(user.uid);
-              setSectionPrompt(true);
-              setUserRole(null);
             } else {
-              setNewUserUID(user.uid);
-              setIsNewUser(true);
-              setSectionPrompt(false);
-              setUserRole(null);
+              // Student's regNo is not in the 'User' collection. Deny access.
+              setError("You are not authorized. Please contact your teacher.");
+              await auth.signOut();
             }
+          }
+          // --- Fallback: Not a teacher and not an SRMIST student ---
+          else {
+            // This is likely a new teacher who needs their UID to get approved by an admin.
+            setNewUserUID(user.uid);
+            setIsNewUser(true);
+            setUserRole(null);
           }
         } catch (err) {
           setError("Something went wrong. Please try again or contact admin.");
           await auth.signOut();
-          setUserRole(null);
-          setSectionPrompt(false);
-          setIsNewUser(false);
         }
       } else {
+        // User is logged out
         setUserRole(null);
         setIsNewUser(false);
         setNewUserUID("");
-        setSectionPrompt(false);
       }
       setLoading(false);
     });
@@ -131,53 +127,10 @@ export default function Home() {
     }
   };
 
-  const handleSectionSubmit = async (e) => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) return;
-
-    // ✅ Extract name + regNo from displayName
-    const { name, regNo } = parseDisplayName(user.displayName);
-
-    try {
-      await setDoc(
-        doc(db, "UsersLogin", user.uid),
-        {
-          email: user.email,
-          name: name,
-          role: "student",
-          section,
-          regNo,
-          department,
-        },
-        { merge: true }
-      );
-      setUserRole("student");
-      setSectionPrompt(false);
-      setIsNewUser(false);
-    } catch (err) {
-      setError("Failed to save section or department");
-    }
-
-    await setDoc(
-      doc(db, "User", regNo),
-      {
-        regNo,
-        name: name,
-        email: user.email,
-        section,
-        department,
-        role: "student",
-        createdAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
-  };
-
   if (loading) return <HamsterLoader />;
 
   // Login screen
-  if (!userRole && !loading && !sectionPrompt) {
+  if (!userRole && !loading) {
     return (
       <div className="relative min-h-screen w-full flex flex-col items-center justify-center text-center px-4 pt-10 overflow-hidden -mb-40 lg:items-end lg:text-end lg:pb-40 lg:pr-[10%]">
         <div
@@ -226,8 +179,8 @@ export default function Home() {
                       <p className="text-red-600 font-medium text-sm">{error}</p>
                     </div>
                   )}
-                  {/* Show UID and admin contact for non-SRM emails */}
-                  {isNewUser && newUserUID && !auth.currentUser?.email?.endsWith("@srmist.edu.in") && (
+                  {/* Show UID and admin contact for new teachers */}
+                  {isNewUser && newUserUID && (
                     <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                       <p className="text-sm font-semibold text-[#0c4da2] mb-3 text-center">Your UID is:</p>
                       <div className="flex items-center justify-center gap-2 mb-3">
@@ -313,60 +266,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-    );
-  }
-
-  // Section/dept prompt for new SRM students (auto‑extract name + regNo)
-  if (sectionPrompt) {
-    return (
-      <form
-        onSubmit={handleSectionSubmit}
-        className="section-form flex flex-col items-center justify-center gap-4 p-10 bg-white rounded shadow max-w-md mx-auto mt-10"
-      >
-        {isNewUser && newUserUID && (
-          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <p className="text-sm font-semibold text-[#0c4da2] mb-3 text-center">Your UID is:</p>
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <div className="bg-white rounded-lg px-3 py-2 border border-blue-200 shadow-sm">
-                <span className="font-mono text-[#0c4da2] font-bold text-sm">
-                  {newUserUID}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => copyToClipboard(newUserUID)}
-                className="p-2 bg-[#0c4da2] text-white rounded-lg hover:bg-[#3a5b72] transition-colors duration-200 shadow-md hover:shadow-lg"
-              >
-                <Copy className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="text-xs text-gray-600 text-center">Share this UID with admin if required.</div>
-          </div>
-        )}
-
-        <h3 className="text-xl font-semibold">Enter Your Section & Department</h3>
-
-        <input
-          className="bg-neutral-200 p-2 rounded w-full"
-          type="text"
-          value={section}
-          onChange={(e) => setSection(e.target.value)}
-          placeholder="Section (e.g., CSE-A)"
-          required
-        />
-        <input
-          className="bg-neutral-200 p-2 rounded w-full"
-          type="text"
-          value={department}
-          onChange={(e) => setDepartment(e.target.value)}
-          placeholder="Department (e.g., CSE)"
-          required
-        />
-        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-          Submit
-        </button>
-        {error && <p className="text-red-500">{error}</p>}
-      </form>
     );
   }
 
