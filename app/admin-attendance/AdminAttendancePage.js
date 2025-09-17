@@ -678,9 +678,6 @@ const confirmBulkAlert = async () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reg. No</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Low Att. Subjects</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">All Subjects Att.</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Absent Details & Controls</th>
                     </tr>
@@ -697,25 +694,6 @@ const confirmBulkAlert = async () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{student.name}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.regNo}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.section}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline cursor-pointer">
-                          <a href={`mailto:${student.email}`}>{student.email}</a>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline cursor-pointer">
-                          <a href={`mailto:${student.parentEmail}`}>{student.parentEmail}</a>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex flex-wrap gap-1">
-                            {student.lowAttendanceSubjects.length > 0 ? (
-                              student.lowAttendanceSubjects.map((subject) => (
-                                <span key={subject} className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">
-                                  {subject}
-                                </span>
-                              ))
-                            ) : (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">None</span>
-                            )}
-                          </div>
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex flex-wrap gap-1">
                             {Object.entries(student.attendance || {}).map(([subject, percentage]) => (
