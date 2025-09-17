@@ -217,7 +217,7 @@ const ScoreBox = ({ tenthPercentagePoints, twelfthPercentagePoints,cgpaUptoSixth
       <h2 className="text-lg font-semibold mb-2">Calculated Scores</h2>
       
       <hr className="my-2" />
-      <p className="font-medium">Total Score: {totalScore} / 5</p>
+      <p className="font-medium">Total Score: {totalScore} / 100</p>
     </div>
   );
 };

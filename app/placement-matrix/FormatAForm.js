@@ -313,6 +313,41 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     <div style={styles.headerUnderline}></div>
                 </div>
 
+                <div style={styles.buttonContainer}>
+                    {isEditing && !hasPendingChanges ? (
+                        <>
+                            <button type="submit" disabled={loading} style={styles.submitButton}>
+                                {loading ? (
+                                    <>
+                                        <span style={styles.spinner}></span>
+                                        Submitting for Approval...
+                                    </>
+                                ) : (
+                                    <>
+                                        <span style={styles.buttonIcon}>✓</span>
+                                        Submit Changes for Approval
+                                    </>
+                                )}
+                            </button>
+                        </>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={handleEdit}
+                            disabled={loading || hasPendingChanges}
+                            style={{
+                                ...styles.editButton,
+                                ...(hasPendingChanges && styles.disabledButton)
+                            }}
+                        >
+                            <span style={styles.buttonIcon}>
+                                {hasPendingChanges ? '⏳' : '✏️'}
+                            </span>
+                            {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
+                        </button>
+                    )}
+                </div>
+
                 {hasPendingChanges && (
                     <div style={styles.pendingMessage}>
                         <div style={styles.pendingIcon}>⏳</div>
@@ -1111,44 +1146,7 @@ const FormatAForm = ({ prefilledRegistrationNumber }) => {
                     {renderProofLinksSection('careerAndPlacement', 'Proof Links for Career & Placement')}
                 </div>
 
-                <div style={styles.buttonContainer}>
-                    {isEditing && !hasPendingChanges ? (
-                        <>
-                            <button type="submit" disabled={loading} style={styles.submitButton}>
-                                {loading ? (
-                                    <>
-                                        <span style={styles.spinner}></span>
-                                        Submitting for Approval...
-                                    </>
-                                ) : (
-                                    <>
-                                        <span style={styles.buttonIcon}>✓</span>
-                                        Submit Changes for Approval
-                                    </>
-                                )}
-                            </button>
-                            <button type="button" onClick={handleCancelEdit} disabled={loading} style={styles.cancelButton}>
-                                <span style={styles.buttonIcon}>✕</span>
-                                Cancel
-                            </button>
-                        </>
-                    ) : (
-                        <button
-                            type="button"
-                            onClick={handleEdit}
-                            disabled={loading || hasPendingChanges}
-                            style={{
-                                ...styles.editButton,
-                                ...(hasPendingChanges && styles.disabledButton)
-                            }}
-                        >
-                            <span style={styles.buttonIcon}>
-                                {hasPendingChanges ? '⏳' : '✏️'}
-                            </span>
-                            {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
-                        </button>
-                    )}
-                </div>
+                
             </form>
         </div>
     );

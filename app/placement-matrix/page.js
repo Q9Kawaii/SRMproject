@@ -69,24 +69,9 @@ export default function PlacementMatrixPage() {
   }, []);
   /* --------------------------------------------------------------- */
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-    } catch (err) {
-      console.error("Error logging out:", err);
-    }
-  };
 
   return (
     <div style={styles.container}>
-      <div style={styles.header}>
-        <h1 style={styles.heading}>Placement Matrix</h1>
-        {user && (
-          <button style={styles.logoutButton} onClick={handleLogout}>
-            Logout
-          </button>
-        )}
-      </div>
 
       {userRole === "teacher" ? (
         <>
@@ -125,10 +110,6 @@ export default function PlacementMatrixPage() {
           )}
         </>
       )}
-
-      {/* export buttons always visible */}
-      <ExportButtonFormA />
-      <ExportButtonFormB />
     </div>
   );
 }
@@ -158,16 +139,6 @@ const styles = {
     color: "#1a202c",
     fontSize: "2.5em",
     flexGrow: 1
-  },
-  logoutButton: {
-    padding: "8px 15px",
-    fontSize: "1em",
-    borderRadius: "5px",
-    border: "1px solid #dc3545",
-    backgroundColor: "#dc3545",
-    color: "#fff",
-    cursor: "pointer",
-    transition: "background-color 0.3s, color 0.3s"
   },
   buttonContainer: {
     display: "flex",

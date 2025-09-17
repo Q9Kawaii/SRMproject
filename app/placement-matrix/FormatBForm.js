@@ -325,6 +325,66 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
         <form onSubmit={handleSubmitB} style={styles.form}>
             <h2 style={styles.subHeading}>Format B Details</h2>
 
+            <div style={styles.buttonContainer}>
+                {isEditing && !hasPendingChanges ? (
+                    <>
+                        <button type="submit" disabled={loading} style={styles.submitButton}>
+                            {loading ? 'Submitting for Approval...' : 'Submit Changes for Approval'}
+                        </button>
+                    </>
+                ) : (
+                <>
+                    <button
+                        type="button"
+                        onClick={handleEdit}
+                        disabled={loading || hasPendingChanges}
+                        style={{
+                            ...styles.editButton,
+                            ...(hasPendingChanges && styles.disabledButton)
+                        }}
+                    >
+                        {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
+                    </button>
+                    <ScoreBox
+                        tenthPercentage={formDataB.tenthPercentage}
+                        twelfthPercentage={formDataB.twelfthPercentage}
+                        twelfthPercentagePoints={formDataB.twelfthPercentagePoints}
+                        tenthPercentagePoints={formDataB.tenthPercentagePoints}
+                        cgpaPoints={formDataB.cgpaPoints}
+                        githubContributionsPoints={formDataB.githubContributionsPoints}
+                        githubFrequencyPoints={formDataB.githubFrequencyPoints}
+                        communityProjectsPoints={formDataB.communityProjectsPoints}
+                        collaborationsPoints={formDataB.collaborationsPoints}
+                        codingPracticeCPoints={formDataB.codingPracticeCPoints}
+                        codingPracticeQuestionsPoints={formDataB.codingPracticeQuestionsPoints}
+                        internshipIITNITSRMPoints={formDataB.internshipIITNITSRMPoints}
+                        internshipFortune500Points={formDataB.internshipFortune500Points}
+                        internshipSmallCompaniesPoints={formDataB.internshipSmallCompaniesPoints}
+                        internshipLessThan3MonthsPoints={formDataB.internshipLessThan3MonthsPoints}
+                        internshipPaidPoints={formDataB.internshipPaidPoints}
+                        certificationCiscoPoints={formDataB.certificationCiscoPoints}
+                        certificationNPTELPoints={formDataB.certificationNPTELPoints}
+                        certificationCourseraPoints={formDataB.certificationCourseraPoints}
+                        certificationPgmmgCertPoints={formDataB.certificationPgmmgCertPoints}
+                        certificationUdemyElabPoints={formDataB.certificationUdemyElabPoints}
+                        projectsIITDRDOPoints={formDataB.projectsIITDRDOPoints}
+                        projectsGovtPoints={formDataB.projectsGovtPoints}
+                        projectsMobileWebAppPoints={formDataB.projectsMobileWebAppPoints}
+                        projectsMiniProjectPoints={formDataB.projectsMiniProjectPoints}
+                        fsdProjectPoints={formDataB.fsdProjectPoints}
+                        codingCompetitionFirstPoints={formDataB.codingCompetitionFirstPoints}
+                        codingCompetitionSecondPoints={formDataB.codingCompetitionSecondPoints}
+                        codingCompetitionThirdPoints={formDataB.codingCompetitionThirdPoints}
+                        codingCompetitionParticipatedPoints={formDataB.codingCompetitionParticipatedPoints}
+                        inhouseEachProjectPoints={formDataB.inhouseEachProjectPoints}
+                        professionalBodiesMembershipPoints={formDataB.professionalBodiesMembershipPoints}
+                        assessmentMarksPoints={formDataB.assessmentMarksPoints}
+                        totalPoints={formDataB.totalPoints}
+                    />
+                </>
+                )}
+            </div>
+
             {hasPendingChanges && (
                 <div style={styles.pendingMessage}>
                     <p>
@@ -343,8 +403,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                         value={formDataB.registrationNumber}
                         onChange={handleInputChange}
                         required
-                        style={{ ...styles.input, ...styles.lockedInput }}
-                        readOnly
+                        style={{ ...styles.input, }}
                     />
                 </label>
                 <label style={styles.label}>
@@ -457,38 +516,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 )}
             </div>
 
-            <div style={styles.inputGroup}>
-                <h3 style={styles.groupTitle}>Section 5: Coding Practice Platform</h3>
-                
-                <label style={styles.label}>
-                    {inputCounter++}. C :
-                    <input type="number" name="codingPracticeCPoints" value={formDataB.codingPracticeCPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
-                <label style={styles.label}>
-                    {inputCounter++}. No of Medium and Difficult Questions Solved :
-                    <input type="number" name="codingPracticeQuestionsPoints" value={formDataB.codingPracticeQuestionsPoints} onChange={handleInputChange} style={styles.input} disabled={!isEditing || hasPendingChanges} />
-                </label>
-            {/* Proof links for Academic Details */}
-                <h4 style={styles.proofTitle}>Proof Links for Coding Platforms:</h4>
-                {proofLinksB.codingplatform.map((link, index) => (
-                    <div key={index} style={styles.proofInputWrapper}>
-                        <input
-                            type="text"
-                            value={link}
-                            onChange={(e) => handleProofLinkChange('codingplatform', index, e.target.value)}
-                            placeholder="Enter proof URL"
-                            style={styles.input}
-                            disabled={!isEditing || hasPendingChanges}
-                        />
-                    </div>
-                ))}
-                {isEditing && !hasPendingChanges && (
-                    <button type="button" onClick={() => addProofLink('codingplatform')} style={styles.addButton}>
-                        + Add another proof link
-                    </button>
-                )}
-            </div>
-
+            
             <div style={styles.inputGroup}>
                 <h3 style={styles.groupTitle}>Section 6: Internships</h3>
                 <label style={styles.label}>
@@ -987,68 +1015,7 @@ const FormatBForm = ({ prefilledRegistrationNumber }) => {
                 </label>
             </div>
 
-            <div style={styles.buttonContainer}>
-                {isEditing && !hasPendingChanges ? (
-                    <>
-                        <button type="submit" disabled={loading} style={styles.submitButton}>
-                            {loading ? 'Submitting for Approval...' : 'Submit Changes for Approval'}
-                        </button>
-                        <button type="button" onClick={handleCancelEdit} disabled={loading} style={{ ...styles.submitButton, ...styles.cancelButton }}>
-                            Cancel
-                        </button>
-                    </>
-                ) : (
-                <>
-                    <button
-                        type="button"
-                        onClick={handleEdit}
-                        disabled={loading || hasPendingChanges}
-                        style={{
-                            ...styles.editButton,
-                            ...(hasPendingChanges && styles.disabledButton)
-                        }}
-                    >
-                        {hasPendingChanges ? 'Changes Pending Approval' : 'Edit Data'}
-                    </button>
-                    <ScoreBox
-                        tenthPercentage={formDataB.tenthPercentage}
-                        twelfthPercentage={formDataB.twelfthPercentage}
-                        twelfthPercentagePoints={formDataB.twelfthPercentagePoints}
-                        tenthPercentagePoints={formDataB.tenthPercentagePoints}
-                        cgpaPoints={formDataB.cgpaPoints}
-                        githubContributionsPoints={formDataB.githubContributionsPoints}
-                        githubFrequencyPoints={formDataB.githubFrequencyPoints}
-                        communityProjectsPoints={formDataB.communityProjectsPoints}
-                        collaborationsPoints={formDataB.collaborationsPoints}
-                        codingPracticeCPoints={formDataB.codingPracticeCPoints}
-                        codingPracticeQuestionsPoints={formDataB.codingPracticeQuestionsPoints}
-                        internshipIITNITSRMPoints={formDataB.internshipIITNITSRMPoints}
-                        internshipFortune500Points={formDataB.internshipFortune500Points}
-                        internshipSmallCompaniesPoints={formDataB.internshipSmallCompaniesPoints}
-                        internshipLessThan3MonthsPoints={formDataB.internshipLessThan3MonthsPoints}
-                        internshipPaidPoints={formDataB.internshipPaidPoints}
-                        certificationCiscoPoints={formDataB.certificationCiscoPoints}
-                        certificationNPTELPoints={formDataB.certificationNPTELPoints}
-                        certificationCourseraPoints={formDataB.certificationCourseraPoints}
-                        certificationPgmmgCertPoints={formDataB.certificationPgmmgCertPoints}
-                        certificationUdemyElabPoints={formDataB.certificationUdemyElabPoints}
-                        projectsIITDRDOPoints={formDataB.projectsIITDRDOPoints}
-                        projectsGovtPoints={formDataB.projectsGovtPoints}
-                        projectsMobileWebAppPoints={formDataB.projectsMobileWebAppPoints}
-                        projectsMiniProjectPoints={formDataB.projectsMiniProjectPoints}
-                        fsdProjectPoints={formDataB.fsdProjectPoints}
-                        codingCompetitionFirstPoints={formDataB.codingCompetitionFirstPoints}
-                        codingCompetitionSecondPoints={formDataB.codingCompetitionSecondPoints}
-                        codingCompetitionThirdPoints={formDataB.codingCompetitionThirdPoints}
-                        codingCompetitionParticipatedPoints={formDataB.codingCompetitionParticipatedPoints}
-                        inhouseEachProjectPoints={formDataB.inhouseEachProjectPoints}
-                        professionalBodiesMembershipPoints={formDataB.professionalBodiesMembershipPoints}
-                        assessmentMarksPoints={formDataB.assessmentMarksPoints}
-                        totalPoints={formDataB.totalPoints}
-                    />
-                </>
-                )}
-            </div>
+            
         </form>
     );
 };
