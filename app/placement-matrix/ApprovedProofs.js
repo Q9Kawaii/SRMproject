@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import ExportButtonFormA from "./ExportButtonFormA";
+import ExportButtonFormB from "./ExportButtonFormB";
 
 // Mapping object for translating database keys to user-friendly names
 const displayNameMapping = {
@@ -159,6 +161,10 @@ const ApprovedProofs = () => {
           </div>
         ))
       )}
+       <div style={{ display: "flex", justifyContent: "center", marginTop: "30px", gap: "20px" }}>
+                <ExportButtonFormA />
+                <ExportButtonFormB />
+            </div>
     </div>
   );
 };

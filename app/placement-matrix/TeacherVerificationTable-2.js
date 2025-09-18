@@ -171,6 +171,10 @@ const TeacherVerificationTable = () => {
                             </div>
                         </div>
                     ))}
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "30px", gap: "20px" }}>
+                <ExportButtonFormA />
+                <ExportButtonFormB />
+            </div>
                 </div>
             )}
         </div>
