@@ -162,6 +162,12 @@ export default function AdminDashBoard({ secRole, SectionofFA, nameOfFA }) {
   <div className="relative z-10">
     {renderComponent()}
   </div>
+  {/* --- NEW BUTTON ADDED HERE --- */}
+                {/* Replaced next/link with standard <a> tag */}
+                <a href="/addNewSection" className="flex items-center gap-2 text-xs font-medium text-white bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] px-3 py-1.5 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 w-[100px]">
+                    <span>Add New Section</span>
+                </a>
+                {/* --- END OF NEW BUTTON --- */}
 </div>
 
     </>

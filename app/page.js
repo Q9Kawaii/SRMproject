@@ -46,10 +46,17 @@ export default function Home() {
       if (user) {
         setError("");
         try {
-          // --- Priority Check 1: Is the user a Teacher? ---
-          const teacherRef = doc(db, "UsersLogin", user.uid);
-          const teacherSnap = await getDoc(teacherRef);
+          // --- Priority Check 1: Is the user a Teacher? (UID or Email) ---
+          
+          // First, try to get the teacher document using their UID.
+          let teacherSnap = await getDoc(doc(db, "UsersLogin", user.uid));
 
+          // If not found by UID, try again using their email as a fallback.
+          if (!teacherSnap.exists() && user.email) {
+            teacherSnap = await getDoc(doc(db, "UsersLogin", user.email));
+          }
+
+          // Now, check if a valid teacher document was found by either method.
           if (teacherSnap.exists() && teacherSnap.data().role === 'teacher') {
             const data = teacherSnap.data();
             setUserRole("teacher");
@@ -149,20 +156,20 @@ export default function Home() {
           <div className="absolute bottom-40 left-32 w-5 h-5 bg-blue-400 transform rotate-45 animate-bounce delay-1000"></div>
           <div className="relative z-10 w-full max-w-4xl mx-auto px-4 py-8">
             <div className="text-center mb-12">
-  <div className="inline-block p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg mb-6">
-    <h1 className="text-4xl sm:text-5xl font-bold text-[#0c4da2] mb-2 lg:text-8xl">
-      <span className="text-[#3a5b72] relative">
-        SHINE
-      </span>
-    </h1>
-    <p className="text-sm text-gray-600 mt-3 font-medium">
-      SRM Holistic Information on Notification & Engagement
-    </p>
-  </div>
-  <p className="text-xl text-gray-700 font-medium mb-8 lg:text-4xl">
-    Welcome User,
-  </p>
-</div>
+              <div className="inline-block p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg mb-6">
+                <h1 className="text-4xl sm:text-5xl font-bold text-[#0c4da2] mb-2 lg:text-8xl">
+                  <span className="text-[#3a5b72] relative">
+                    SHINE
+                  </span>
+                </h1>
+                <p className="text-sm text-gray-600 mt-3 font-medium">
+                  SRM Holistic Information on Notification & Engagement
+                </p>
+              </div>
+              <p className="text-xl text-gray-700 font-medium mb-8 lg:text-4xl">
+                Welcome User,
+              </p>
+            </div>
 
             <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
               <div className="w-full max-w-md">

@@ -1,6 +1,7 @@
 "use client"
 import React from 'react';
-import Image from "next/image";
+// Imports for next/image and next/link are removed to resolve build errors.
+import { PlusCircle } from 'lucide-react'; // Import an icon for the button
 
 export default function Footer() {
   return (
@@ -28,10 +29,9 @@ export default function Footer() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
                 <div className="relative p-3 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100 group-hover:shadow-xl transition-all duration-300">
-                  <Image 
+                  {/* Replaced next/image with standard <img> tag */}
+                  <img 
                     src="/SRMlogo.png" 
-                    width={80} 
-                    height={80} 
                     className="h-12 md:h-12 w-auto" 
                     alt="SRM Logo" 
                   />
@@ -41,10 +41,9 @@ export default function Footer() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity duration-300"></div>
                 <div className="relative p-3 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100 group-hover:shadow-xl transition-all duration-300">
-                  <Image 
+                  {/* Replaced next/image with standard <img> tag */}
+                  <img 
                     src="/SAMADHAN transparent english.png" 
-                    width={160} 
-                    height={80} 
                     className="h-12 md:h-16 w-auto" 
                     alt="Samadhan Logo" 
                   />
@@ -85,6 +84,9 @@ export default function Footer() {
 
               {/* Additional Links/Info */}
               <div className="flex items-center gap-6">
+
+                
+
                 <div className="text-center">
                   <p className="text-xs text-[#0c4da2] font-medium">
                     Student Management System
@@ -107,3 +109,4 @@ export default function Footer() {
     </footer>
   );
 }
+
