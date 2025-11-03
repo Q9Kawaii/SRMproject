@@ -474,3 +474,137 @@ export async function getAllStudentsAchievements() {
         return { success: false, message: "Error fetching all data", data: [] };
     }
 }
+
+//! Approve a SINGLE achievement from pending items
+// NEW: This function approves only one achievement by its ID
+export async function approveSingleAchievement(regNo, achievementId, remarks = '') {
+  try {
+    const pendingRef = doc(db, "pendingAchievements", regNo);
+    const userRef = doc(db, "User", regNo);
+
+    await runTransaction(db, async (transaction) => {
+      const pendingSnap = await transaction.get(pendingRef);
+
+      if (!pendingSnap.exists()) {
+        throw new Error("No pending update found to approve.");
+      }
+
+      const pendingData = pendingSnap.data();
+      const pendingItems = pendingData.pendingItems || [];
+      
+      // Find the specific achievement to approve
+      const achievementIndex = pendingItems.findIndex(item => item.id === achievementId);
+      
+      if (achievementIndex === -1) {
+        throw new Error("Achievement not found in pending items.");
+      }
+
+      const achievementToApprove = pendingItems[achievementIndex];
+      const { id, category, data } = achievementToApprove;
+
+      // Get or create user document
+      let userSnap = await transaction.get(userRef);
+      if (!userSnap.exists()) {
+        const basicInfo = await getBasicStudentInfo(regNo);
+        transaction.set(userRef, {
+          regNo: regNo,
+          name: basicInfo?.data?.name || 'Unknown Student',
+          section: basicInfo?.data?.section || 'Unknown Section',
+          achievements: {}
+        });
+        userSnap = await transaction.get(userRef);
+      }
+
+      const userData = userSnap.data();
+      const currentAchievements = userData.achievements || {};
+      const updatedAchievements = { ...currentAchievements };
+
+      // Add the approved achievement to the user's achievements
+      if (!updatedAchievements[category]) {
+        updatedAchievements[category] = [];
+      } else if (!Array.isArray(updatedAchievements[category])) {
+        console.warn(`Category '${category}' was not an array! Fixing.`);
+        updatedAchievements[category] = [updatedAchievements[category]];
+      }
+
+      const existingIndex = updatedAchievements[category].findIndex((ach) => ach.id === id);
+      if (existingIndex !== -1) {
+        updatedAchievements[category][existingIndex] = { ...data, id };
+      } else {
+        updatedAchievements[category].push({ ...data, id });
+      }
+
+      transaction.update(userRef, { achievements: updatedAchievements });
+
+      // Remove the approved achievement from pendingItems
+      const updatedPendingItems = pendingItems.filter(item => item.id !== achievementId);
+      
+      // Update remarks if provided
+      const currentRemarks = pendingData.remarks || [];
+      const finalRemarks = remarks.trim() !== '' ? [...currentRemarks, remarks] : currentRemarks;
+
+      // If no pending items remain and no remarks, delete the document, otherwise update
+      if (updatedPendingItems.length === 0 && finalRemarks.length === 0) {
+        transaction.delete(pendingRef);
+      } else {
+        transaction.update(pendingRef, {
+          pendingItems: updatedPendingItems,
+          remarks: finalRemarks
+        });
+      }
+    });
+
+    return { success: true, message: "Achievement approved successfully." };
+  } catch (err) {
+    console.error("[approveSingleAchievement] ❌ Error:", err);
+    return { success: false, message: `Failed to approve achievement: ${err.message}` };
+  }
+}
+
+//! Reject a SINGLE achievement from pending items
+// NEW: This function rejects only one achievement by its ID
+export async function rejectSingleAchievement(regNo, achievementId, remarks = '') {
+  try {
+    const pendingRef = doc(db, "pendingAchievements", regNo);
+
+    await runTransaction(db, async (transaction) => {
+      const pendingSnap = await transaction.get(pendingRef);
+
+      if (!pendingSnap.exists()) {
+        throw new Error("No pending document found.");
+      }
+
+      const pendingData = pendingSnap.data();
+      const pendingItems = pendingData.pendingItems || [];
+      
+      // Find the specific achievement to reject
+      const achievementIndex = pendingItems.findIndex(item => item.id === achievementId);
+      
+      if (achievementIndex === -1) {
+        throw new Error("Achievement not found in pending items.");
+      }
+
+      // Remove the rejected achievement from pendingItems
+      const updatedPendingItems = pendingItems.filter(item => item.id !== achievementId);
+      
+      // Update remarks if provided
+      const currentRemarks = pendingData.remarks || [];
+      const finalRemarks = remarks.trim() !== '' ? [...currentRemarks, remarks] : currentRemarks;
+
+      // If no pending items remain and no remarks, delete the document, otherwise update
+      if (updatedPendingItems.length === 0 && finalRemarks.length === 0) {
+        transaction.delete(pendingRef);
+      } else {
+        transaction.update(pendingRef, {
+          pendingItems: updatedPendingItems,
+          remarks: finalRemarks
+        });
+      }
+    });
+
+    return { success: true, message: "Achievement rejected successfully." };
+  } catch (err) {
+    console.error("[rejectSingleAchievement] ❌ Error:", err);
+    return { success: false, message: `Failed to reject achievement: ${err.message}` };
+  }
+}

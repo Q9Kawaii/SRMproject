@@ -180,7 +180,8 @@
         const [searchResults, setSearchResults] = useState([]); // Stores fetched student data
         const [selectedCategory, setSelectedCategory] = useState(Object.keys(CATEGORIES_CONFIG)[0]); // Active category for approved view
         const [loading, setLoading] = useState(false);
-        const [remarkInput, setRemarkInput] = useState(''); // State for the remarks textbox
+        const [remarkInput, setRemarkInput] = useState(''); // State for the remarks textbox (for Approve All/Reject All)
+        const [individualRemarks, setIndividualRemarks] = useState({}); // State for individual achievement remarks { achievementId: "remark text" }
         const [error, setError] = useState(null);
         const [selectedStudentForPendingView, setSelectedStudentForPendingView] = useState(null); // Full student object for pending detail
 
@@ -454,6 +455,7 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
             setSelectedStudentForPendingView(null);
             setSearchResults([]); // Clear results immediately on mode change
             setRemarkInput(''); // Clear remark input on mode change
+            setIndividualRemarks({}); // Clear individual remarks on mode change
             // We will now rely on the `handleSearch` or direct calls to `fetchData`
             // based on user interaction, rather than useEffect automatically re-fetching.
             // If you want it to fetch immediately on mode change AND if search criteria is already valid:
@@ -466,12 +468,14 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
             setSelectedStudentForPendingView(student);
             setDisplayMode('pending_detail');
             setRemarkInput(''); // Clear remark input when selecting a new student
+            setIndividualRemarks({}); // Clear individual remarks when selecting a new student
         }, []);
 
         const handleBackToPendingList = useCallback(() => {
             setSelectedStudentForPendingView(null);
             setDisplayMode('pending');
             setRemarkInput(''); // Clear remark input when going back
+            setIndividualRemarks({}); // Clear individual remarks when going back
             // Re-fetch pending list after going back
             fetchData();
         }, [fetchData]);
@@ -495,6 +499,55 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                 handleBackToPendingList(); // This will re-fetch the list
             }
         }, [selectedStudentForPendingView, remarkInput, apiCall, handleBackToPendingList]); // REMARK: Added remarkInput to dependencies
+
+        // NEW: Handle individual achievement approval/rejection
+        const handleIndividualApproveReject = useCallback(async (achievementId, actionType) => {
+            if (!selectedStudentForPendingView) return;
+
+            const remark = individualRemarks[achievementId] || '';
+            const url = actionType === 'approve' ? '/api/approve-single-achievement' : '/api/reject-single-achievement';
+            const payload = {
+                regNo: selectedStudentForPendingView.regNo,
+                achievementId: achievementId,
+                remarks: remark
+            };
+
+            const response = await apiCall(url, payload);
+            if (response && response.success) {
+                toast.success(`Achievement ${actionType === 'approve' ? 'approved' : 'rejected'} successfully!`);
+                
+                // Remove the remark for this achievement from state
+                const updatedRemarks = { ...individualRemarks };
+                delete updatedRemarks[achievementId];
+                setIndividualRemarks(updatedRemarks);
+
+                // Update the pending items in the selected student view (remove the processed item)
+                const updatedPendingItems = selectedStudentForPendingView.pendingItems.filter(
+                    item => item.id !== achievementId
+                );
+                
+                // Update the selected student view
+                setSelectedStudentForPendingView({
+                    ...selectedStudentForPendingView,
+                    pendingItems: updatedPendingItems
+                });
+
+                // If no more pending items, go back to list
+                if (updatedPendingItems.length === 0) {
+                    setTimeout(() => {
+                        handleBackToPendingList();
+                    }, 1000);
+                }
+            }
+        }, [selectedStudentForPendingView, individualRemarks, apiCall, handleBackToPendingList]);
+
+        // NEW: Handle individual remark change
+        const handleIndividualRemarkChange = useCallback((achievementId, value) => {
+            setIndividualRemarks(prev => ({
+                ...prev,
+                [achievementId]: value
+            }));
+        }, []);
         const handleDownloadExcel = useCallback(() => {
             exportAchievementsToExcel(); // Call the internal function
         }, [exportAchievementsToExcel]); // Now depends on the internal function itself
@@ -814,70 +867,108 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                             </h2>
 
                             {selectedStudentForPendingView.pendingItems && Array.isArray(selectedStudentForPendingView.pendingItems) && selectedStudentForPendingView.pendingItems.length > 0 ? (
-                                <div className="space-y-6">
-                                    {selectedStudentForPendingView.pendingItems.map((item, index) => (
-                                        <motion.div
-                                            key={item.id || index}
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ duration: 0.3, delay: index * 0.05 }}
-                                            className="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500"
-                                        >
-                                            <p className="text-lg font-semibold mb-2">Category: {item.category}</p>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                                                {Object.entries(item.data).map(([key, value]) => {
-  const fieldConfig = CATEGORIES_CONFIG[item.category]?.fields.find(f => f.name === key);
-  return (
-    <p key={key} className="text-gray-700">
-      <span className="font-medium">{key}:</span>{' '}
-      {fieldConfig?.type === 'url' && value
-        ? (
-            <a
-              href={value}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline break-all"
-            >
-              {value}
-            </a>
-          )
-        : fieldConfig?.type === 'date'
-          ? formatDateToDDMMYYYY(value)
-          : value}
-    </p>
-  );
-})}
+                                <>
+                                    <div className="space-y-6">
+                                        {selectedStudentForPendingView.pendingItems.map((item, index) => (
+                                            <motion.div
+                                                key={item.id || index}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ duration: 0.3, delay: index * 0.05 }}
+                                                className="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500"
+                                            >
+                                                <p className="text-lg font-semibold mb-2">Category: {item.category}</p>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                                    {Object.entries(item.data).map(([key, value]) => {
+      const fieldConfig = CATEGORIES_CONFIG[item.category]?.fields.find(f => f.name === key);
+      return (
+        <p key={key} className="text-gray-700">
+          <span className="font-medium">{key}:</span>{' '}
+          {fieldConfig?.type === 'url' && value
+            ? (
+                <a
+                  href={value}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline break-all"
+                >
+                  {value}
+                </a>
+              )
+            : fieldConfig?.type === 'date'
+              ? formatDateToDDMMYYYY(value)
+              : value}
+        </p>
+      );
+    })}
 
-                                            </div>
-                                            
-                                            {/* Remarks Textarea and Action Buttons Section - Moved outside the map for clarity and single input */}
+                                                </div>
+                                                
+                                                {/* Individual Achievement Remarks and Action Buttons */}
+                                                <div className="mt-4 pt-4 border-t border-gray-200">
+                                                    <label htmlFor={`remark-${item.id}`} className="block text-gray-700 text-sm font-semibold mb-2">
+                                                        Remarks for this achievement (Optional)
+                                                    </label>
+                                                    <textarea
+                                                        id={`remark-${item.id}`}
+                                                        value={individualRemarks[item.id] || ''}
+                                                        onChange={(e) => handleIndividualRemarkChange(item.id, e.target.value)}
+                                                        placeholder="Enter remarks for this achievement (optional)..."
+                                                        rows={2}
+                                                        className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm text-gray-800 mb-3"
+                                                    />
+                                                    
+                                                    {/* Individual Approve/Reject Buttons */}
+                                                    <div className="flex justify-end gap-3">
+                                                        <motion.button
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleIndividualApproveReject(item.id, 'approve')}
+                                                            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center gap-2 text-sm font-semibold"
+                                                            disabled={loading}
+                                                        >
+                                                            <Check className="h-4 w-4" /> Approve
+                                                        </motion.button>
+                                                        <motion.button
+                                                            whileTap={{ scale: 0.95 }}
+                                                            onClick={() => handleIndividualApproveReject(item.id, 'reject')}
+                                                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300 flex items-center gap-2 text-sm font-semibold"
+                                                            disabled={loading}
+                                                        >
+                                                            <X className="h-4 w-4" /> Reject
+                                                        </motion.button>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                    
+                                    {/* Global Approve All / Reject All Section (for convenience) */}
                                     <motion.div
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3, delay: selectedStudentForPendingView.pendingItems.length * 0.05 + 0.1 }}
-                                        className="bg-white p-6 rounded-lg shadow-md mt-6" // Added margin-top to separate from achievement cards
+                                        className="bg-gray-50 p-6 rounded-lg shadow-md mt-6 border-2 border-dashed border-gray-300"
                                     >
                                         <label htmlFor="adminRemarks" className="block text-gray-700 text-lg font-semibold mb-2">
-                                            Admin Remarks (Optional)
+                                            Approve/Reject All Achievements (Optional Remarks)
                                         </label>
                                         <textarea
                                             id="adminRemarks"
                                             value={remarkInput}
                                             onChange={(e) => setRemarkInput(e.target.value)}
-                                            placeholder="Enter remarks for approval or rejection (optional)..."
-                                            rows={4}
+                                            placeholder="Enter remarks for all achievements (optional)..."
+                                            rows={3}
                                             className="w-full px-4 py-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-gray-800"
-                                            // Removed 'required' attribute since remarks are optional
                                         />
-                                        <p className="text-sm text-gray-500 mt-1">These remarks will be saved for the student's reference.</p>
+                                        <p className="text-sm text-gray-500 mt-1">These remarks will apply to all remaining achievements when using Approve All or Reject All.</p>
 
-                                        {/* Approve/Reject Buttons */}
-                                        <div className="flex justify-end gap-4 mt-6">
+                                        {/* Approve All/Reject All Buttons */}
+                                        <div className="flex justify-end gap-4 mt-4">
                                             <motion.button
                                                 whileTap={{ scale: 0.95 }}
                                                 onClick={() => handleApproveReject('approve')}
                                                 className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center gap-2 text-lg font-semibold"
-                                                disabled={loading} // Only disable if loading, not based on remark presence
+                                                disabled={loading}
                                             >
                                                 <Check className="h-6 w-6" /> Approve All
                                             </motion.button>
@@ -885,15 +976,13 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                                 whileTap={{ scale: 0.95 }}
                                                 onClick={() => handleApproveReject('reject')}
                                                 className="px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition duration-300 flex items-center gap-2 text-lg font-semibold"
-                                                disabled={loading} // Only disable if loading, not based on remark presence
+                                                disabled={loading}
                                             >
                                                 <X className="h-6 w-6" /> Reject All
                                             </motion.button>
                                         </div>
                                     </motion.div>
-                                        </motion.div>
-                                    ))}
-                                </div>
+                                </>
                             ) : (
                                 <p className="text-gray-500 italic">No pending achievements for this student.</p>
                             )}
