@@ -137,16 +137,19 @@ export default function AddNewSection() {
                 }
 
                 const studentData = {
-                    name: row['Name']?.trim() || '',
-                    regNo: regNo,
-                    email: row['Stu.Email']?.trim() || '',
-                    section: section.toUpperCase(),
-                    phoneNumber: row['Stu.Mobile']?.toString().trim() || '',
-                    parentEmail: row['Parent Email']?.trim() || '',
-                    fatherMobile: row['Parent Mobile']?.toString().trim() || '',
-                    faEmail: row['FA']?.trim() || '',
-                    aaEmail: row['AA']?.trim() || '',
-                };
+    name: row['Name']?.trim() || '',
+    regNo: regNo,
+    email: row['Stu.Email']?.trim() || '',
+    section: section.toUpperCase(),
+    phoneNumber: row['Stu.Mobile']?.toString().trim() || '',
+    parentEmail: row['Parent Email']?.trim() || '',
+    fatherMobile: row['Parent Mobile']?.toString().trim() || '',
+    'FA name': row['FA Name']?.trim() || '',
+    faEmail: row['FA Email id']?.trim() || '',
+    'AA name': row['AA Name']?.trim() || '',
+    aaEmail: row['AA Email id']?.trim() || '',
+};
+
 
                 try {
                     await setDoc(doc(db, "User", regNo), studentData, { merge: true });
@@ -155,22 +158,44 @@ export default function AddNewSection() {
                     addLog(`[User] FAILED to upsert ${regNo}: ${error.message}`, 'error');
                 }
 
-                const faEmail = row['FA']?.trim();
-                if (faEmail && !processedFAs.has(faEmail)) {
-                    const faData = {
-                        SecRole: "FA",
-                        name: faEmail.split('@')[0],
-                        role: "teacher",
-                        section: section.toUpperCase(),
-                    };
-                    try {
-                        await setDoc(doc(db, "UsersLogin", faEmail), faData, { merge: true });
-                        addLog(`[UsersLogin] Upserted FA: ${faEmail}`, 'success');
-                        processedFAs.add(faEmail);
-                    } catch (error) {
-                        addLog(`[UsersLogin] FAILED to upsert FA ${faEmail}: ${error.message}`, 'error');
-                    }
-                }
+                // === Handle FA entry in UsersLogin ===
+const faEmail = row['FA Email id']?.trim();
+const faName = row['FA Name']?.trim();
+if (faEmail && !processedFAs.has(faEmail)) {
+    const faData = {
+        SecRole: "FA",
+        name: faName || faEmail.split('@')[0],
+        role: "teacher",
+        section: section.toUpperCase(),
+    };
+    try {
+        await setDoc(doc(db, "UsersLogin", faEmail), faData, { merge: true });
+        addLog(`[UsersLogin] Upserted FA: ${faEmail}`, 'success');
+        processedFAs.add(faEmail);
+    } catch (error) {
+        addLog(`[UsersLogin] FAILED to upsert FA ${faEmail}: ${error.message}`, 'error');
+    }
+}
+
+// === Handle AA entry in UsersLogin ===
+const aaEmail = row['AA Email id']?.trim();
+const aaName = row['AA Name']?.trim();
+if (aaEmail && !processedFAs.has(aaEmail)) {
+    const aaData = {
+        SecRole: "AA",
+        name: aaName || aaEmail.split('@')[0],
+        role: "teacher",
+        email: aaEmail,
+    };
+    try {
+        await setDoc(doc(db, "UsersLogin", aaEmail), aaData, { merge: true });
+        addLog(`[UsersLogin] Upserted AA: ${aaEmail}`, 'success');
+        processedFAs.add(aaEmail);
+    } catch (error) {
+        addLog(`[UsersLogin] FAILED to upsert AA ${aaEmail}: ${error.message}`, 'error');
+    }
+}
+
                 await new Promise(res => setTimeout(res, 20));
             }
             
