@@ -52,6 +52,28 @@ _Add relevant screenshots or UI GIFs here to visually showcase the portal._
 
 ---
 
+## 🔐 Environment Variables
+
+Create a `.env.local` file in `SRMproject/` and populate it using the placeholders below (also available in `env.sample`):
+
+```
+# Base64-encoded Firebase service account JSON (preferred)
+FIREBASE_SERVICE_ACCOUNT_B64=REPLACE_WITH_BASE64_OF_SERVICE_ACCOUNT_JSON
+
+# Comma-separated list of Gemini API keys (fallback order)
+GEMINI_API_KEYS=REPLACE_WITH_KEY1,REPLACE_WITH_KEY2
+
+# Optional: comma-separated list of models in fallback order.
+# Defaults if omitted: gemini-1.5-pro, gemini-1.5-flash, gemini-1.0-pro
+GEMINI_MODELS=gemini-1.5-pro,gemini-1.5-flash
+```
+
+Tips:
+- Windows PowerShell to base64 the service account: `[Convert]::ToBase64String([IO.File]::ReadAllBytes("serviceAccountKey.json"))`
+- Linux/macOS: `cat serviceAccountKey.json | base64 -w 0`
+
+---
+
 ## 📬 Contact
 
 For questions, collaborations, or feedback:  

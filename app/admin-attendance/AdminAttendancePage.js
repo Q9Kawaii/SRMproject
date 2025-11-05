@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Upload, Download, AlertTriangle, Check, Clock, Users, Filter, FileText } from 'lucide-react';
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 // Utility: Get subjects with attendance < 75%
 const getLowAttendanceSubjects = (attendanceMap) => {
@@ -19,6 +20,7 @@ const getLowAttendanceSubjects = (attendanceMap) => {
 };
 
 const AdminAttendancePage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const secRole = searchParams.get('role') || "FA";
   const sectionFromUrl = searchParams.get('section') || "";
@@ -467,7 +469,7 @@ const confirmBulkAlert = async () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => window.open('https://university-portal-pink.vercel.app/', '_blank')}
+              onClick={() => router.push('/attendance-upload')}
               className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
             >
               <Upload size={20} />

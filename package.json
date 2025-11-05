@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/genai": "^1.28.0",
     "@heroicons/react": "^2.2.0",
     "@sparticuz/chromium": "^138.0.2",
     "exceljs": "^4.4.0",
