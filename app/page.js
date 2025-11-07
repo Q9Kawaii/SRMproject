@@ -23,10 +23,8 @@ const parseDisplayName = (displayName) => {
   return { name: displayName.trim(), regNo: "" };
 };
 
-
 export default function Home() {
   const [userRole, setUserRole] = useState(null);
-  // sectionPrompt and handleSectionSubmit are fully removed.
   const [section, setSection] = useState("");
   const [regNo, setRegNo] = useState("");
   const [department, setDepartment] = useState("");
@@ -37,6 +35,7 @@ export default function Home() {
   const [secRole, setSecRole] = useState(null);
   const [SectionofFA, setSectionofFA] = useState(null);
   const [nameOfFA, setnameOfFA] = useState(null);
+  const [currentUID, setCurrentUID] = useState("");
 
   const copyToClipboard = (text) => navigator.clipboard.writeText(text);
 
@@ -44,29 +43,29 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setLoading(true);
       if (user) {
+        setCurrentUID(user.uid); // ✅ Always set UID for any login attempt
         setError("");
         try {
-          // --- Priority Check 1: Is the user a Teacher? (UID or Email) ---
-          
-          // First, try to get the teacher document using their UID.
+          const normalizedEmail = user.email ? user.email.toLowerCase() : null;
           let teacherSnap = await getDoc(doc(db, "UsersLogin", user.uid));
 
-          // If not found by UID, try again using their email as a fallback.
-          if (!teacherSnap.exists() && user.email) {
-            teacherSnap = await getDoc(doc(db, "UsersLogin", user.email));
+          if (!teacherSnap.exists() && normalizedEmail) {
+            teacherSnap = await getDoc(doc(db, "UsersLogin", normalizedEmail));
           }
 
-          // Now, check if a valid teacher document was found by either method.
           if (teacherSnap.exists() && teacherSnap.data().role === 'teacher') {
             const data = teacherSnap.data();
-            setUserRole("teacher");
-            setSecRole(data.SecRole);
-            setSectionofFA(data.section);
-            setnameOfFA(data.name);
-            setIsNewUser(false);
-          }
-          // --- Priority Check 2: If not a teacher, are they an authorized Student? ---
-          else if (user.email.endsWith("@srmist.edu.in")) {
+            if (data.role === 'teacher') {
+              setUserRole("teacher");
+              setSecRole(data.SecRole);
+              setSectionofFA(data.section);
+              setnameOfFA(data.name);
+              setIsNewUser(false);
+            } else {
+              setError("Unauthorized role detected. Access denied.");
+              await auth.signOut();
+            }
+          } else if (user.email.endsWith("@srmist.edu.in")) {
             const { regNo: parsedRegNo, name: parsedName } = parseDisplayName(user.displayName);
 
             if (!parsedRegNo) {
@@ -79,10 +78,7 @@ export default function Home() {
             const studentSnap = await getDoc(studentRef);
 
             if (studentSnap.exists()) {
-              // Student is authorized. Update their details and log them in.
               const studentData = studentSnap.data();
-              
-              // Update the User doc with the latest name and email from Google.
               await setDoc(studentRef, {
                 name: parsedName,
                 email: user.email,
@@ -94,14 +90,10 @@ export default function Home() {
               setDepartment(studentData.department);
               setIsNewUser(false);
             } else {
-              // Student's regNo is not in the 'User' collection. Deny access.
               setError("You are not authorized. Please contact your teacher.");
               await auth.signOut();
             }
-          }
-          // --- Fallback: Not a teacher and not an SRMIST student ---
-          else {
-            // This is likely a new teacher who needs their UID to get approved by an admin.
+          } else {
             setNewUserUID(user.uid);
             setIsNewUser(true);
             setUserRole(null);
@@ -111,10 +103,10 @@ export default function Home() {
           await auth.signOut();
         }
       } else {
-        // User is logged out
         setUserRole(null);
         setIsNewUser(false);
         setNewUserUID("");
+        setCurrentUID(""); // ✅ Clear UID when logged out
       }
       setLoading(false);
     });
@@ -186,7 +178,6 @@ export default function Home() {
                       <p className="text-red-600 font-medium text-sm">{error}</p>
                     </div>
                   )}
-                  {/* Show UID and admin contact for new teachers */}
                   {isNewUser && newUserUID && (
                     <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                       <p className="text-sm font-semibold text-[#0c4da2] mb-3 text-center">Your UID is:</p>
@@ -229,6 +220,7 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+
               {/* Features Section */}
               <div className="w-full max-w-md lg:max-w-sm">
                 <div className="space-y-4">
@@ -262,6 +254,7 @@ export default function Home() {
                 </div>
               </div>
             </div>
+
             <div className="text-center mt-12 space-y-2">
               <p className="text-sm text-[#0c4da2] font-medium italic">
                 Track attendance, academics, and placement progress
@@ -272,6 +265,13 @@ export default function Home() {
             </div>
           </div>
         </div>
+
+        {/* ✅ UID Display Box - Always Visible */}
+        {currentUID && (
+          <div className="fixed bottom-4 right-4 bg-white/90 backdrop-blur-md border border-blue-200 shadow-lg rounded-xl px-4 py-2 text-sm font-mono text-[#0c4da2]">
+            UID: {currentUID}
+          </div>
+        )}
       </div>
     );
   }
@@ -280,9 +280,16 @@ export default function Home() {
   return (
     <div className="dashboard-container p-4">
       <div className="flex justify-end mb-4"></div>
-      {userRole === "teacher" && <AdminDashBoardd secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA}/>}
+      {userRole === "teacher" && <AdminDashBoardd secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA} />}
       {userRole === "student" && <StudentsDashBoard regNo={regNo} section={section} />}
       {!userRole && <div className="error">No role assigned</div>}
+
+      {/* ✅ UID Display Box - Always Visible */}
+      {currentUID && (
+        <div className="fixed bottom-4 right-4 bg-white/90 backdrop-blur-md border border-blue-200 shadow-lg rounded-xl px-4 py-2 text-sm font-mono text-[#0c4da2]">
+          UID: {currentUID}
+        </div>
+      )}
     </div>
   );
 }
