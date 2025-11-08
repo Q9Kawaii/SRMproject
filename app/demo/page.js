@@ -154,7 +154,6 @@ export default function ProjectShowcase() {
                             `${totalUsers}+`
                         )}
                     </p>
-                    <p className="mt-2 text-gray-500">Sum of documents in "UsersLogin" and "User" collections.</p>
                 </div>
 
                 {/* Sections Block */}
@@ -179,7 +178,6 @@ export default function ProjectShowcase() {
                     ) : (
                         <span className="text-gray-500">No sections found with FA role.</span>
                     )}
-                    <p className="mt-4 text-gray-500">Sections managed by Faculty Advisors (FA) in "UsersLogin" collection.</p>
                 </div>
             </div>
         </div>
