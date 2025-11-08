@@ -140,7 +140,7 @@ const contributors = [
     links: {
       github: "github.com/OMNIPOTENTHAVOC",
       linkedin: "https://www.linkedin.com/in/siddhansh-srivastava-86214a326/",
-      instagram: "https://www.instagram.com/omnipotent_havoc?igsh=ZHQ5aTE3YzZ3OXFy",
+      instagram: "",
     },
   },
   {
@@ -148,7 +148,7 @@ const contributors = [
     role: "",
     displayRole: ["Coordinator", "Testers"],
     image: "/team/PranjalKundu.jpg",
-    bio: "Live Life",
+    bio: "Exploring the future of India’s power grid through data, AI, and innovation.",
     links: {
       github: "https://github.com/10pranjal2005",
       linkedin: "https://www.linkedin.com/in/pranjal-kundu-3a557b303",
