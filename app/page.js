@@ -7,7 +7,7 @@ import AdminDashBoardd from "./components/Admin-DashBoard";
 import StudentsDashBoard from "./components/Students-DashBoard";
 import { app } from "../lib/firebase";
 import HamsterLoader from "./components/DashboardComponents/HamsterLoader";
-import { Copy, Shield, BookOpen, Users, TrendingUp } from 'lucide-react';
+import { Copy, Shield, BookOpen, Users, TrendingUp } from "lucide-react";
 
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -35,7 +35,6 @@ export default function Home() {
   const [secRole, setSecRole] = useState(null);
   const [SectionofFA, setSectionofFA] = useState(null);
   const [nameOfFA, setnameOfFA] = useState(null);
-  const [currentUID, setCurrentUID] = useState("");
 
   const copyToClipboard = (text) => navigator.clipboard.writeText(text);
 
@@ -43,19 +42,26 @@ export default function Home() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setLoading(true);
       if (user) {
-        setCurrentUID(user.uid); // ✅ Always set UID for any login attempt
+        // ✅ Log UID to console for all login attempts
+        console.log("User attempted login with UID:", user.uid);
+
         setError("");
         try {
+          // --- Priority Check 1: Is the user a Teacher? (UID or Email) ---
           const normalizedEmail = user.email ? user.email.toLowerCase() : null;
+
+          // First, try to get the teacher document using their UID.
           let teacherSnap = await getDoc(doc(db, "UsersLogin", user.uid));
 
+          // If not found by UID, try again using their email as a fallback.
           if (!teacherSnap.exists() && normalizedEmail) {
             teacherSnap = await getDoc(doc(db, "UsersLogin", normalizedEmail));
           }
 
-          if (teacherSnap.exists() && teacherSnap.data().role === 'teacher') {
+          // Now, check if a valid teacher document was found by either method.
+          if (teacherSnap.exists() && teacherSnap.data().role === "teacher") {
             const data = teacherSnap.data();
-            if (data.role === 'teacher') {
+            if (data.role === "teacher") {
               setUserRole("teacher");
               setSecRole(data.SecRole);
               setSectionofFA(data.section);
@@ -65,7 +71,9 @@ export default function Home() {
               setError("Unauthorized role detected. Access denied.");
               await auth.signOut();
             }
-          } else if (user.email.endsWith("@srmist.edu.in")) {
+          }
+          // --- Priority Check 2: If not a teacher, are they an authorized Student? ---
+          else if (user.email.endsWith("@srmist.edu.in")) {
             const { regNo: parsedRegNo, name: parsedName } = parseDisplayName(user.displayName);
 
             if (!parsedRegNo) {
@@ -79,10 +87,16 @@ export default function Home() {
 
             if (studentSnap.exists()) {
               const studentData = studentSnap.data();
-              await setDoc(studentRef, {
-                name: parsedName,
-                email: user.email,
-              }, { merge: true });
+
+              // Update the User doc with the latest name and email from Google.
+              await setDoc(
+                studentRef,
+                {
+                  name: parsedName,
+                  email: user.email,
+                },
+                { merge: true }
+              );
 
               setUserRole("student");
               setRegNo(studentData.regNo || parsedRegNo);
@@ -93,7 +107,10 @@ export default function Home() {
               setError("You are not authorized. Please contact your teacher.");
               await auth.signOut();
             }
-          } else {
+          }
+          // --- Fallback: Not a teacher and not an SRMIST student ---
+          else {
+            // This is likely a new teacher who needs their UID to get approved by an admin.
             setNewUserUID(user.uid);
             setIsNewUser(true);
             setUserRole(null);
@@ -103,10 +120,10 @@ export default function Home() {
           await auth.signOut();
         }
       } else {
+        // User is logged out
         setUserRole(null);
         setIsNewUser(false);
         setNewUserUID("");
-        setCurrentUID(""); // ✅ Clear UID when logged out
       }
       setLoading(false);
     });
@@ -150,17 +167,13 @@ export default function Home() {
             <div className="text-center mb-12">
               <div className="inline-block p-4 bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg mb-6">
                 <h1 className="text-4xl sm:text-5xl font-bold text-[#0c4da2] mb-2 lg:text-8xl">
-                  <span className="text-[#3a5b72] relative">
-                    SHINE
-                  </span>
+                  <span className="text-[#3a5b72] relative">SHINE</span>
                 </h1>
                 <p className="text-sm text-gray-600 mt-3 font-medium">
                   SRM Holistic Information on Notification & Engagement
                 </p>
               </div>
-              <p className="text-xl text-gray-700 font-medium mb-8 lg:text-4xl">
-                Welcome User,
-              </p>
+              <p className="text-xl text-gray-700 font-medium mb-8 lg:text-4xl">Welcome User,</p>
             </div>
 
             <div className="flex flex-col lg:flex-row gap-8 items-center justify-center">
@@ -178,14 +191,13 @@ export default function Home() {
                       <p className="text-red-600 font-medium text-sm">{error}</p>
                     </div>
                   )}
+                  {/* Show UID and admin contact for new teachers */}
                   {isNewUser && newUserUID && (
                     <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
                       <p className="text-sm font-semibold text-[#0c4da2] mb-3 text-center">Your UID is:</p>
                       <div className="flex items-center justify-center gap-2 mb-3">
                         <div className="bg-white rounded-lg px-3 py-2 border border-blue-200 shadow-sm">
-                          <span className="font-mono text-[#0c4da2] font-bold text-sm">
-                            {newUserUID}
-                          </span>
+                          <span className="font-mono text-[#0c4da2] font-bold text-sm">{newUserUID}</span>
                         </div>
                         <button
                           type="button"
@@ -254,7 +266,6 @@ export default function Home() {
                 </div>
               </div>
             </div>
-
             <div className="text-center mt-12 space-y-2">
               <p className="text-sm text-[#0c4da2] font-medium italic">
                 Track attendance, academics, and placement progress
@@ -265,13 +276,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-
-        {/* ✅ UID Display Box - Always Visible */}
-        {currentUID && (
-          <div className="fixed bottom-4 right-4 bg-white/90 backdrop-blur-md border border-blue-200 shadow-lg rounded-xl px-4 py-2 text-sm font-mono text-[#0c4da2]">
-            UID: {currentUID}
-          </div>
-        )}
       </div>
     );
   }
@@ -280,16 +284,11 @@ export default function Home() {
   return (
     <div className="dashboard-container p-4">
       <div className="flex justify-end mb-4"></div>
-      {userRole === "teacher" && <AdminDashBoardd secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA} />}
+      {userRole === "teacher" && (
+        <AdminDashBoardd secRole={secRole} SectionofFA={SectionofFA} nameOfFA={nameOfFA} />
+      )}
       {userRole === "student" && <StudentsDashBoard regNo={regNo} section={section} />}
       {!userRole && <div className="error">No role assigned</div>}
-
-      {/* ✅ UID Display Box - Always Visible */}
-      {currentUID && (
-        <div className="fixed bottom-4 right-4 bg-white/90 backdrop-blur-md border border-blue-200 shadow-lg rounded-xl px-4 py-2 text-sm font-mono text-[#0c4da2]">
-          UID: {currentUID}
-        </div>
-      )}
     </div>
   );
 }

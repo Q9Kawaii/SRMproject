@@ -1,7 +1,7 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useState } from "react";
 import { 
   Github, 
   ExternalLink, 
@@ -20,10 +20,77 @@ import {
 } from 'lucide-react';
 import ZoomImageModal from "./ZoomImageModal";
 
+// ⬇️ IMPORT FIREBASE TOOLS 
+import { getFirestore, collection, getDocs, query, where } from "firebase/firestore";
+// ⬇️ ASSUMING you have a config file that exports your initialized db
+// import { db } from "../firebase/firebaseConfig"; // Replace with your actual path to db/firestore instance
+
+// --- PLACEHOLDER FOR FIRESTORE INSTANCE ---
+// Since I cannot import your actual 'db' instance, 
+// I will create a placeholder function. 
+// **You must replace `getDbInstance()` with your actual imported Firestore instance (e.g., `db`).**
+const getDbInstance = () => {
+    // This is a placeholder. You must use your actual imported Firestore instance.
+    // Example: return db;
+    return getFirestore(); 
+};
+
 export default function ProjectShowcase() {
   const [activeTab, setActiveTab] = useState('overview');
   const [zoomedImage, setZoomedImage] = useState(null);
   const [zoomedAlt, setZoomedAlt] = useState("");
+  
+  // ⬇️ NEW STATE FOR FETCHED DATA
+  const [totalUsers, setTotalUsers] = useState(null);
+  const [sections, setSections] = useState([]);
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      setIsLoadingStats(true);
+      const db = getDbInstance(); // Use your actual imported db instance here
+
+      try {
+        // 1. Fetch Total Users
+        
+        // Count from 'UsersLogin' collection
+        const usersLoginSnapshot = await getDocs(collection(db, "UsersLogin"));
+        const usersLoginCount = usersLoginSnapshot.size;
+        
+        // Count from 'User' collection
+        const userSnapshot = await getDocs(collection(db, "User"));
+        const userCount = userSnapshot.size;
+
+        const total = usersLoginCount + userCount;
+        setTotalUsers(total);
+
+        // 2. Fetch Unique Sections
+        // Query for documents where SecRole is 'FA'
+        const faQuery = query(collection(db, "UsersLogin"), where("SecRole", "==", "FA"));
+        const faSnapshot = await getDocs(faQuery);
+        
+        const uniqueSections = new Set();
+        faSnapshot.forEach((doc) => {
+          const sectionValue = doc.data().section;
+          if (sectionValue) {
+            uniqueSections.add(sectionValue);
+          }
+        });
+
+        // Convert Set to an array and sort it
+        setSections(Array.from(uniqueSections).sort());
+
+      } catch (error) {
+        console.error("Error fetching dashboard statistics:", error);
+        setTotalUsers("Error");
+        setSections(["Error"]);
+      } finally {
+        setIsLoadingStats(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
 
   const features = [
@@ -74,6 +141,54 @@ export default function ProjectShowcase() {
     { name: 'Firestore', icon: '🗄️', description: 'NoSQL cloud database' }
   ];
 
+  const StatBlock = () => (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Live Administration Stats</h2>
+        <div className="grid md:grid-cols-2 gap-8">
+            {/* User Count Block */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 border-t-4 border-[#0c4da2]">
+                <div className="flex items-center gap-4 mb-4">
+                    <Users className="w-8 h-8 text-[#0c4da2]" />
+                    <h3 className="text-xl font-semibold text-gray-900">Total Users in System</h3>
+                </div>
+                <p className="text-6xl font-extrabold text-[#0c4da2]">
+                    {isLoadingStats ? (
+                        <span className="text-2xl text-gray-500">Loading...</span>
+                    ) : (
+                        `${totalUsers}+`
+                    )}
+                </p>
+                <p className="mt-2 text-gray-500">Sum of documents in "UsersLogin" and "User" collections.</p>
+            </div>
+
+            {/* Sections Block */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 border-t-4 border-green-600">
+                <div className="flex items-center gap-4 mb-4">
+                    <BookOpen className="w-8 h-8 text-green-600" />
+                    <h3 className="text-xl font-semibold text-gray-900">Active Sections Managed</h3>
+                </div>
+                {isLoadingStats ? (
+                    <span className="text-gray-500">Loading sections...</span>
+                ) : sections.length > 0 ? (
+                    <div className="flex flex-wrap gap-3">
+                        {sections.map((section, index) => (
+                            <span 
+                                key={index} 
+                                className="inline-flex items-center px-4 py-2 text-sm font-medium bg-green-100 text-green-800 rounded-full shadow-sm"
+                            >
+                                {section}
+                            </span>
+                        ))}
+                    </div>
+                ) : (
+                    <span className="text-gray-500">No sections found with FA role.</span>
+                )}
+                <p className="mt-4 text-gray-500">Sections managed by Faculty Advisors (FA) in "UsersLogin" collection.</p>
+            </div>
+        </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Hero Section */}
@@ -111,6 +226,9 @@ export default function ProjectShowcase() {
           </div>
         </div>
       </div>
+
+      {/* NEW: Live Admin Stats Block */}
+      <StatBlock />
 
       {/* Project Overview */}
       <div className="max-w-7xl mx-auto px-4 py-16">
