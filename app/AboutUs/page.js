@@ -81,11 +81,12 @@ const teamLead = [
     role: "Manager",
     displayRole: ["Team Lead", "Developer", "Coordinator"],
     image: "/team/Yash.jpg",
-    bio: "Team Lead | Full Stack Web who loves turning ideas into real-world solutions.",
+    bio: "Full Stack Web Developer who loves turning ideas into real-world solutions.",
     links: {
       github: "https://github.com/Q9Kawaii",
       linkedin: "https://www.linkedin.com/in/yash-dingar-946688276/",
       instagram: "https://www.instagram.com/q9kawaii/",
+      portfolio: "https://q9kawaii.github.io/Yash-Dingar/",
     },
   },
 ];
@@ -133,7 +134,7 @@ const contributors = [
   {
     name: "SIDDHANSH SRIVASTAVA",
     role: "",
-    displayRole: ["Contributor"],
+    displayRole: ["Contributor", "Testers"],
     image: "/team/Siddhansh.jpg",
     bio: "Systems programming and cybersecurity enthusiast",
     links: {
@@ -145,7 +146,7 @@ const contributors = [
   {
     name: "Pranjal Kundu",
     role: "",
-    displayRole: ["Coordinator"],
+    displayRole: ["Coordinator", "Testers"],
     image: "/team/fake.png",
     bio: "Live Life",
     links: {
@@ -158,7 +159,7 @@ const contributors = [
   {
     name: "Aditya Pandey",
     role: "",
-    displayRole: ["Coordinator", "Discord Manager"],
+    displayRole: ["Coordinator", "Testers"],
     image: "/team/AdiShaitan.jpg",
     bio: "Contributor",
     links: {
@@ -222,22 +223,36 @@ const Section = ({ title, members }) => {
                   Visit Profile
                 </a>
               ) : (
-                <div className="flex gap-3 mt-2">
-                  {member.links.github && member.links.github.trim() !== "" && (
-  <a href={member.links.github} target="_blank" rel="noreferrer">
-    <img src="githubicon.png" alt="GitHub" className="w-6 h-6" />
-  </a>
-)}
-{member.links.instagram && member.links.instagram.trim() !== "" && (
-  <a href={member.links.instagram} target="_blank" rel="noreferrer">
-    <img src="instagram.png" alt="Instagram" className="w-6 h-6" />
-  </a>
-)}
-{member.links.linkedin && member.links.linkedin.trim() !== "" && (
-  <a href={member.links.linkedin} target="_blank" rel="noreferrer">
-    <img src="linkedin.png" alt="LinkedIn" className="w-6 h-6" />
-  </a>
-)}
+                <div className="flex-col gap-3 mt-2">
+                  <div className="flex gap-3 justify-center">
+                    {member.links.github && member.links.github.trim() !== "" && (
+                      <a href={member.links.github} target="_blank" rel="noreferrer">
+                        <img src="githubicon.png" alt="GitHub" className="w-6 h-6" />
+                      </a>
+                    )}
+                    {member.links.instagram && member.links.instagram.trim() !== "" && (
+                      <a href={member.links.instagram} target="_blank" rel="noreferrer">
+                        <img src="instagram.png" alt="Instagram" className="w-6 h-6" />
+                      </a>
+                    )}
+                    {member.links.linkedin && member.links.linkedin.trim() !== "" && (
+                      <a href={member.links.linkedin} target="_blank" rel="noreferrer">
+                        <img src="linkedin.png" alt="LinkedIn" className="w-6 h-6" />
+                      </a>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                      {member.links.portfolio && member.links.portfolio.trim() !== "" && (
+                        <a
+                        href={member.links.portflio}
+                        target="\_blank"
+                        rel="noreferrer"
+                        className="text-sm px-4 py-2 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white rounded-full"
+                      >
+                        Visit Portfolio
+                      </a>
+                      )}
+                  </div>
 
                 </div>
               )}
