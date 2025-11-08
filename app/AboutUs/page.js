@@ -132,7 +132,7 @@ const developers = [
 
 const contributors = [
   {
-    name: "SIDDHANSH SRIVASTAVA",
+    name: "Siddhansh Srivastava",
     role: "",
     displayRole: ["Contributor", "Testers"],
     image: "/team/Siddhansh.jpg",
@@ -140,20 +140,19 @@ const contributors = [
     links: {
       github: "github.com/OMNIPOTENTHAVOC",
       linkedin: "https://www.linkedin.com/in/siddhansh-srivastava-86214a326/",
-      instagram: "",
+      instagram: "https://www.instagram.com/omnipotent_havoc?igsh=ZHQ5aTE3YzZ3OXFy",
     },
   },
   {
     name: "Pranjal Kundu",
     role: "",
     displayRole: ["Coordinator", "Testers"],
-    image: "/team/fake.png",
+    image: "/team/PranjalKundu.jpg",
     bio: "Live Life",
     links: {
-    github: "https://github.com/10pranjal2005",
-    linkedin: "https://www.linkedin.com/in/pranjal-kundu-3a557b303",
-      instagram: "",
-      github: "",
+      github: "https://github.com/10pranjal2005",
+      linkedin: "https://www.linkedin.com/in/pranjal-kundu-3a557b303",
+      instagram: "https://www.instagram.com/prxnj_l?igsh=NjdhcW9kMHlrc3Z6",
     },
   },
   {
@@ -241,18 +240,16 @@ const Section = ({ title, members }) => {
                       </a>
                     )}
                   </div>
-                  <div className="mt-3">
                       {member.links.portfolio && member.links.portfolio.trim() !== "" && (
                         <a
-                        href={member.links.portflio}
-                        target="\_blank"
-                        rel="noreferrer"
-                        className="text-sm px-4 py-2 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white rounded-full"
-                      >
-                        Visit Portfolio
-                      </a>
+                          href={member.links.portfolio}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-sm px-4 py-2 bg-gradient-to-r from-[#0c4da2] to-[#3a5b72] text-white rounded-full mt-3 inline-block"
+                        >
+                          Visit Portfolio
+                        </a>
                       )}
-                  </div>
 
                 </div>
               )}
