@@ -102,6 +102,7 @@ const developers = [
       github: "https://github.com/Frostyanand",
       linkedin: "https://www.linkedin.com/in/frostyanand",
       instagram: "https://www.instagram.com/frostyanand",
+      portfolio: "https://frostyanand.github.io/Anurag-Anand/",
     },
   },
   {
@@ -126,6 +127,7 @@ const developers = [
       github: "https://github.com/MJ-1112",
       linkedin: "https://www.linkedin.com/in/mahik-jain-b6a28b324/",
       instagram: "https://www.instagram.com/jain\_mahik/",
+      portfolio: "https://mahikjain.vercel.app/",
     },
   },
 ];
@@ -153,7 +155,7 @@ const contributors = [
       github: "https://github.com/10pranjal2005",
       linkedin: "https://www.linkedin.com/in/pranjal-kundu-3a557b303",
       instagram: "https://www.instagram.com/prxnj_l?igsh=NjdhcW9kMHlrc3Z6",
-      portfolio: "https://pranjalkundu-portfolio.netlify.app/",
+      portfolio: "https://pranjalkundu-portfolio.netlify.app/",e
     },
   },
   {
