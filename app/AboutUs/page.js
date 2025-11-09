@@ -153,6 +153,7 @@ const contributors = [
       github: "https://github.com/10pranjal2005",
       linkedin: "https://www.linkedin.com/in/pranjal-kundu-3a557b303",
       instagram: "https://www.instagram.com/prxnj_l?igsh=NjdhcW9kMHlrc3Z6",
+      portfolio: "https://pranjalkundu-portfolio.netlify.app/",
     },
   },
   {
