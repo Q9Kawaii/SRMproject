@@ -86,7 +86,7 @@ const teamLead = [
       github: "https://github.com/Q9Kawaii",
       linkedin: "https://www.linkedin.com/in/yash-dingar-946688276/",
       instagram: "https://www.instagram.com/q9kawaii/",
-      portfolio: "https://q9kawaii.github.io/Yash-Dingar/",
+      portfolio: "https://www.yashdingar.space/",
     },
   },
 ];
