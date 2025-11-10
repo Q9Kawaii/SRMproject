@@ -102,7 +102,7 @@ const developers = [
       github: "https://github.com/Frostyanand",
       linkedin: "https://www.linkedin.com/in/frostyanand",
       instagram: "https://www.instagram.com/frostyanand",
-      portfolio: "https://frostyanand.github.io/Anurag-Anand/",
+      portfolio: "https://prosperous-motivation-438528-7fc5b74d6.framer.app/",
     },
   },
   {
@@ -127,7 +127,7 @@ const developers = [
       github: "https://github.com/MJ-1112",
       linkedin: "https://www.linkedin.com/in/mahik-jain-b6a28b324/",
       instagram: "https://www.instagram.com/jain\_mahik/",
-      portfolio: "https://mahikjain.vercel.app/",
+      portfolio: "https://my-portfolio-chi-ochre-77.vercel.app/",
     },
   },
 ];
@@ -155,7 +155,7 @@ const contributors = [
       github: "https://github.com/10pranjal2005",
       linkedin: "https://www.linkedin.com/in/pranjal-kundu-3a557b303",
       instagram: "https://www.instagram.com/prxnj_l?igsh=NjdhcW9kMHlrc3Z6",
-      portfolio: "https://pranjalkundu-portfolio.netlify.app/",e
+      portfolio: "https://10pranjal2005.github.io/Portfolio/",
     },
   },
   {
@@ -168,6 +168,7 @@ const contributors = [
       github: "github.com/devsin8",
       linkedin: "www.linkedin.com/in/aditya-pandey-7427171b5/",
       instagram: "www.instagram.com/adiii6806/",
+      portfolio: "https://portfolio-website-kappa-five-98.vercel.app/",
     },
   },
 ];
