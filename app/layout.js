@@ -9,6 +9,7 @@ import Image from "next/image";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import HamsterLoader from "./components/DashboardComponents/HamsterLoader"; // <-- Your loader component
+import { Analytics } from "@vercel/analytics/react";
 
 export default function RootLayout({ children }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -196,6 +197,7 @@ export default function RootLayout({ children }) {
           <div className="relative">{children}</div>
         </main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
