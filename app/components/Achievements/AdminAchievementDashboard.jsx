@@ -184,6 +184,7 @@
         const [individualRemarks, setIndividualRemarks] = useState({}); // State for individual achievement remarks { achievementId: "remark text" }
         const [error, setError] = useState(null);
         const [selectedStudentForPendingView, setSelectedStudentForPendingView] = useState(null); // Full student object for pending detail
+        const [batchDownloadLoading, setBatchDownloadLoading] = useState(false); // Loading state for batch Excel download
 
         // --- Utility Functions (moved here) ---
 
@@ -548,9 +549,121 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                 [achievementId]: value
             }));
         }, []);
+
         const handleDownloadExcel = useCallback(() => {
             exportAchievementsToExcel(); // Call the internal function
         }, [exportAchievementsToExcel]); // Now depends on the internal function itself
+
+        // Batch Excel download (all students in database), independent of current search filters
+        const handleBatchDownloadExcel = useCallback(async () => {
+            try {
+                setBatchDownloadLoading(true);
+
+                const response = await fetch('/api/get-all-students-achievements', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    toast.error(result.message || 'Failed to fetch achievements for batch download.');
+                    return;
+                }
+
+                const allStudents = Array.isArray(result.data) ? result.data : [];
+
+                if (allStudents.length === 0) {
+                    toast.error('No achievements found for batch download.');
+                    return;
+                }
+
+                const wb = new XLSX.Workbook();
+
+                Object.keys(CATEGORIES_CONFIG).forEach(category => {
+                    const config = CATEGORIES_CONFIG[category];
+                    const headers = [
+                        'Reg Number',
+                        'Student Name',
+                        'Section',
+                        ...config.fields
+                            .filter(f => !['Reg Number', 'Student Name', 'Section', 'id'].includes(f.name))
+                            .map(f => f.name)
+                    ];
+
+                    const categoryRows = [];
+
+                    allStudents.forEach(student => {
+                        const studentAchievementsForCategory = student.achievements && Array.isArray(student.achievements[category])
+                            ? student.achievements[category]
+                            : [];
+
+                        studentAchievementsForCategory.forEach(achievement => {
+                            const rowData = {};
+                            rowData['Reg Number'] = student.regNo;
+                            rowData['Student Name'] = student.name;
+                            rowData['Section'] = student.section;
+
+                            config.fields.forEach(field => {
+                                if (!['Reg Number', 'Student Name', 'Section', 'id'].includes(field.name)) {
+                                    let value = achievement[field.name];
+                                    if (field.type === 'date' && value) {
+                                        value = formatDateToDDMMYYYY(value);
+                                    }
+                                    rowData[field.name] = value || '';
+                                }
+                            });
+                            categoryRows.push(rowData);
+                        });
+                    });
+
+                    if (categoryRows.length > 0) {
+                        const ws = wb.addWorksheet(category);
+
+                        const topText = [
+                            ['Student Achievements Data - Category: ' + category],
+                            ['Generated on: ' + new Date().toLocaleDateString('en-GB')],
+                            ['Searched by: Batch (All Students)'],
+                            []
+                        ];
+                        ws.addRows(topText);
+
+                        ws.addRow(headers);
+                        ws.getRow(ws.lastRow.number).font = { bold: true };
+
+                        categoryRows.forEach(row => {
+                            ws.addRow(headers.map(header => row[header]));
+                        });
+
+                        ws.columns.forEach((column, i) => {
+                            let maxLength = 0;
+                            column.eachCell({ includeEmpty: true }, (cell) => {
+                                const columnHeader = headers[i];
+                                const cellValue = cell.value ? cell.value.toString() : '';
+                                maxLength = Math.max(maxLength, cellValue.length, columnHeader.length);
+                            });
+                            column.width = maxLength < 12 ? 12 : maxLength + 2;
+                        });
+                    }
+                });
+
+                if (wb.worksheets.length === 0) {
+                    toast.error('No approved achievements found for batch download in any category.');
+                    return;
+                }
+
+                const fileName = `batch_all_students_achievements_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                const buffer = await wb.xlsx.writeBuffer();
+                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), fileName);
+                toast.success('Batch Excel file downloaded successfully!');
+            } catch (error) {
+                console.error('Error exporting batch achievements to Excel:', error);
+                toast.error('Failed to download batch Excel file.');
+            } finally {
+                setBatchDownloadLoading(false);
+            }
+        }, [formatDateToDDMMYYYY]);
 
         // This useEffect is fine, it just clears error messages when searchIdentifier or displayMode changes
         useEffect(() => {
@@ -741,14 +854,35 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                 })}
                             </motion.div>
 
-                            {/* Download Excel Button */}
+                            {/* Download Excel Button for current search */}
                             {(selectedSearchType === 'batch' || selectedSearchType === 'section' || searchIdentifier) && searchResults.length > 0 && (
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleDownloadExcel}
-                                    className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 mb-6 w-full md:w-auto"
+                                    className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 mb-3 w-full md:w-auto"
                                 >
-                                    <Download className="h-5 w-5" /> Download All Approved Achievements (Excel)
+                                    <Download className="h-5 w-5" /> Download Filtered Approved Achievements (Excel)
+                                </motion.button>
+                            )}
+
+                            {/* Batch Excel Download Button (all students in database) */}
+                            {(secRole === 'FA' || secRole === 'AA') && (
+                                <motion.button
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={handleBatchDownloadExcel}
+                                    className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 mb-6 w-full md:w-auto"
+                                    disabled={batchDownloadLoading}
+                                >
+                                    {batchDownloadLoading ? (
+                                        <span className="flex items-center gap-2">
+                                            <span className="inline-block h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Starting batch download...
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <Download className="h-5 w-5" /> Download Batch Achievements (All Students)
+                                        </>
+                                    )}
                                 </motion.button>
                             )}
 
