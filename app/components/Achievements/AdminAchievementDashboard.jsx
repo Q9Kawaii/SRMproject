@@ -783,6 +783,36 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                     </motion.button>
                 </motion.div>
 
+                {/* Batch Download Button - AA Only */}
+                {secRole === 'AA' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15, duration: 0.5 }}
+                        className="mb-8 flex justify-center"
+                    >
+                        <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            whileHover={{ scale: 1.02 }}
+                            onClick={handleBatchDownloadExcel}
+                            disabled={batchDownloadLoading}
+                            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg text-lg font-semibold hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl"
+                        >
+                            {batchDownloadLoading ? (
+                                <span className="flex items-center gap-3">
+                                    <span className="inline-block h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    Processing batch download...
+                                </span>
+                            ) : (
+                                <>
+                                    <Download className="h-6 w-6" />
+                                    Download All Students Achievements (Batch Excel)
+                                </>
+                            )}
+                        </motion.button>
+                    </motion.div>
+                )}
+
                 {/* Main Content Area - Conditional Rendering with AnimatePresence */}
                 <AnimatePresence mode="wait">
                     {loading && (
@@ -859,30 +889,9 @@ payload = { identifier: effectiveIdentifier, type: selectedSearchType };
                                 <motion.button
                                     whileTap={{ scale: 0.95 }}
                                     onClick={handleDownloadExcel}
-                                    className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 mb-3 w-full md:w-auto"
+                                    className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 mb-6 w-full md:w-auto"
                                 >
                                     <Download className="h-5 w-5" /> Download Filtered Approved Achievements (Excel)
-                                </motion.button>
-                            )}
-
-                            {/* Batch Excel Download Button (all students in database) */}
-                            {(secRole === 'FA' || secRole === 'AA') && (
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleBatchDownloadExcel}
-                                    className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-300 flex items-center justify-center gap-2 mb-6 w-full md:w-auto"
-                                    disabled={batchDownloadLoading}
-                                >
-                                    {batchDownloadLoading ? (
-                                        <span className="flex items-center gap-2">
-                                            <span className="inline-block h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                            Starting batch download...
-                                        </span>
-                                    ) : (
-                                        <>
-                                            <Download className="h-5 w-5" /> Download Batch Achievements (All Students)
-                                        </>
-                                    )}
                                 </motion.button>
                             )}
 
